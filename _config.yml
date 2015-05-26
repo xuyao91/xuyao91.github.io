@@ -5,8 +5,8 @@
 url: http://xuyao91.github.io
 title: Xu Yao's Blog
 subtitle: 感受生活，感悟工作，感触心灵
-author: Your Name
-simple_search: https://www.google.com/search
+author: Peter Xu
+simple_search: https://cn.bing.com
 description:
 
 # Default date format is "ordinal" (resulting in "July 22nd 2007")
@@ -71,7 +71,7 @@ github_skip_forks: true
 
 # Twitter
 twitter_user:
-twitter_tweet_button: true
+twitter_tweet_button: false
 
 # Google +1
 google_plus_one: false
