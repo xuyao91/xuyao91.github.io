@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "ruby_alias_methods"
+title: "rails 中alias alias_method alias_method_chain的使用"
 date: 2015-05-28 22:03:17 +0800
 comments: true
 categories: 
