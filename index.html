@@ -1,1 +1,516 @@
-My Octopress Page is coming soon &hellip;
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>深不可测</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
+存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便 ActiveSupport::Cache::Store 它是一个抽象类，有很多cache &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao91.github.io/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="深不可测" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">深不可测</a></h1>
+  
+    <h2>感受生活，感悟工作，感触心灵</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao91.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div class="blog-index">
+  
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-03-24T10:05:39+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:05 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2016/03/24/about-rails-cache/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
+存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便</p>
+
+<h3>ActiveSupport::Cache::Store</h3>
+
+<p>它是一个抽象类，有很多cache store的实现
+rails中的这个类提供了和缓存交互的很多基本的方法，包括(read,write,delete,exist?,fetch)，下面说下具体实现</p>
+
+<h3>ActiveSupport::Cache::FileStore</h3>
+
+<p>先说一下FileStore,这种存储方式Rails默认的存储方式，他是将数据存储到系统文件,默认将文件存储到项目的/tmp/cache下面，你可以修改它的存储路径</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">cache_store</span> <span class="o">=</span> <span class="ss">:file_store</span><span class="p">,</span> <span class="s2">&quot;/path/to/cache/directory&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面说FileStore是Rails默认的存储方式，看下面这句代码就知道了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">class</span>  <span class="o">=&gt;</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">FileStore</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>cache有几种常用的方法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;peter&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>cache中的key都是string型，而且区分大小写的，Hash和数据也或以当作key,上面的代码的key也可以用hash表示</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="o">==</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你的cache是和其它程序公用的存储，你可以给他定义一个namespace，一旦namespace定义，就会在key前面加了个前缀
+其它一些参数
+:compress 是否压缩缓存，
+:compress_threshold 和compress一起使用，设定一个阈值，低于这个值就不压缩缓存。默认为 16 KB。
+:expires_in 为缓存记录设定一个过期时间，单位为秒，过期后把记录从缓存中删除。</p>
+
+<h3>ActiveSupport::Cache::MemoryStore</h3>
+
+<p>这种存储方式是把数据存储在内存中，而且存储空间的大小由:size决定，默认为32M，如果超出分配的大小，系统会清理缓存，把最不常使用的记录删除。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cache</span> <span class="o">=</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">MemoryStore</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;peter&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ActiveSupport::Cache::MemCacheStore</h3>
+
+<p>这种存储方式使用 Danga 开发的 memcached 服务器，为程序提供一个中心化的缓存存储。Rails 默认使用附带安装的 dalli gem 实现这种存储方式。这是目前在生产环境中使用最广泛的缓存存储方式，可以提供单个缓存存储，或者共享的缓存集群，性能高，冗余度低。</p>
+
+<p>初始化时要指定集群中所有 memcached 服务器的地址。如果没有指定地址，默认运行在本地主机的默认端口上，这对大型网站来说不是个好主意。</p>
+
+<p>在这种缓存存储中使用 write 和 fetch 方法还可指定两个额外的选项，充分利用 memcached 的特有功能。指定 :raw 选项可以直接把没有序列化的数据传给 memcached 服务器。在这种类型的数据上可以使用 memcached 的原生操作，例如 increment 和 decrement。如果不想让 memcached 覆盖已经存在的记录，可以指定 :unless_exist 选项。
+上面的这种我也没用过，只是摘了别人一段话来补补。。。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/29/include-vs-extend-in-ruby/">Ruby中include和extend的比较</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-06-29T12:21:35+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:21 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/06/29/include-vs-extend-in-ruby/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文翻译,改编自<a href="http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/">Include vs Extend in Ruby</a></p>
+
+<p>在类中引用一个模块,有两种方式,一种是include,另一种是extend,两种的大致区别就是:<br/>
+<strong><em>include是给class增加一个实例方法,而extend是增加一个类方法</em>  </strong><br/>
+我们看一下小例子.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/29/include-vs-extend-in-ruby/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-06-05T10:49:54+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:49 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/06/05/about-me-with-ruby-code/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Person</span>
+</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:birthday</span><span class="p">,</span> <span class="ss">:gender</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="nb">name</span><span class="p">,</span><span class="n">birthday</span><span class="p">,</span><span class="n">gender</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@name</span> <span class="o">=</span> <span class="nb">name</span>
+</span><span class='line'>    <span class="vi">@birthday</span> <span class="o">=</span> <span class="n">birthday</span>
+</span><span class='line'>    <span class="vi">@gender</span> <span class="o">=</span> <span class="n">gender</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">company</span><span class="o">=</span> <span class="nb">name</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">company</span> <span class="o">=</span> <span class="nb">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">position</span><span class="o">=</span> <span class="n">position</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">position</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hobby</span> <span class="o">*</span><span class="n">arg</span>
+</span><span class='line'>    <span class="s2">&quot;I like </span><span class="si">#{</span><span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">me</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;徐耀&quot;</span><span class="p">,</span><span class="s2">&quot;1991-02-03&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">me</span><span class="o">.</span><span class="n">nickname</span> <span class="o">=</span> <span class="sx">%W(老徐 徐逗逗)</span>
+</span><span class='line'><span class="n">me</span><span class="o">.</span><span class="n">company</span><span class="o">=</span> <span class="s2">&quot;上海微客来软件技术有限公司&quot;</span>
+</span><span class='line'><span class="n">me</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="s2">&quot;Ruby Engineer&quot;</span>
+</span><span class='line'><span class="n">me</span><span class="o">.</span><span class="n">hobby</span> <span class="s2">&quot;coding&quot;</span><span class="p">,</span><span class="s2">&quot;reading&quot;</span><span class="p">,</span><span class="s2">&quot;music&quot;</span><span class="p">,</span><span class="s2">&quot;traveling&quot;</span><span class="p">,</span><span class="s2">&quot;grils&quot;</span>
+</span><span class='line'><span class="n">me</span><span class="o">.</span><span class="n">weibo</span> <span class="o">=</span> <span class="s2">&quot;http://weibo.com/1676361452&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">How to Understand Rails Virtual Attributes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-06-04T16:37:50+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:37 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>在网上看到关于rails  virtual attributes 的例子,得觉挺好玩的,自己动手试一下,好叼</h4>
+
+<p>有时候在一张表里面有两个字段,但是实际表单里其实只有一个文本框输入,比如老外的名字分first_name last_name,
+在表里面是分开保存的,但其实是在一个文本框中输入的,这里使用virtal attriubtes最恰当不过了,看表结构</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/28/ruby-alias-methods/">Rails 中alias Alias_method Alias_method_chain的使用</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-28T22:03:17+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:03 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/05/28/ruby-alias-methods/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h5>首先看一下alias的用法，上一个实例是明了</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
+</span><span class='line'>          <span class="nb">puts</span>  <span class="s2">&quot;say hello&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'> <span class="k">alias</span> <span class="ss">:wang</span> <span class="ss">:say</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dog</span> <span class="o">=</span> <span class="no">Dog</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">dog</span><span class="o">.</span><span class="n">wang</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=&gt;</span> <span class="n">say</span> <span class="n">hello</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>在类中可以将一个实例方法重新命名,注意的是新方法在前面，用空格格开</p>
+
+<h5>alias_method的用法，</h5>
+
+<p>和alias一样，只是他是module的一个私有方法，而且它的方法名可以是字符中，而alias不行，看代码</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/05/28/ruby-alias-methods/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/26/my-first-post/">Hello Everybody</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-26T17:29:27+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>5:29 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/05/26/my-first-post/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>hello everybody, this is my first post, I'am very happy, bescuse it is successful.</p>
+
+<p>如果想了解微信相关开发的东西请到我的<a href="http://blog.sina.com.cn/xuyao90">新浪博客</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  <div class="pagination">
+    
+    <a href="/blog/archives">Blog Archives</a>
+    
+  </div>
+</div>
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/29/include-vs-extend-in-ruby/">Ruby中include和extend的比较</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">How to Understand Rails Virtual Attributes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/28/ruby-alias-methods/">Rails 中alias Alias_method Alias_method_chain的使用</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

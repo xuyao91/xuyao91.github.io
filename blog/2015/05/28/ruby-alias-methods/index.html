@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rails 中alias Alias_method Alias_method_chain的使用 - 深不可测</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="首先看一下alias的用法，上一个实例是明了 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+class Dog def say puts &quot;say hello&quot; end alias :wang :say
+end dog = Dog.new
+dog.wang =&gt; say &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao91.github.io/blog/2015/05/28/ruby-alias-methods/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="深不可测" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">深不可测</a></h1>
+  
+    <h2>感受生活，感悟工作，感触心灵</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao91.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Rails 中alias Alias_method Alias_method_chain的使用</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-28T22:03:17+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:03 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h5>首先看一下alias的用法，上一个实例是明了</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
+</span><span class='line'>          <span class="nb">puts</span>  <span class="s2">&quot;say hello&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'> <span class="k">alias</span> <span class="ss">:wang</span> <span class="ss">:say</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dog</span> <span class="o">=</span> <span class="no">Dog</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">dog</span><span class="o">.</span><span class="n">wang</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=&gt;</span> <span class="n">say</span> <span class="n">hello</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>在类中可以将一个实例方法重新命名,注意的是新方法在前面，用空格格开</p>
+
+<h5>alias_method的用法，</h5>
+
+<p>和alias一样，只是他是module的一个私有方法，而且它的方法名可以是字符中，而alias不行，看代码</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Dog</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
+</span><span class='line'>          <span class="nb">puts</span>  <span class="s2">&quot;say hello&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">alias_method</span> <span class="s2">&quot;wang&quot;</span><span class="p">,</span> <span class="s2">&quot;say&quot;</span>
+</span><span class='line'><span class="c1">#alias_method :wang, :say</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Animal</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Dog</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Anima</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">wang</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=&gt;</span><span class="n">say</span> <span class="n">hello</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<h5>alias_method_chain 是ActiveSupport的一个公有实例方法，用法和alias_method是一样的，这里不举例，最后附上alias_method_chain的源码</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">alias_method_chain</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1"># Strip out punctuation on predicates or bang methods since    </span>
+</span><span class='line'>  <span class="c1"># e.g. target?_without_feature is not a valid method name.    </span>
+</span><span class='line'>  <span class="n">aliased_target</span><span class="p">,</span> <span class="n">punctuation</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sr">/([?!=])$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="vg">$1</span>
+</span><span class='line'>  <span class="k">yield</span><span class="p">(</span><span class="n">aliased_target</span><span class="p">,</span> <span class="n">punctuation</span><span class="p">)</span> <span class="k">if</span> <span class="nb">block_given?</span>
+</span><span class='line'>  <span class="n">with_method</span><span class="p">,</span> <span class="n">without_method</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">aliased_target</span><span class="si">}</span><span class="s2">_with_</span><span class="si">#{</span><span class="n">feature</span><span class="si">}#{</span><span class="n">punctuation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">aliased_target</span><span class="si">}</span><span class="s2">_without_</span><span class="si">#{</span><span class="n">feature</span><span class="si">}#{</span><span class="n">punctuation</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">alias_method</span> <span class="n">without_method</span><span class="p">,</span> <span class="n">target</span>
+</span><span class='line'>  <span class="n">alias_method</span> <span class="n">target</span><span class="p">,</span> <span class="n">with_method</span>
+</span><span class='line'>  <span class="k">case</span>
+</span><span class='line'>    <span class="k">when</span> <span class="nb">public_method_defined?</span><span class="p">(</span><span class="n">without_method</span><span class="p">)</span>
+</span><span class='line'>      <span class="kp">public</span> <span class="n">target</span>
+</span><span class='line'>    <span class="k">when</span> <span class="nb">protected_method_defined?</span><span class="p">(</span><span class="n">without_method</span><span class="p">)</span>
+</span><span class='line'>      <span class="kp">protected</span> <span class="n">target</span>
+</span><span class='line'>    <span class="k">when</span> <span class="nb">private_method_defined?</span><span class="p">(</span><span class="n">without_method</span><span class="p">)</span>
+</span><span class='line'>    <span class="kp">private</span> <span class="n">target</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-05-28T22:03:17+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:03 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/05/26/my-first-post/" title="Previous Post: hello everybody">&laquo; hello everybody</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/" title="Next Post: how to understand rails virtual attributes">how to understand rails virtual attributes &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Rails 中alias Alias_method Alias_method_chain的使用"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/29/include-vs-extend-in-ruby/">Ruby中include和extend的比较</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">How to Understand Rails Virtual Attributes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/05/28/ruby-alias-methods/">Rails 中alias Alias_method Alias_method_chain的使用</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
