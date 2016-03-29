@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[深不可测]]></title>
-  <link href="http://xuyao91.github.io/atom.xml" rel="self"/>
-  <link href="http://xuyao91.github.io/"/>
-  <updated>2016-03-29T22:26:27+08:00</updated>
-  <id>http://xuyao91.github.io/</id>
+  <link href="http://xuyao.club/atom.xml" rel="self"/>
+  <link href="http://xuyao.club/"/>
+  <updated>2016-03-29T22:32:57+08:00</updated>
+  <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
     
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[About Rails Cache]]></title>
-    <link href="http://xuyao91.github.io/blog/2016/03/24/about-rails-cache/"/>
+    <link href="http://xuyao.club/blog/2016/03/24/about-rails-cache/"/>
     <updated>2016-03-24T10:05:39+08:00</updated>
-    <id>http://xuyao91.github.io/blog/2016/03/24/about-rails-cache</id>
+    <id>http://xuyao.club/blog/2016/03/24/about-rails-cache</id>
     <content type="html"><![CDATA[<p>在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
 存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便</p>
 
@@ -94,9 +94,9 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   
   <entry>
     <title type="html"><![CDATA[Ruby中include和extend的比较]]></title>
-    <link href="http://xuyao91.github.io/blog/2015/06/29/include-vs-extend-in-ruby/"/>
+    <link href="http://xuyao.club/blog/2015/06/29/include-vs-extend-in-ruby/"/>
     <updated>2015-06-29T12:21:35+08:00</updated>
-    <id>http://xuyao91.github.io/blog/2015/06/29/include-vs-extend-in-ruby</id>
+    <id>http://xuyao.club/blog/2015/06/29/include-vs-extend-in-ruby</id>
     <content type="html"><![CDATA[<p>本文翻译,改编自<a href="http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/">Include vs Extend in Ruby</a></p>
 
 <p>在类中引用一个模块,有两种方式,一种是include,另一种是extend,两种的大致区别就是:<br/>
@@ -290,9 +290,9 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   
   <entry>
     <title type="html"><![CDATA[About Me]]></title>
-    <link href="http://xuyao91.github.io/blog/2015/06/05/about-me-with-ruby-code/"/>
+    <link href="http://xuyao.club/blog/2015/06/05/about-me-with-ruby-code/"/>
     <updated>2015-06-05T10:49:54+08:00</updated>
-    <id>http://xuyao91.github.io/blog/2015/06/05/about-me-with-ruby-code</id>
+    <id>http://xuyao.club/blog/2015/06/05/about-me-with-ruby-code</id>
     <content type="html"><![CDATA[<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -356,9 +356,9 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   
   <entry>
     <title type="html"><![CDATA[How to Understand Rails Virtual Attributes]]></title>
-    <link href="http://xuyao91.github.io/blog/2015/06/04/how-to-understand-rails-virtual-attributes/"/>
+    <link href="http://xuyao.club/blog/2015/06/04/how-to-understand-rails-virtual-attributes/"/>
     <updated>2015-06-04T16:37:50+08:00</updated>
-    <id>http://xuyao91.github.io/blog/2015/06/04/how-to-understand-rails-virtual-attributes</id>
+    <id>http://xuyao.club/blog/2015/06/04/how-to-understand-rails-virtual-attributes</id>
     <content type="html"><![CDATA[<h4>在网上看到关于rails  virtual attributes 的例子,得觉挺好玩的,自己动手试一下,好叼</h4>
 
 <p>有时候在一张表里面有两个字段,但是实际表单里其实只有一个文本框输入,比如老外的名字分first_name last_name,
@@ -487,9 +487,9 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   
   <entry>
     <title type="html"><![CDATA[Rails 中alias Alias_method Alias_method_chain的使用]]></title>
-    <link href="http://xuyao91.github.io/blog/2015/05/28/ruby-alias-methods/"/>
+    <link href="http://xuyao.club/blog/2015/05/28/ruby-alias-methods/"/>
     <updated>2015-05-28T22:03:17+08:00</updated>
-    <id>http://xuyao91.github.io/blog/2015/05/28/ruby-alias-methods</id>
+    <id>http://xuyao.club/blog/2015/05/28/ruby-alias-methods</id>
     <content type="html"><![CDATA[<h5>首先看一下alias的用法，上一个实例是明了</h5>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -614,9 +614,9 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   
   <entry>
     <title type="html"><![CDATA[Hello Everybody]]></title>
-    <link href="http://xuyao91.github.io/blog/2015/05/26/my-first-post/"/>
+    <link href="http://xuyao.club/blog/2015/05/26/my-first-post/"/>
     <updated>2015-05-26T17:29:27+08:00</updated>
-    <id>http://xuyao91.github.io/blog/2015/05/26/my-first-post</id>
+    <id>http://xuyao.club/blog/2015/05/26/my-first-post</id>
     <content type="html"><![CDATA[<p>hello everybody, this is my first post, I'am very happy, bescuse it is successful.</p>
 
 <p>如果想了解微信相关开发的东西请到我的<a href="http://blog.sina.com.cn/xuyao90">新浪博客</a></p>

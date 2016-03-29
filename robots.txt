@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://xuyao91.github.io/sitemap.xml 
+Sitemap: http://xuyao.club/sitemap.xml 
