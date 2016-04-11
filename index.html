@@ -9,8 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
-存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便 ActiveSupport::Cache::Store 它是一个抽象类，有很多cache &hellip;">
+  <meta name="description" content="前言 目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。 这里主要针对doorkeeper作讲解 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +72,48 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-06T16:19:32+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:19 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2016/04/06/about-sso-in-rails/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>前言</h3>
+
+<p>目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。</p>
+
+<p>这里主要针对doorkeeper作讲解</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/04/06/about-sso-in-rails/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a></h1>
     
     
@@ -117,55 +158,12 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>cache有几种常用的方法</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;peter&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
-</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>cache中的key都是string型，而且区分大小写的，Hash和数据也或以当作key,上面的代码的key也可以用hash表示</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
-</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="o">==</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="kp">true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果你的cache是和其它程序公用的存储，你可以给他定义一个namespace，一旦namespace定义，就会在key前面加了个前缀
-其它一些参数
-:compress 是否压缩缓存，
-:compress_threshold 和compress一起使用，设定一个阈值，低于这个值就不压缩缓存。默认为 16 KB。
-:expires_in 为缓存记录设定一个过期时间，单位为秒，过期后把记录从缓存中删除。</p>
-
-<h3>ActiveSupport::Cache::MemoryStore</h3>
-
-<p>这种存储方式是把数据存储在内存中，而且存储空间的大小由:size决定，默认为32M，如果超出分配的大小，系统会清理缓存，把最不常使用的记录删除。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cache</span> <span class="o">=</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">MemoryStore</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;peter&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>ActiveSupport::Cache::MemCacheStore</h3>
-
-<p>这种存储方式使用 Danga 开发的 memcached 服务器，为程序提供一个中心化的缓存存储。Rails 默认使用附带安装的 dalli gem 实现这种存储方式。这是目前在生产环境中使用最广泛的缓存存储方式，可以提供单个缓存存储，或者共享的缓存集群，性能高，冗余度低。</p>
-
-<p>初始化时要指定集群中所有 memcached 服务器的地址。如果没有指定地址，默认运行在本地主机的默认端口上，这对大型网站来说不是个好主意。</p>
-
-<p>在这种缓存存储中使用 write 和 fetch 方法还可指定两个额外的选项，充分利用 memcached 的特有功能。指定 :raw 选项可以直接把没有序列化的数据传给 memcached 服务器。在这种类型的数据上可以使用 memcached 的原生操作，例如 increment 和 decrement。如果不想让 memcached 覆盖已经存在的记录，可以指定 :unless_exist 选项。
-上面的这种我也没用过，只是摘了别人一段话来补补。。。</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/03/24/about-rails-cache/">Read on&rarr;</a>
+    </footer>
   
 
 
@@ -463,6 +461,10 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a>
       </li>
     
@@ -476,10 +478,6 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
     
       <li class="post">
         <a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">How to Understand Rails Virtual Attributes</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/05/28/ruby-alias-methods/">Rails 中alias Alias_method Alias_method_chain的使用</a>
       </li>
     
   </ul>
