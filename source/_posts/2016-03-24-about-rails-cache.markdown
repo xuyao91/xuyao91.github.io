@@ -23,6 +23,7 @@ config.cache_store = :file_store, "/path/to/cache/directory"
 ```ruby
 Rails.cache.class  => ActiveSupport::Cache::FileStore 
 ```
+<!-- more -->
 
 cache有几种常用的方法
 ```ruby

@@ -7,9 +7,9 @@ categories:
 ---
 ###前言
 目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。  
-  
-这里主要针对doorkpper作讲解  
 
+这里主要针对doorkeeper作讲解  
+<!-- more -->
 
 ![查看图](http://i2.piimg.com/285bc33bd4eab4b1.png)
 ###需要用到的插件
