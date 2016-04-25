@@ -1,4 +1,4 @@
-## 这是我的个人博客，欢迎访问(xuyao.club)[http://xuyao.club]
+## 这是我的个人博客，欢迎访问[xuyao.club](http://xuyao.club)
 
 ## Octopress 3.0
 
