@@ -1,3 +1,5 @@
+## 这是我的个人博客，欢迎访问(xuyao.club)[http://xuyao.club]
+
 ## Octopress 3.0
 
 Note: Octopress 3.0 is in development at https://github.com/octopress/octopress
