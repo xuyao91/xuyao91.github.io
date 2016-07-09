@@ -31,6 +31,8 @@ categories:
     me = Person.new("徐耀","1991-02-03",1)
     me.nickname = %W(老徐 徐逗逗)
     me.company= "上海微客来软件技术有限公司"
+    #TODO update at 2015-7-15
+    me.company= "苏州医云健康有限公司"
     me.position = "Ruby Engineer"
     me.hobby "coding","reading","music","traveling","grils"
     me.weibo = "http://weibo.com/1676361452"
