@@ -110,15 +110,15 @@
 
 <h4>Appium Concepts（appium理念）</h4>
 
-<p><strong>Client/Server 设计风格</strong>
+<p><strong>Client/Server 设计风格</strong> <br/>
    Appium本质是一个核心webserver,暴露一些REST API与手机设备交互, 而且之间通信是一标准的HTTP协议，client的test code语言几乎现在主流的语言都支持，写测试用例比较方便，下图是它servre端的GUI</p>
 
 <p><img src="http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" alt="CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" /></p>
 
-<p><strong>Session(会话)</strong>
+<p><strong>Session(会话)</strong><br/>
   自动化每次都会在一个会话里面进行，client每次都会发送一个post /session 请求，服务器根据客户端信息起一个automation session和返回一个session ID用于后续操作</p>
 
-<p><strong>Desired Capabilities</strong>
+<p><strong>Desired Capabilities</strong><br/>
   一组hash参数，告诉server端我们需要启动一个的怎样automation session,不同设备参数不同
 这是iOs一个demo</p>
 
@@ -158,10 +158,10 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><strong>Appium Server</strong>
+<p><strong>Appium Server</strong><br/>
   server端是用node.js写的</p>
 
-<p><strong>Appium Clients</strong>
+<p><strong>Appium Clients</strong><br/>
   客户端的库有很多( Java, Ruby, Python, PHP, JavaScript, and C#)，这些都对WebDriver封装扩展过,所以不需要找个WebDriver client来做这些东西,如果使用ruby语言来写脚本，ruby里有个<a href="https://rubygems.org/gems/appium_lib">appium_lib</a> gem，里面集成了很多现成的方法，可以再安装一个<a href="https://github.com/appium/ruby_console">appium_console</a>，直接打开console进行调试</p>
 
 <h4>Appium Inspector</h4>
