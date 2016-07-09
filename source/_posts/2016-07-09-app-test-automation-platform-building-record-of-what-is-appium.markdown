@@ -12,7 +12,9 @@ categories:
 ![img](http://upload-images.jianshu.io/upload_images/1796624-10f320a9d37a0d96.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ####为什么选择appium作为自动化测试框架
-appium能够同时支持ios，android，h5,比较容易保持接口统一，减少开发维护成本，还有就是appium测试脚本支持多种语言(ruby/python/java/php/javascript),适用人群多。至于文档方面，ios的文档比较多，android方面的文档比较少.
+*   使用标准的api形式，能够同时支持ios，android，h5,接口保持统一，减少开发维护成本
+*   你可以使用任何你喜欢的开发工具，及支持多种脚本语言(ruby/python/java/php/javascript/C#/ Clojure/Perl)  
+*   你可以使用任何的测试框架
 ####What is the Appium
 具体什么是appium呢，引用了官方的一段话：
   Appium is an open source test automation framework for use with native, [hybrid](http://appium.io/slate/en/master/#hybrid.md) and mobile web apps.
