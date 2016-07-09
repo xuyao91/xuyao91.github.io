@@ -17,17 +17,17 @@ appium能够同时支持ios，android，h5,比较容易保持接口统一，减�
 具体什么是appium呢，引用了官方的一段话：
   Appium is an open source test automation framework for use with native, [hybrid](http://appium.io/slate/en/master/#hybrid.md) and mobile web apps.
 
-####Appium Concepts（appium理念）
-**Client/Server 设计风格** 
+####Appium Concepts（appium理念）  
+**Client/Server 设计风格**   
    Appium本质是一个核心webserver,暴露一些REST API与手机设备交互, 而且之间通信是一标准的HTTP协议，client的test code语言几乎现在主流的语言都支持，写测试用例比较方便，下图是它servre端的GUI
 
-![CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png](http://upload-images.jianshu.io/upload_images/1796624-9e3759c99b2e9495.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png](http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png)
 
 
-**Session(会话)**
+**Session(会话)**  
   自动化每次都会在一个会话里面进行，client每次都会发送一个post /session 请求，服务器根据客户端信息起一个automation session和返回一个session ID用于后续操作
 
-**Desired Capabilities**
+**Desired Capabilities**  
   一组hash参数，告诉server端我们需要启动一个的怎样automation session,不同设备参数不同
 这是iOs一个demo
 ```ruby
@@ -50,15 +50,15 @@ capabilities = {
 }
 ```
 
-**Appium Server**
+**Appium Server**  
   server端是用node.js写的
 
-**Appium Clients**
+**Appium Clients**  
   客户端的库有很多( Java, Ruby, Python, PHP, JavaScript, and C#)，这些都对WebDriver封装扩展过,所以不需要找个WebDriver client来做这些东西,如果使用ruby语言来写脚本，ruby里有个[appium_lib](https://rubygems.org/gems/appium_lib) gem，里面集成了很多现成的方法，可以再安装一个[appium_console](https://github.com/appium/ruby_console)，直接打开console进行调试
 
 ####Appium Inspector
 在控件台里面获取页面元素比较麻烦，往往需要一直定位，Appium提供了一个比较友好的GUI给我们操作，而且操作起来还容易，大大减少了我们查找元素的时间
-![Appium Inspector GUI](http://upload-images.jianshu.io/upload_images/1796624-36371e4f4fe1beb2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![Appium Inspector GUI](http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg)
 
 ######参考资料
 http://appium.io/  
