@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/</loc>
+<lastmod>2016-07-09T17:06:02+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2016/04/06/about-sso-in-rails/</loc>
 <lastmod>2016-04-06T16:19:32+08:00</lastmod>
 </url>

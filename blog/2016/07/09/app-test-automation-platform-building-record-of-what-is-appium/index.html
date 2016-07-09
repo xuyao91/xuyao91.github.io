@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>App自动化测试平台搭建记录之什么是appium - 深不可测</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="前言 目前我们的项目关于测试这块还是处于很初级阶段，rails后端的rspec也写的很少，app方面完全靠手动测试，基于此情况，我们决定搭建一个自动化测试平台，期望目标是移动端ios和android及h5每天定时拉取最新代码，进行部署，打包，最后进行回归测试，生成测试报告发送给测试人员， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="深不可测" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">深不可测</a></h1>
+  
+    <h2>为了远方的自由</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">App自动化测试平台搭建记录之什么是appium</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-07-09T17:06:02+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>5:06 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>前言</h4>
+
+<p>目前我们的项目关于测试这块还是处于很初级阶段，rails后端的rspec也写的很少，app方面完全靠手动测试，基于此情况，我们决定搭建一个自动化测试平台，期望目标是移动端ios和android及h5每天定时拉取最新代码，进行部署，打包，最后进行回归测试，生成测试报告发送给测试人员，
+最后流程如下所示</p>
+
+<!-- more -->
+
+
+<p><img src="http://upload-images.jianshu.io/upload_images/1796624-10f320a9d37a0d96.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="img" /></p>
+
+<h4>为什么选择appium作为自动化测试框架</h4>
+
+<p>appium能够同时支持ios，android，h5,比较容易保持接口统一，减少开发维护成本，还有就是appium测试脚本支持多种语言(ruby/python/java/php/javascript),适用人群多。至于文档方面，ios的文档比较多，android方面的文档比较少.</p>
+
+<h4>What is the Appium</h4>
+
+<p>具体什么是appium呢，引用了官方的一段话：
+  Appium is an open source test automation framework for use with native, <a href="http://appium.io/slate/en/master/#hybrid.md">hybrid</a> and mobile web apps.</p>
+
+<h4>Appium Concepts（appium理念）</h4>
+
+<p><strong>Client/Server 设计风格</strong>
+   Appium本质是一个核心webserver,暴露一些REST API与手机设备交互, 而且之间通信是一标准的HTTP协议，client的test code语言几乎现在主流的语言都支持，写测试用例比较方便，下图是它servre端的GUI</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/1796624-9e3759c99b2e9495.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" /></p>
+
+<p><strong>Session(会话)</strong>
+  自动化每次都会在一个会话里面进行，client每次都会发送一个post /session 请求，服务器根据客户端信息起一个automation session和返回一个session ID用于后续操作</p>
+
+<p><strong>Desired Capabilities</strong>
+  一组hash参数，告诉server端我们需要启动一个的怎样automation session,不同设备参数不同
+这是iOs一个demo</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;appium-version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;platformName&#39;</span><span class="p">:</span> <span class="s1">&#39;iOS&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;platformVersion&#39;</span><span class="p">:</span> <span class="s1">&#39;8.2&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;deviceName&#39;</span><span class="p">:</span> <span class="s1">&#39;iPhone 6&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="s2">&quot;/Users/xuyao/Downloads/Cloudoc-Patient.app&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是android的样本</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;appium-version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;platformName&#39;</span><span class="p">:</span> <span class="s1">&#39;Android&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;platformVersion&#39;</span><span class="p">:</span> <span class="s1">&#39;5.1&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;deviceName&#39;</span><span class="p">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="s1">&#39;/Users/xuyao/Downloads/Yydys0627.apk&#39;</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>Appium Server</strong>
+  server端是用node.js写的</p>
+
+<p><strong>Appium Clients</strong>
+  客户端的库有很多( Java, Ruby, Python, PHP, JavaScript, and C#)，这些都对WebDriver封装扩展过,所以不需要找个WebDriver client来做这些东西,如果使用ruby语言来写脚本，ruby里有个<a href="https://rubygems.org/gems/appium_lib">appium_lib</a> gem，里面集成了很多现成的方法，可以再安装一个<a href="https://github.com/appium/ruby_console">appium_console</a>，直接打开console进行调试</p>
+
+<h4>Appium Inspector</h4>
+
+<p>在控件台里面获取页面元素比较麻烦，往往需要一直定位，Appium提供了一个比较友好的GUI给我们操作，而且操作起来还容易，大大减少了我们查找元素的时间
+<img src="http://upload-images.jianshu.io/upload_images/1796624-36371e4f4fe1beb2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Appium Inspector GUI" /></p>
+
+<h6>参考资料</h6>
+
+<p><a href="http://appium.io/">http://appium.io/</a><br/>
+<a href="https://github.com/appium/ruby_console">https://github.com/appium/ruby_console</a><br/>
+<a href="https://github.com/appium/ruby_lib">https://github.com/appium/ruby_lib</a><br/>
+<a href="https://ruby-china.org/topics/30074">https://ruby-china.org/topics/30074</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-07-09T17:06:02+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>5:06 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/04/06/about-sso-in-rails/" title="Previous Post: about sso in rails">&laquo; about sso in rails</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="App自动化测试平台搭建记录之什么是appium"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/">App自动化测试平台搭建记录之什么是appium</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/29/include-vs-extend-in-ruby/">Ruby中include和extend的比较</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
