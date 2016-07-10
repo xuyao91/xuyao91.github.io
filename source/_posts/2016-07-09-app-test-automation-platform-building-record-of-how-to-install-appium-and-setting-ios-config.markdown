@@ -72,6 +72,6 @@ but the available devices were: ["Resizable iPad (8.2 Simulator) [341C7D49-B181-
 ![iphone5](http://7xjibn.com1.z0.glb.clouddn.com/iphone_5s_device.png)
 ![Appium Inspector GUI](http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg)
 #####参考资料
-http://appium.io/getting-started.html?lang=zh
+http://appium.io/getting-started.html?lang=zh  
 https://ruby-china.org/topics/30085
 
