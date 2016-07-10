@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/</loc>
+<lastmod>2016-07-10T00:12:30+08:00</lastmod>
+</url>
+<url>
+<loc>http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/</loc>
+<lastmod>2016-07-09T21:29:56+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/</loc>
 <lastmod>2016-07-09T17:06:02+08:00</lastmod>
 </url>
