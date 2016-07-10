@@ -1,0 +1,485 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>App自动化测试平台搭建记录之如何优雅地找到控件 - 深不可测</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="这篇讲一下如果找到对应ios/android里的UI控件，以便我们快速地写测试代码，本系列文章未特殊提到使用什么语言时，默认使用ruby脚本语言。ios/android设备的UI控件有很多种，下面讲一下使用appium Inspector和appium ruby console(arc) &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="深不可测" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">深不可测</a></h1>
+  
+    <h2>为了远方的自由</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">App自动化测试平台搭建记录之如何优雅地找到控件</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-07-10T22:22:44+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:22 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>这篇讲一下如果找到对应ios/android里的UI控件，以便我们快速地写测试代码，本系列文章未特殊提到使用什么语言时，默认使用ruby脚本语言。ios/android设备的UI控件有很多种，下面讲一下使用appium Inspector和appium ruby console(arc)来查找UI控件</p>
+
+<!-- more -->
+
+
+<h4>Appium Inspector GUI</h4>
+
+<p>appium服务启动后，点击inspector,启动client GUI，如下图,GUI已帮我们获取到所有的Ui控件，并且有很多模拟操作，非常适合我们调试用，点击record，每个模拟操作都会生成相应的代码，而且代码还可以选择你需要的语言版本。
+<img src="http://upload-images.jianshu.io/upload_images/1796624-3b07ee8a85aaeadd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="android_detail" />
+<img src="http://upload-images.jianshu.io/upload_images/1796624-c58b0c22fd15b56c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="android_record" /><br/>
+我们具体定位到某个控件，可以看到这个控件的详细信息，比如我现在找到一个登录按钮，下面是这个登录按钮的信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android某个控件的详细信息</span>
+</span><span class='line'><span class="n">content</span><span class="o">-</span><span class="ss">desc</span><span class="p">:</span>
+</span><span class='line'><span class="ss">type</span><span class="p">:</span> <span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">Button</span>
+</span><span class='line'><span class="ss">text</span><span class="p">:</span> <span class="err">登录</span>
+</span><span class='line'><span class="ss">index</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'><span class="ss">enabled</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="ss">location</span><span class="p">:</span> <span class="p">{</span><span class="mi">418</span><span class="p">,</span> <span class="mi">1054</span><span class="p">}</span>
+</span><span class='line'><span class="ss">size</span><span class="p">:</span> <span class="p">{</span><span class="mi">262</span><span class="p">,</span> <span class="mi">89</span><span class="p">}</span>
+</span><span class='line'><span class="ss">checkable</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="ss">checked</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="ss">focusable</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="ss">clickable</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="n">long</span><span class="o">-</span><span class="ss">clickable</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="ss">package</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span>
+</span><span class='line'><span class="ss">password</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="n">resource</span><span class="o">-</span><span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">immediate_experience</span>
+</span><span class='line'><span class="ss">scrollable</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="ss">selected</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="ss">xpath</span><span class="p">:</span> <span class="sr">//</span><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">LinearLayout</span><span class="o">[</span><span class="mi">1</span><span class="o">]/</span><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">FrameLayout</span><span class="o">[</span><span class="mi">1</span><span class="o">]/</span><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">LinearLayout</span><span class="o">[</span><span class="mi">1</span><span class="o">]/</span><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">LinearLayout</span><span class="o">[</span><span class="mi">1</span><span class="o">]/</span><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">LinearLayout</span><span class="o">[</span><span class="mi">2</span><span class="o">]/</span><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">Button</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#ios某个控件下的详情信息</span>
+</span><span class='line'><span class="nb">name</span><span class="p">:</span> <span class="err">登录</span>
+</span><span class='line'><span class="ss">type</span><span class="p">:</span> <span class="no">UIAButton</span>
+</span><span class='line'><span class="ss">value</span><span class="p">:</span>
+</span><span class='line'><span class="ss">label</span><span class="p">:</span> <span class="err">登录</span>
+</span><span class='line'><span class="ss">hint</span><span class="p">:</span>
+</span><span class='line'><span class="ss">enabled</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="ss">visible</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="ss">valid</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="ss">location</span><span class="p">:</span> <span class="p">{</span><span class="mi">192</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">575</span><span class="p">}</span>
+</span><span class='line'><span class="ss">size</span><span class="p">:</span> <span class="p">{</span><span class="mi">167</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">44</span><span class="p">}</span>
+</span><span class='line'><span class="ss">xpath</span><span class="p">:</span> <span class="sr">//</span><span class="no">UIAApplication</span><span class="o">[</span><span class="mi">1</span><span class="o">]/</span><span class="no">UIAWindow</span><span class="o">[</span><span class="mi">2</span><span class="o">]/</span><span class="no">UIAScrollView</span><span class="o">[</span><span class="mi">1</span><span class="o">]/</span><span class="no">UIAButton</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>appium ruby console(arc)</h4>
+
+<p><a href="https://github.com/appium/ruby_console">ruby_console</a>是针对ruby打造的一个console端的gem，使用起来也很方便，直接在console里使用命令arc就能启动设备，不过他并不能读取我们在appium里面的配置信息，所以需要我们手动创建一个appium.txt文件，在此文件目录下面启动，下面的android/ios的appium.txt文件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android</span>
+</span><span class='line'><span class="o">[</span><span class="n">caps</span><span class="o">]</span>
+</span><span class='line'><span class="n">platformName</span> <span class="o">=</span> <span class="s2">&quot;Android&quot;</span>
+</span><span class='line'><span class="n">platformVersion</span> <span class="o">=</span> <span class="s1">&#39;5.1&#39;</span>
+</span><span class='line'><span class="n">app</span> <span class="o">=</span> <span class="s2">&quot;/Users/xuyao/Downloads/Yydys0627.apk&quot;</span>
+</span><span class='line'><span class="n">deviceName</span> <span class="o">=</span> <span class="s2">&quot;Android Simulator&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#ios</span>
+</span><span class='line'><span class="o">[</span><span class="n">caps</span><span class="o">]</span>
+</span><span class='line'><span class="n">platformName</span> <span class="o">=</span> <span class="s2">&quot;ios&quot;</span>
+</span><span class='line'><span class="n">platformVersion</span> <span class="o">=</span> <span class="s1">&#39;8.2&#39;</span>
+</span><span class='line'><span class="n">app</span> <span class="o">=</span> <span class="s2">&quot;/Users/xuyao/Downloads/Cloudoc-Patient.app&quot;</span>
+</span><span class='line'><span class="n">deviceName</span> <span class="o">=</span> <span class="s2">&quot;iPhone Simulator&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#启动arc</span>
+</span><span class='line'><span class="err">➜</span> <span class="n">ls</span>
+</span><span class='line'><span class="n">appium</span><span class="o">.</span><span class="n">txt</span>
+</span><span class='line'><span class="err">➜</span> <span class="n">arc</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动后，我们可以通过page方法查看当前页面所有的元素</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">4</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">page</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">FrameLayout</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="ss">android</span><span class="p">:</span><span class="nb">id</span><span class="o">/</span><span class="n">content</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">support</span><span class="o">.</span><span class="n">v4</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">ViewPager</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">vp_welcome</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">ImageView</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">wel_img</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">Button</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">text</span><span class="p">:</span> <span class="err">逛一逛</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">direct_access</span>
+</span><span class='line'>  <span class="n">strings</span><span class="o">.</span><span class="n">xml</span><span class="p">:</span> <span class="n">direct_access</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">Button</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">text</span><span class="p">:</span> <span class="err">登录</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">immediate_experience</span>
+</span><span class='line'>  <span class="n">strings</span><span class="o">.</span><span class="n">xml</span><span class="p">:</span> <span class="n">immediate_experience</span>
+</span><span class='line'>               <span class="n">login</span>
+</span><span class='line'><span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果觉得页面信息很多，找不到自己想要的控件，page方法后面可以带个参数class_name来过滤元素，如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">5</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">page</span> <span class="ss">:Button</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">Button</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">text</span><span class="p">:</span> <span class="err">逛一逛</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">direct_access</span>
+</span><span class='line'>  <span class="n">strings</span><span class="o">.</span><span class="n">xml</span><span class="p">:</span> <span class="n">direct_access</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">android</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">Button</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="ss">text</span><span class="p">:</span> <span class="err">登录</span>
+</span><span class='line'>  <span class="nb">id</span><span class="p">:</span> <span class="n">com</span><span class="o">.</span><span class="n">yydys</span><span class="ss">:id</span><span class="o">/</span><span class="n">immediate_experience</span>
+</span><span class='line'>  <span class="n">strings</span><span class="o">.</span><span class="n">xml</span><span class="p">:</span> <span class="n">immediate_experience</span>
+</span><span class='line'>               <span class="n">login</span>
+</span><span class='line'><span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就能找到按钮的元素了</p>
+
+<h6>find_element()方法</h6>
+
+<p>根据上面的信息我们可以通过find_elment方法来查找android/ios下的xpath,模拟点击操作</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android</span>
+</span><span class='line'><span class="n">find_element</span><span class="p">(</span><span class="ss">xpath</span><span class="p">:</span> <span class="s2">&quot;//android.widget.LinearLayout[1]/android.widget.FrameLayout[1]/android.widget.LinearLayout[1]/android.widget.LinearLayout[1]/android.widget.LinearLayout[2]/android.widget.Button[2]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span>
+</span><span class='line'><span class="c1">#android我们还可以根据他的recource-id，来查找他的唯一控件</span>
+</span><span class='line'><span class="n">find_element</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/immediate_experience&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span>
+</span><span class='line'><span class="c1">#ios</span>
+</span><span class='line'><span class="n">find_element</span><span class="p">(</span><span class="ss">xpath</span><span class="p">:</span> <span class="s2">&quot;//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAButton[2]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span>
+</span><span class='line'><span class="c1">#当然你也可以通过class_name来查找，如果一个页面上有多个相同的class_name,会返回第一个tag</span>
+</span><span class='line'><span class="n">find_element</span><span class="p">(</span><span class="ss">class_name</span><span class="p">:</span> <span class="s2">&quot;android.widget.Button&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span>  <span class="c1">#android</span>
+</span><span class='line'><span class="n">find_element</span><span class="p">(</span><span class="ss">class_name</span><span class="p">:</span> <span class="s2">&quot;UIAButton&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>button_exact方法</h6>
+
+<p>有时候我们知道要找一个按钮，那么我们可以使用button_exact来直接查找一个button,button_exact方法会找到第一个配置到的元素</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">8</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;登录&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#&lt;Selenium::WebDriver::Element:0x5dffe05a97580bc2 id=&quot;3&quot;&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>textfield_exact()方法</h6>
+
+<p>根据给定的值找到EditText/TextFeild第一个元素</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">24</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">textfield_exact</span><span class="p">(</span><span class="s2">&quot;com.yydys:id/login_input&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">type</span> <span class="s2">&quot;9123&quot;</span>
+</span><span class='line'><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>exists()方法</h6>
+
+<p>测试的时候一般需要判断某个元素是否存在，可以使用exists</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">40</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">exists</span><span class="p">{</span><span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;com.yydys:id/login_btn&quot;</span><span class="p">)}</span>
+</span><span class='line'><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上就是一些比较常用的方法，以后用到再更新一些新的方法</p>
+
+<h5>参考资料</h5>
+
+<p><a href="https://github.com/appium/ruby_lib/blob/master/docs/android_docs.md">https://github.com/appium/ruby_lib/blob/master/docs/android_docs.md</a><br/>
+<a href="https://github.com/appium/ruby_lib/blob/master/docs/ios_docs.md">https://github.com/appium/ruby_lib/blob/master/docs/ios_docs.md</a><br/>
+<a href="https://ruby-china.org/topics/30154">https://ruby-china.org/topics/30154</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-07-10T22:22:44+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:22 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/" title="Previous Post: App自动化测试平台搭建记录之Android模拟器/真机的配置">&laquo; App自动化测试平台搭建记录之Android模拟器/真机的配置</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="App自动化测试平台搭建记录之如何优雅地找到控件"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/">App自动化测试平台搭建记录之如何优雅地找到控件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">App自动化测试平台搭建记录之Android模拟器/真机的配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/">App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/">App自动化测试平台搭建记录之什么是appium</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
