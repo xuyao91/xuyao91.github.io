@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置 - 深不可测</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="上一篇讲了什么是appium，这次讲一下如何安装appium，及怎样配置ios/android的模拟器/真机 系统选择 因为要跑ios的包的，所以我们肯定需要apple的系统来支持，而且ios版的appium也支持android，这样就完美了。 iOS必备条件 Mac OS X 10.10 or &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="深不可测" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">深不可测</a></h1>
+  
+    <h2>为了远方的自由</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-07-09T21:29:56+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:29 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>上一篇讲了什么是appium，这次讲一下如何安装appium，及怎样配置ios/android的模拟器/真机</p>
+
+<h4>系统选择</h4>
+
+<p>因为要跑ios的包的，所以我们肯定需要apple的系统来支持，而且ios版的appium也支持android，这样就完美了。</p>
+
+<!-- more -->
+
+
+<h6>iOS必备条件</h6>
+
+<ul>
+<li>Mac OS X 10.10 or 更高, 建议使用10.11.1</li>
+<li>XCode >= 6.0, 7.1.1</li>
+<li>Apple Developer Tools (iPhone simulator SDK, command line tools)</li>
+</ul>
+
+
+<h6>Android必备条件</h6>
+
+<ul>
+<li><a href="http://developer.android.com/">Android SDK</a> API >= 17 (Additional features require 18/19)</li>
+</ul>
+
+
+<h4>安装appium</h4>
+
+<p>appium服务器是使用node.js跑的,所以要确保你机子上安装了node.js</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">node</span> <span class="c1">#安装nodejs</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="n">g</span> <span class="n">appium</span> <span class="c1">#安装appium</span>
+</span><span class='line'><span class="n">appium</span>  <span class="c1">#启动appium</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>当然你还可以下载一个包，直接安装，<a href="https://bitbucket.org/appium/appium.app/downloads/">点击下载</a>
+如果不确实appium是否安装好，可以使用appium-doctor插件检测依赖环境是否安装成功</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="n">g</span> <span class="n">appium</span><span class="o">-</span><span class="n">doctor</span> <span class="c1"># 安装appium-doctor</span>
+</span><span class='line'><span class="n">appium</span><span class="o">-</span><span class="n">doctor</span> <span class="c1">#如果安装成功，会显示以下数据</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span> <span class="c1">### Diagnostic starting ###</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">Xcode</span> <span class="n">is</span> <span class="n">installed</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Applications/</span><span class="no">Xcode</span><span class="o">.</span><span class="n">app</span><span class="o">/</span><span class="no">Contents</span><span class="o">/</span><span class="no">Developer</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">Xcode</span> <span class="no">Command</span> <span class="no">Line</span> <span class="no">Tools</span> <span class="n">are</span> <span class="n">installed</span><span class="o">.</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">DevToolsSecurity</span> <span class="n">is</span> <span class="n">enabled</span><span class="o">.</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">The</span> <span class="no">Authorization</span> <span class="no">DB</span> <span class="n">is</span> <span class="n">set</span> <span class="n">up</span> <span class="n">properly</span><span class="o">.</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">The</span> <span class="no">Node</span><span class="o">.</span><span class="n">js</span> <span class="n">binary</span> <span class="n">was</span> <span class="n">found</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">node</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">HOME</span> <span class="n">is</span> <span class="n">set</span> <span class="ss">to</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">ANDROID_HOME</span> <span class="n">is</span> <span class="n">set</span> <span class="ss">to</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">JAVA_HOME</span> <span class="n">is</span> <span class="n">set</span> <span class="ss">to</span><span class="p">:</span> <span class="sr">/Library/</span><span class="no">Java</span><span class="o">/</span><span class="no">JavaVirtualMachines</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_71</span><span class="o">.</span><span class="n">jdk</span><span class="o">/</span><span class="no">Contents</span><span class="o">/</span><span class="no">Home</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="n">adb</span> <span class="n">exists</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span><span class="o">/</span><span class="n">platform</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">adb</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="n">android</span> <span class="n">exists</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">android</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="n">emulator</span> <span class="n">exists</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">emulator</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span> <span class="c1">### Diagnostic completed, no fix needed. ###</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span> <span class="no">Everything</span> <span class="n">looks</span> <span class="n">good</span><span class="p">,</span> <span class="n">bye!</span>
+</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>好了以上就是安装appium的步骤，安装好，就可以启动了，启动后的界面如下
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" alt="CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" /></p>
+
+<h4>iOS模拟器/真机信息配置</h4>
+
+<p>正常情况下apple的包是.ipa文件，那里因为所有的ios设备使用的都的ARM处理器，但是我们现在配置的是模拟器的设备，而模拟器是基于Intel处理器,处理架构不一样，所以在编辑生成包的时候请选择.app文件，请看下图的配置参数
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/apple-setting.png" alt="apple-setting" />
+App path就是apple包的路径<br/>
+BunleID就是苹果开发的bundle identifier，仅在真机测试时勾上并填写<br/>
+UDID苹果设备的唯一ID，仅在真机测试时勾上并填写<br/>
+Force Device 要测试的iphone设备
+Platform Version 要测试的iphone的版本好(设备和版本号一定要匹配)
+以上配置好后，点击launch按钮，启动appium服务，启动成功后，可看到如下信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">MJSONWP</span><span class="o">]</span> <span class="no">Responding</span> <span class="n">to</span> <span class="n">client</span> <span class="n">with</span> <span class="n">driver</span><span class="o">.</span><span class="n">getStatus</span><span class="p">()</span> <span class="ss">result</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;build&quot;</span><span class="p">:{</span><span class="s2">&quot;version&quot;</span><span class="ss">:&quot;1.5.3&quot;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="o">[</span><span class="no">HTTP</span><span class="o">]</span> <span class="o">&lt;--</span> <span class="no">GET</span> <span class="sr">/wd/</span><span class="n">hub</span><span class="o">/</span><span class="n">status</span> <span class="mi">200</span> <span class="mi">26</span> <span class="n">ms</span> <span class="o">-</span> <span class="mi">83</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下来点击那个类似搜索的按钮来启动client端<br/>
+如果启动的时候报如下错误</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">MJSONWP</span><span class="o">]</span> <span class="no">Encountered</span> <span class="n">internal</span> <span class="n">error</span> <span class="n">running</span> <span class="ss">command</span><span class="p">:</span> <span class="ss">Error</span><span class="p">:</span> <span class="no">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="n">a</span> <span class="n">device</span> <span class="n">to</span> <span class="n">launch</span><span class="o">.</span> <span class="no">You</span> <span class="n">requested</span> <span class="s1">&#39;iPhone 6 (9.3 Simulator)&#39;</span><span class="p">,</span>
+</span><span class='line'><span class="n">but</span> <span class="n">the</span> <span class="n">available</span> <span class="n">devices</span> <span class="ss">were</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;Resizable iPad (8.2 Simulator) [341C7D49-B181-46B8-AB61-CF644C3250F1]&quot;</span><span class="p">,</span><span class="s2">&quot;Resizable iPhone (8.2 Simulator) [411D39CB-6DB6-41A9-9E6C-89CFDED27B69]&quot;</span><span class="p">,</span><span class="s2">&quot;iPad 2 (8.2 Simulator) [B3780274-2AE7-4677-831A-17CDDC92F2A5]&quot;</span><span class="p">,</span><span class="s2">&quot;iPad Air (8.2 Simulator) [C675C17C-9B79-4E57-B877-732A441F8DDA]&quot;</span><span class="p">,</span><span class="s2">&quot;iPad Retina (8.2 Simulator) [1C9FF2EF-A643-4D27-9268-4C3A4ADD8710]&quot;</span><span class="p">,</span><span class="s2">&quot;iPhone 4s (8.2 Simulator) [0AB005A2-63AD-44F8-AE80-8BFBB21BCDD2]&quot;</span><span class="p">,</span><span class="s2">&quot;iPhone 5 (8.2 Simulator) [15765CF4-96B1-4826-B397-6E23658AC89A]&quot;</span><span class="p">,</span><span class="s2">&quot;iPhone 5s (8.2 Simulator) </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>那是因为你的设备和版本不对的原因，仔细看下log就发现了，改一下设备和版本信息重新启动<br/>
+启动成功后出现如下画面，启动成功后会帮你打开Appium Inspector，可以使用Inspector查找组件路径，自此苹果的设备就配置成功了
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/iphone_5s_device.png" alt="iphone5" />
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg" alt="Appium Inspector GUI" /></p>
+
+<h5>参考资料</h5>
+
+<p><a href="http://appium.io/getting-started.html?lang=zh">http://appium.io/getting-started.html?lang=zh</a>
+<a href="https://ruby-china.org/topics/30085">https://ruby-china.org/topics/30085</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-07-09T21:29:56+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:29 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/" title="Previous Post: App自动化测试平台搭建记录之什么是appium">&laquo; App自动化测试平台搭建记录之什么是appium</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/" title="Next Post: App自动化测试平台搭建记录之Android模拟器/真机的配置">App自动化测试平台搭建记录之Android模拟器/真机的配置 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">App自动化测试平台搭建记录之Android模拟器/真机的配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/">App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/">App自动化测试平台搭建记录之什么是appium</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
