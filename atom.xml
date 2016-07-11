@@ -4,7 +4,7 @@
   <title><![CDATA[深不可测]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2016-07-10T22:41:26+08:00</updated>
+  <updated>2016-07-11T10:01:10+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -26,8 +26,8 @@
 <h4>Appium Inspector GUI</h4>
 
 <p>appium服务启动后，点击inspector,启动client GUI，如下图,GUI已帮我们获取到所有的Ui控件，并且有很多模拟操作，非常适合我们调试用，点击record，每个模拟操作都会生成相应的代码，而且代码还可以选择你需要的语言版本。
-<img src="http://upload-images.jianshu.io/upload_images/1796624-3b07ee8a85aaeadd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="android_detail" />
-<img src="http://upload-images.jianshu.io/upload_images/1796624-c58b0c22fd15b56c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="android_record" /><br/>
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/android_detail.png" alt="android_detail" />
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/android_record.png" alt="android_record" /><br/>
 我们具体定位到某个控件，可以看到这个控件的详细信息，比如我现在找到一个登录按钮，下面是这个登录按钮的信息</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
