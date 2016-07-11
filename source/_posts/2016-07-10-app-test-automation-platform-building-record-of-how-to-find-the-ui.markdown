@@ -9,8 +9,8 @@ categories:
 <!-- more -->
 ####Appium Inspector GUI
 appium服务启动后，点击inspector,启动client GUI，如下图,GUI已帮我们获取到所有的Ui控件，并且有很多模拟操作，非常适合我们调试用，点击record，每个模拟操作都会生成相应的代码，而且代码还可以选择你需要的语言版本。
-![android_detail](http://upload-images.jianshu.io/upload_images/1796624-3b07ee8a85aaeadd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-![android_record](http://upload-images.jianshu.io/upload_images/1796624-c58b0c22fd15b56c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)  
+![android_detail](http://7xjibn.com1.z0.glb.clouddn.com/android_detail.png)
+![android_record](http://7xjibn.com1.z0.glb.clouddn.com/android_record.png)  
 我们具体定位到某个控件，可以看到这个控件的详细信息，比如我现在找到一个登录按钮，下面是这个登录按钮的信息
 ```ruby
 #android某个控件的详细信息
