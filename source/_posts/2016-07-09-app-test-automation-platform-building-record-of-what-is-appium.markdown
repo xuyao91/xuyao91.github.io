@@ -9,7 +9,7 @@ categories:
 目前我们的项目关于测试这块还是处于很初级阶段，rails后端的rspec也写的很少，app方面完全靠手动测试，基于此情况，我们决定搭建一个自动化测试平台，期望目标是移动端ios和android及h5每天定时拉取最新代码，进行部署，打包，最后进行回归测试，生成测试报告发送给测试人员，
 最后流程如下所示
 <!-- more -->
-![img](http://7xjibn.com1.z0.glb.clouddn.com/1796624-10f320a9d37a0d96.png)
+![img](http://7xjibn.com1.z0.glb.clouddn.com/appium%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%9B%BE%20%281%29.png)
 
 ####为什么选择appium作为自动化测试框架
 *   使用标准的api形式，能够同时支持ios，android，h5,接口保持统一，减少开发维护成本
