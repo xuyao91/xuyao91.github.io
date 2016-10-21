@@ -4,7 +4,7 @@
   <title><![CDATA[深不可测]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2016-08-04T18:11:26+08:00</updated>
+  <updated>2016-08-07T15:36:18+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,368 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[App自动化测试平台搭建记录之rspec与appium的完美组合]]></title>
+    <link href="http://xuyao.club/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/"/>
+    <updated>2016-08-04T18:31:04+08:00</updated>
+    <id>http://xuyao.club/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium</id>
+    <content type="html"><![CDATA[<p>我们的预期目标是每天定时跑测试代码，并生成相应的测试报告，所以这里需要一个比较完善的测试框架来做这些事情，这里我选择的是rspec，</p>
+
+<h4>rspec与appium组合</h4>
+
+<ul>
+<li>将app(ios和android)端每个页面封装成自己的类，页面中的每个控件实例成方法，使用到哪个页面只需将对应的类初始化一下。</li>
+<li>写测试用例的人员只需写对应的测试用例，而不需要关注每个页面的控件封闭，而写控件封装的人，则只需写类的封装，也不必关注测试用例，这样极大的提高了开发效率</li>
+<li>考虑到ios与android中大部分页面的控件以及逻辑都是一样的，所以针对ios和android测试，spec代码只需写一份，这样做的好处是将测试用例与逻辑代码分离，便于以后维护，同时测试用例的扩展性和重用性也大大得到的提高</li>
+</ul>
+
+
+<h4>（页面）类的封装</h4>
+
+<p>测试开发流程具体如下，以app上的添加亲友为例
+<img src="http://7xjibn.com1.z0.glb.clouddn.com/Screenshot_2016-08-06-17-58-40_com.yydys.png" alt="img" />
+可以看到添加亲友页面上有4个控件，那么可以将这个页面封装成一个类，这些控件就是对应的实例方法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android对应的类</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">Simulator</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Android</span>
+</span><span class='line'>    <span class="k">module</span> <span class="nn">Pages</span>
+</span><span class='line'>      <span class="k">module</span> <span class="nn">Patient</span>
+</span><span class='line'>        <span class="k">class</span> <span class="nc">AddRelative</span> <span class="o">&lt;</span> <span class="no">Simulator</span><span class="o">::</span><span class="no">Android</span><span class="o">::</span><span class="no">Pages</span><span class="o">::</span><span class="no">Patient</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">my_relatives_link</span>
+</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="s2">&quot;我的亲友&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">add_relative_button</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/add_folks&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">relative_select</span>
+</span><span class='line'>            <span class="c1">#text(&quot;是你的&quot;)</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/role_name&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">name_option_selected</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;爸爸&quot;</span>
+</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">mobile_num_text_field</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/mobile&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">glucose_sms_reminder</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/glucose_exception_togglebtn&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">medicine_sms_reminder</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/forget_medication_togglebtn&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">save_button</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/right_btn&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#ios对应的类</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">Simulator</span>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">Ios</span>
+</span><span class='line'>    <span class="k">module</span> <span class="nn">Pages</span>
+</span><span class='line'>      <span class="k">module</span> <span class="nn">Patient</span>
+</span><span class='line'>        <span class="k">class</span> <span class="nc">AddRelative</span> <span class="o">&lt;</span> <span class="no">Simulator</span><span class="o">::</span><span class="no">Ios</span><span class="o">::</span><span class="no">Pages</span><span class="o">::</span><span class="no">Patient</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">my_relatives_link</span>
+</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="s2">&quot;我的亲友&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">add_relative_button</span>
+</span><span class='line'>            <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;添加亲友&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">relative_select</span>
+</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="s2">&quot;是您的&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">name_option_selected</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;爸爸&quot;</span>
+</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">mobile_num_text_field</span>
+</span><span class='line'>            <span class="n">textfield_exact</span><span class="p">(</span><span class="s2">&quot;请输入手机号&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">glucose_sms_reminder</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="ss">xpath</span><span class="p">:</span> <span class="s2">&quot;//UIAApplication[1]/UIAWindow[1]/UIATableView[1]/UIATableCell[3]/UIASwitch[1]&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">medicine_sms_reminder</span>
+</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="ss">xpath</span><span class="p">:</span> <span class="s2">&quot;//UIAApplication[1]/UIAWindow[1]/UIATableView[1]/UIATableCell[3]/UIASwitch[2]&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">save_button</span>
+</span><span class='line'>            <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;保存&quot;</span><span class="p">)</span>
+</span><span class='line'>            <span class="c1">#find(xpath: &quot;//UIAApplication[1]/UIAWindow[1]/UIATableView[1]/UIATableCell[4]/UIASwitch[1]&quot;)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="k">def</span> <span class="nf">return_button</span>
+</span><span class='line'>            <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;返回&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到对应页面上的每个控件，ios和android都会有自己的封闭方法，这样做提高了代码的重用性，与测试代码分离，便于以后维护</p>
+
+<h4>测试用例</h4>
+
+<p>上面说道一般ios和android页面上的控件是一样的，所以正常情况下，我们只需写一份测试代码就可以，但是ios和android的测试代码还是要分开跑的，所以这里我引用了rpsec的<a href="http://rspec.info/documentation/3.5/rspec-core/#Shared_Examples_and_Contexts">share_example</a>来做</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android的测试用例</span>
+</span><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;../../../shared/patient/v1/add_relative_spec&#39;</span>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;AddRelative   &quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">include_examples</span> <span class="s2">&quot;share_add_relative&quot;</span>  <span class="p">,</span> <span class="s2">&quot;android&quot;</span>
+</span><span class='line'><span class="k">end</span>    
+</span><span class='line'>
+</span><span class='line'><span class="c1">#ios的测试用例</span>
+</span><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;../../../shared/patient/v1/add_relative_spec&#39;</span>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;AddRelative&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">include_examples</span> <span class="s2">&quot;share_add_relative&quot;</span>  <span class="p">,</span> <span class="s2">&quot;ios&quot;</span>
+</span><span class='line'><span class="k">end</span>    
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#shared部分</span>
+</span><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;../../../spec_helper&#39;</span>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">shared_examples</span> <span class="s2">&quot;share_add_relative&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">device</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">before</span><span class="p">(</span><span class="ss">:all</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">login</span> <span class="n">device</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#Appium.promote_appium_methods Object</span>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;add relative&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="k">begin</span>
+</span><span class='line'>              <span class="nb">sleep</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">user_center_bar</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">my_relatives_link</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">add_relative_button</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>          <span class="k">if</span> <span class="vi">@device</span><span class="o">.</span><span class="n">appium_device</span> <span class="o">==</span>  <span class="ss">:android</span>
+</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">relative_select</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">name_option_selected</span><span class="p">(</span><span class="s2">&quot;爸爸&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>          <span class="k">else</span>
+</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">relative_select</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">return_button</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">mobile_num_text_field</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="s2">&quot;13524836959&quot;</span><span class="p">)}</span>
+</span><span class='line'>          <span class="k">if</span> <span class="vi">@device</span><span class="o">.</span><span class="n">appium_device</span> <span class="o">==</span>  <span class="ss">:android</span>
+</span><span class='line'>              <span class="c1">#screen = wait {add_relative_page.boot_screen}</span>
+</span><span class='line'>              <span class="c1">#size = screen.window_size</span>
+</span><span class='line'>              <span class="c1">#start_x, end_x, start_y, end_y = size.width - 5, size.width/100, size.height/2, size.height/2</span>
+</span><span class='line'>              <span class="c1">#wait {exists{swipe(start_x:start_x,start_y:start_y, end_x:end_x,end_y:end_y, duration:1000)}}</span>
+</span><span class='line'>          <span class="k">else</span>
+</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">glucose_sms_reminder</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>              <span class="c1">#wait {add_relative_page.medicine_sms_reminder.click}</span>
+</span><span class='line'>          <span class="k">end</span>
+</span><span class='line'>          <span class="c1">#wait {add_relative_page.glucose_sms_reminder.}</span>
+</span><span class='line'>          <span class="c1">#wait {add_relative_page.mobile_num_text_field.type(&quot;11000009123&quot;)}</span>
+</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">save_button</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
+</span><span class='line'>          <span class="n">expect</span><span class="p">(</span><span class="n">exists</span><span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">add_relative_button</span><span class="p">})</span><span class="o">.</span><span class="n">to</span> <span class="n">be_truthy</span>
+</span><span class='line'>  <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>          <span class="nb">puts</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span>
+</span><span class='line'>          <span class="vi">@driver</span><span class="o">.</span><span class="n">quit</span> <span class="k">if</span> <span class="vi">@driver</span>
+</span><span class='line'>          <span class="k">raise</span> <span class="n">e</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">after</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">quit</span> <span class="k">if</span> <span class="vi">@driver</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到写测试用例的人员，不必关注底层控件的封装，只需按正常逻辑写测试用例就可</p>
+
+<h4>测试报告</h4>
+
+<p><img src="http://7xjibn.com1.z0.glb.clouddn.com/C8EA5B20-316A-45CB-A950-5F393B4AEC85.png" alt="img" /></p>
+
+<h4>未完成的工作</h4>
+
+<ul>
+<li>配置jenkins，使其每天定时打包最新的代码</li>
+<li>动态数据的载入</li>
+<li>不同app版本的测试</li>
+<li>混合，h5页面的测试</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[App自动化测试平台搭建记录之如何优雅地找到控件]]></title>
@@ -539,7 +901,7 @@ Platform Version 要测试的iphone的版本好(设备和版本号一定要匹�
 <!-- more -->
 
 
-<p><img src="http://7xjibn.com1.z0.glb.clouddn.com/1796624-10f320a9d37a0d96.png" alt="img" /></p>
+<p><img src="http://7xjibn.com1.z0.glb.clouddn.com/appium%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%9B%BE%20%281%29.png" alt="img" /></p>
 
 <h4>为什么选择appium作为自动化测试框架</h4>
 
