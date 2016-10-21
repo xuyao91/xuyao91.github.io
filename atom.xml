@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[深不可测]]></title>
+  <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2016-08-07T15:36:18+08:00</updated>
+  <updated>2016-10-21T16:07:39+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,72 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[关于RSA加密的一些问题]]></title>
+    <link href="http://xuyao.club/blog/2016/10/20/about-rsa/"/>
+    <updated>2016-10-20T18:35:23+08:00</updated>
+    <id>http://xuyao.club/blog/2016/10/20/about-rsa</id>
+    <content type="html"><![CDATA[<p>做支付的时候经常有各种加密，最常见的算是RSA加密了，以前一直不太明白RSA加密是什么样的，如何工作的，今天看了一些文档，有了一些基本了解，记录下来，做个备份</p>
+
+<h4>什么是RSA</h4>
+
+<p>RSA是一种非对称加密算法，在公开密钥加密和电子商业被广泛使用，名字是由三个创始人的名字首字母组成，更多信息请查看<a href="https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95">https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95</a></p>
+
+<!-- more -->
+
+
+<h4>RSA的工作原理</h4>
+
+<p>假设A要发送一段文字给B，如果A发送的信息需要使用RSA加密，则整个过程如下
+*   首先需要给用户A和B分别生成公钥和私钥，双方的公钥信息都公开，私钥则自己保留<br/>
+*   A要发送一串字符给B,则先使用B的公钥加密，生成密文，B收到密文后使用私钥解密就得到明文
+*   同样的道理，B发送一串字符给A,使用A的公钥加密后发送给A，A收到后使用自己的私钥解密就可得到明文
+具体的加密、解密算法原理可以看<a href="http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html">http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html</a></p>
+
+<h4>例子</h4>
+
+<p>可以看下下面的例子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;我是明文，给我加密啊&#39;</span>
+</span><span class='line'><span class="n">digest</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">pkey</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>  <span class="c1">#生成2048位的私钥</span>
+</span><span class='line'><span class="n">signature</span> <span class="o">=</span> <span class="n">pkey</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>  <span class="c1">#生成签名</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pub_key</span> <span class="o">=</span> <span class="n">pkey</span><span class="o">.</span><span class="n">public_key</span> <span class="c1">#生成公钥</span>
+</span><span class='line'><span class="n">pub_key</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>  <span class="c1">#验签签名是否正确</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面是私钥和公钥的数据格式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pkey</span><span class="o">.</span><span class="n">to_pem</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-----</span><span class="k">BEGIN</span> <span class="no">RSA</span> <span class="no">PRIVATE</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">nMIIEowIBAAKCAQEAw4a9XP0wqRORAm6hvKjrltdX0mfGIOWi4YqLyB4HYwFC0meR</span><span class="p">\</span><span class="n">nZbQ8ZtGxZ6wJAZ6uuJm7n4ZmMToPqiQywggCEfFjzjnX9HVPkLzuajXSTAqjihhb</span><span class="p">\</span><span class="n">nzs31VrPzwlCNiC</span><span class="o">+</span><span class="n">gJoN</span><span class="o">/</span><span class="no">UofwBQIVh19fAPPGTPL0Mf4n2zIylJudYQbiaL3Honx1</span><span class="p">\</span><span class="n">nL73hmzBeNMR1BbbE</span><span class="o">/</span><span class="n">u5ku3RhgYFetY</span><span class="o">+</span><span class="n">nxQRqxup8ekO3om6Q3Fd</span><span class="o">+</span><span class="mi">1</span><span class="n">gQw0EGdLvl5</span><span class="p">\</span><span class="n">nJb7kCR5ZC6o9cB8vUl</span><span class="o">+</span><span class="n">f</span><span class="o">/</span><span class="n">c1jLm4Buz9AQXpqUAWIbJF2</span><span class="o">+</span><span class="n">g3nvGnPQBKHqyOqlzbD</span><span class="p">\</span><span class="n">nWgm4K</span><span class="o">+</span><span class="no">Bid8gGCUfL9oX4fzJ</span><span class="o">/</span><span class="no">DFzLZOpsCesQKQIDAQABAoIBAF4236oeCkN</span><span class="o">+</span><span class="no">PSJ5</span><span class="p">\</span><span class="n">n4o9AqfyOGTA2dt7FKB4bn003QwHuyp8N7p6eIXi91AkLeW</span><span class="o">+</span><span class="no">BYdlrol</span><span class="o">+</span><span class="mo">06</span><span class="no">CsSOhgW</span><span class="p">\</span><span class="n">nxyp9p1m0Ag6OCsQtfsBUeWFOO94ORk01fY</span><span class="o">+</span><span class="no">B6JT1syBPplMX98h3FnPTMtGG9o67</span><span class="p">\</span><span class="n">nYtDXphbP</span><span class="o">/</span><span class="n">uDUAap6XqsC7Oui4Jfs</span><span class="o">+</span><span class="n">k2uPmDFQ139sgIKme4jS9Ee7XQ</span><span class="o">+</span><span class="no">IReL25VA</span><span class="p">\</span><span class="n">nSF2V2ADgrxHqZ7126YCtJyKxA2K8h8PLy47hw0slln</span><span class="o">/</span><span class="n">W</span><span class="o">+</span><span class="no">FJ4ArAPsRbN1yiQDrAn</span><span class="p">\</span><span class="n">nldRublnTBMvAGBWqSRgZUqT4KvfmnIySGzyfe2</span><span class="o">/</span><span class="no">HdSzW5gHIRgWqTtUecL</span><span class="o">+</span><span class="n">rYbah</span><span class="p">\</span><span class="n">neJeY9AECgYEA8B2NrZ1</span><span class="o">/</span><span class="n">neYZXdE0NFQAx3U4JeMD9WxSk8PJib8t1IxG2D8</span><span class="o">/</span><span class="n">mXug</span><span class="p">\</span><span class="n">n8TGf5TwqWHo79X3YXE25fX0WmNjI6gw7CwYd8vskldvjt2Aw3hiJfTNXrUKtcyAi</span><span class="p">\</span><span class="n">nIfGqXT</span><span class="o">/</span><span class="n">hiWoeYMsRtv9oZ4INcIrSWychcyGxNdKobRXs7oHe0jjFPqkCgYEA0HYN</span><span class="p">\</span><span class="n">ndnjhYqw4fXf2hsc</span><span class="o">/</span><span class="n">medewPrtoHI9TXgBRDsEJDYT5RAMBklhg33RNd</span><span class="o">/</span><span class="no">LQKFRPtqh</span><span class="p">\</span><span class="n">ngMLNqnku6rkIi18GRP</span><span class="o">/</span><span class="n">hdOyuzR</span><span class="o">/</span><span class="n">lbGTQey1K0pnoX32LTBNMACP7hIe6YIvt9jdj</span><span class="p">\</span><span class="n">n8wfxzjmnMZvsyKt564m4ZCexgpZleaEBzFARtYECgYBMRfcFWWx6aedQ5</span><span class="o">+</span><span class="mi">2</span><span class="n">fWbfN</span><span class="p">\</span><span class="n">npCyrzEsroLcyfRT</span><span class="o">+</span><span class="no">Dp6uT8kJVD4NsTnUpCDYnp4M8Pcu6kTaPU5Y0G1nLCXWQwBW</span><span class="p">\</span><span class="n">nZiEJWEGs4OabD5E2W7EA9lg5j16tnV16TtwBNxObpPv1X0xHRyaRCrzeLRrZHbsA</span><span class="p">\</span><span class="n">naYlzQXGDBV33</span><span class="o">/</span><span class="no">YUcXjA50QKBgQC12bYm2o6reFeTRJpfuuNFzCvBp2SyadYGhaB9</span><span class="p">\</span><span class="n">nOAqF2FMEqToEJfGWNqTSHZd</span><span class="o">+</span><span class="n">mvt4HFt1KvslMq</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="no">VJx2oRqntm8GVjoAmIua8ff</span><span class="p">\</span><span class="n">nHITAMZkf7DIfPFo5aSpZ09mHran59xoPAag0YeDzivVFnSkviyW64VGd</span><span class="o">/</span><span class="no">LsrHoSm</span><span class="p">\</span><span class="n">nCldYgQKBgBzMtLh</span><span class="o">+</span><span class="no">YLQlDfBPt6IDggi</span><span class="o">+</span><span class="n">p1qdMEU8v</span><span class="o">+</span><span class="n">e6pBm7sBTRPplAoXeQfCvJ</span><span class="p">\</span><span class="n">nv9Ix60</span><span class="o">+</span><span class="mi">2</span><span class="no">NH5KKSAqvSYpNqRtWNGIA2zi</span><span class="o">/</span><span class="mi">5</span><span class="n">an1clmKBVpK9EVtOy5qiTcNziyhHdQ</span><span class="p">\</span><span class="n">nq8m7UWJRpck8R88N1DFadxEqb6HfwnW</span><span class="o">/</span><span class="mi">6</span><span class="no">DclKbKIgwxQYQA</span><span class="o">/</span><span class="no">Ug2y</span><span class="p">\</span><span class="n">n</span><span class="o">-----</span><span class="k">END</span> <span class="no">RSA</span> <span class="no">PRIVATE</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">n</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">pub_key</span><span class="o">.</span><span class="n">to_pem</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-----</span><span class="k">BEGIN</span> <span class="no">PUBLIC</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw4a9XP0wqRORAm6hvKjr</span><span class="p">\</span><span class="n">nltdX0mfGIOWi4YqLyB4HYwFC0meRZbQ8ZtGxZ6wJAZ6uuJm7n4ZmMToPqiQywggC</span><span class="p">\</span><span class="n">nEfFjzjnX9HVPkLzuajXSTAqjihhbzs31VrPzwlCNiC</span><span class="o">+</span><span class="n">gJoN</span><span class="o">/</span><span class="no">UofwBQIVh19fAPPG</span><span class="p">\</span><span class="n">nTPL0Mf4n2zIylJudYQbiaL3Honx1L73hmzBeNMR1BbbE</span><span class="o">/</span><span class="n">u5ku3RhgYFetY</span><span class="o">+</span><span class="n">nxQRq</span><span class="p">\</span><span class="n">nxup8ekO3om6Q3Fd</span><span class="o">+</span><span class="mi">1</span><span class="n">gQw0EGdLvl5Jb7kCR5ZC6o9cB8vUl</span><span class="o">+</span><span class="n">f</span><span class="o">/</span><span class="n">c1jLm4Buz9AQXpq</span><span class="p">\</span><span class="n">nUAWIbJF2</span><span class="o">+</span><span class="n">g3nvGnPQBKHqyOqlzbDWgm4K</span><span class="o">+</span><span class="no">Bid8gGCUfL9oX4fzJ</span><span class="o">/</span><span class="no">DFzLZOpsCesQ</span><span class="p">\</span><span class="n">nKQIDAQAB</span><span class="p">\</span><span class="n">n</span><span class="o">-----</span><span class="k">END</span> <span class="no">PUBLIC</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">n</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[App自动化测试平台搭建记录之rspec与appium的完美组合]]></title>
@@ -27,6 +93,9 @@
 <li>写测试用例的人员只需写对应的测试用例，而不需要关注每个页面的控件封闭，而写控件封装的人，则只需写类的封装，也不必关注测试用例，这样极大的提高了开发效率</li>
 <li>考虑到ios与android中大部分页面的控件以及逻辑都是一样的，所以针对ios和android测试，spec代码只需写一份，这样做的好处是将测试用例与逻辑代码分离，便于以后维护，同时测试用例的扩展性和重用性也大大得到的提高</li>
 </ul>
+
+
+<!-- more -->
 
 
 <h4>（页面）类的封装</h4>

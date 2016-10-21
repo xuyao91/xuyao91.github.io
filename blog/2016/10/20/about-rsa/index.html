@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>关于RSA加密的一些问题 - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="做支付的时候经常有各种加密，最常见的算是RSA加密了，以前一直不太明白RSA加密是什么样的，如何工作的，今天看了一些文档，有了一些基本了解，记录下来，做个备份 什么是RSA RSA是一种非对称加密算法，在公开密钥加密和电子商业被广泛使用，名字是由三个创始人的名字首字母组成，更多信息请查看https &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2016/10/20/about-rsa/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>为了远方的自由</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">关于RSA加密的一些问题</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-10-20T18:35:23+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:35 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>做支付的时候经常有各种加密，最常见的算是RSA加密了，以前一直不太明白RSA加密是什么样的，如何工作的，今天看了一些文档，有了一些基本了解，记录下来，做个备份</p>
+
+<h4>什么是RSA</h4>
+
+<p>RSA是一种非对称加密算法，在公开密钥加密和电子商业被广泛使用，名字是由三个创始人的名字首字母组成，更多信息请查看<a href="https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95">https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95</a></p>
+
+<!-- more -->
+
+
+<h4>RSA的工作原理</h4>
+
+<p>假设A要发送一段文字给B，如果A发送的信息需要使用RSA加密，则整个过程如下
+*   首先需要给用户A和B分别生成公钥和私钥，双方的公钥信息都公开，私钥则自己保留<br/>
+*   A要发送一串字符给B,则先使用B的公钥加密，生成密文，B收到密文后使用私钥解密就得到明文
+*   同样的道理，B发送一串字符给A,使用A的公钥加密后发送给A，A收到后使用自己的私钥解密就可得到明文
+具体的加密、解密算法原理可以看<a href="http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html">http://www.ruanyifeng.com/blog/2013/06/rsa_algorithm_part_one.html</a></p>
+
+<h4>例子</h4>
+
+<p>可以看下下面的例子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;我是明文，给我加密啊&#39;</span>
+</span><span class='line'><span class="n">digest</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">Digest</span><span class="o">::</span><span class="no">SHA256</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">pkey</span> <span class="o">=</span> <span class="no">OpenSSL</span><span class="o">::</span><span class="no">PKey</span><span class="o">::</span><span class="no">RSA</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">2048</span><span class="p">)</span>  <span class="c1">#生成2048位的私钥</span>
+</span><span class='line'><span class="n">signature</span> <span class="o">=</span> <span class="n">pkey</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>  <span class="c1">#生成签名</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pub_key</span> <span class="o">=</span> <span class="n">pkey</span><span class="o">.</span><span class="n">public_key</span> <span class="c1">#生成公钥</span>
+</span><span class='line'><span class="n">pub_key</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">digest</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>  <span class="c1">#验签签名是否正确</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面是私钥和公钥的数据格式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pkey</span><span class="o">.</span><span class="n">to_pem</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-----</span><span class="k">BEGIN</span> <span class="no">RSA</span> <span class="no">PRIVATE</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">nMIIEowIBAAKCAQEAw4a9XP0wqRORAm6hvKjrltdX0mfGIOWi4YqLyB4HYwFC0meR</span><span class="p">\</span><span class="n">nZbQ8ZtGxZ6wJAZ6uuJm7n4ZmMToPqiQywggCEfFjzjnX9HVPkLzuajXSTAqjihhb</span><span class="p">\</span><span class="n">nzs31VrPzwlCNiC</span><span class="o">+</span><span class="n">gJoN</span><span class="o">/</span><span class="no">UofwBQIVh19fAPPGTPL0Mf4n2zIylJudYQbiaL3Honx1</span><span class="p">\</span><span class="n">nL73hmzBeNMR1BbbE</span><span class="o">/</span><span class="n">u5ku3RhgYFetY</span><span class="o">+</span><span class="n">nxQRqxup8ekO3om6Q3Fd</span><span class="o">+</span><span class="mi">1</span><span class="n">gQw0EGdLvl5</span><span class="p">\</span><span class="n">nJb7kCR5ZC6o9cB8vUl</span><span class="o">+</span><span class="n">f</span><span class="o">/</span><span class="n">c1jLm4Buz9AQXpqUAWIbJF2</span><span class="o">+</span><span class="n">g3nvGnPQBKHqyOqlzbD</span><span class="p">\</span><span class="n">nWgm4K</span><span class="o">+</span><span class="no">Bid8gGCUfL9oX4fzJ</span><span class="o">/</span><span class="no">DFzLZOpsCesQKQIDAQABAoIBAF4236oeCkN</span><span class="o">+</span><span class="no">PSJ5</span><span class="p">\</span><span class="n">n4o9AqfyOGTA2dt7FKB4bn003QwHuyp8N7p6eIXi91AkLeW</span><span class="o">+</span><span class="no">BYdlrol</span><span class="o">+</span><span class="mo">06</span><span class="no">CsSOhgW</span><span class="p">\</span><span class="n">nxyp9p1m0Ag6OCsQtfsBUeWFOO94ORk01fY</span><span class="o">+</span><span class="no">B6JT1syBPplMX98h3FnPTMtGG9o67</span><span class="p">\</span><span class="n">nYtDXphbP</span><span class="o">/</span><span class="n">uDUAap6XqsC7Oui4Jfs</span><span class="o">+</span><span class="n">k2uPmDFQ139sgIKme4jS9Ee7XQ</span><span class="o">+</span><span class="no">IReL25VA</span><span class="p">\</span><span class="n">nSF2V2ADgrxHqZ7126YCtJyKxA2K8h8PLy47hw0slln</span><span class="o">/</span><span class="n">W</span><span class="o">+</span><span class="no">FJ4ArAPsRbN1yiQDrAn</span><span class="p">\</span><span class="n">nldRublnTBMvAGBWqSRgZUqT4KvfmnIySGzyfe2</span><span class="o">/</span><span class="no">HdSzW5gHIRgWqTtUecL</span><span class="o">+</span><span class="n">rYbah</span><span class="p">\</span><span class="n">neJeY9AECgYEA8B2NrZ1</span><span class="o">/</span><span class="n">neYZXdE0NFQAx3U4JeMD9WxSk8PJib8t1IxG2D8</span><span class="o">/</span><span class="n">mXug</span><span class="p">\</span><span class="n">n8TGf5TwqWHo79X3YXE25fX0WmNjI6gw7CwYd8vskldvjt2Aw3hiJfTNXrUKtcyAi</span><span class="p">\</span><span class="n">nIfGqXT</span><span class="o">/</span><span class="n">hiWoeYMsRtv9oZ4INcIrSWychcyGxNdKobRXs7oHe0jjFPqkCgYEA0HYN</span><span class="p">\</span><span class="n">ndnjhYqw4fXf2hsc</span><span class="o">/</span><span class="n">medewPrtoHI9TXgBRDsEJDYT5RAMBklhg33RNd</span><span class="o">/</span><span class="no">LQKFRPtqh</span><span class="p">\</span><span class="n">ngMLNqnku6rkIi18GRP</span><span class="o">/</span><span class="n">hdOyuzR</span><span class="o">/</span><span class="n">lbGTQey1K0pnoX32LTBNMACP7hIe6YIvt9jdj</span><span class="p">\</span><span class="n">n8wfxzjmnMZvsyKt564m4ZCexgpZleaEBzFARtYECgYBMRfcFWWx6aedQ5</span><span class="o">+</span><span class="mi">2</span><span class="n">fWbfN</span><span class="p">\</span><span class="n">npCyrzEsroLcyfRT</span><span class="o">+</span><span class="no">Dp6uT8kJVD4NsTnUpCDYnp4M8Pcu6kTaPU5Y0G1nLCXWQwBW</span><span class="p">\</span><span class="n">nZiEJWEGs4OabD5E2W7EA9lg5j16tnV16TtwBNxObpPv1X0xHRyaRCrzeLRrZHbsA</span><span class="p">\</span><span class="n">naYlzQXGDBV33</span><span class="o">/</span><span class="no">YUcXjA50QKBgQC12bYm2o6reFeTRJpfuuNFzCvBp2SyadYGhaB9</span><span class="p">\</span><span class="n">nOAqF2FMEqToEJfGWNqTSHZd</span><span class="o">+</span><span class="n">mvt4HFt1KvslMq</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="no">VJx2oRqntm8GVjoAmIua8ff</span><span class="p">\</span><span class="n">nHITAMZkf7DIfPFo5aSpZ09mHran59xoPAag0YeDzivVFnSkviyW64VGd</span><span class="o">/</span><span class="no">LsrHoSm</span><span class="p">\</span><span class="n">nCldYgQKBgBzMtLh</span><span class="o">+</span><span class="no">YLQlDfBPt6IDggi</span><span class="o">+</span><span class="n">p1qdMEU8v</span><span class="o">+</span><span class="n">e6pBm7sBTRPplAoXeQfCvJ</span><span class="p">\</span><span class="n">nv9Ix60</span><span class="o">+</span><span class="mi">2</span><span class="no">NH5KKSAqvSYpNqRtWNGIA2zi</span><span class="o">/</span><span class="mi">5</span><span class="n">an1clmKBVpK9EVtOy5qiTcNziyhHdQ</span><span class="p">\</span><span class="n">nq8m7UWJRpck8R88N1DFadxEqb6HfwnW</span><span class="o">/</span><span class="mi">6</span><span class="no">DclKbKIgwxQYQA</span><span class="o">/</span><span class="no">Ug2y</span><span class="p">\</span><span class="n">n</span><span class="o">-----</span><span class="k">END</span> <span class="no">RSA</span> <span class="no">PRIVATE</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">n</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">pub_key</span><span class="o">.</span><span class="n">to_pem</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-----</span><span class="k">BEGIN</span> <span class="no">PUBLIC</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw4a9XP0wqRORAm6hvKjr</span><span class="p">\</span><span class="n">nltdX0mfGIOWi4YqLyB4HYwFC0meRZbQ8ZtGxZ6wJAZ6uuJm7n4ZmMToPqiQywggC</span><span class="p">\</span><span class="n">nEfFjzjnX9HVPkLzuajXSTAqjihhbzs31VrPzwlCNiC</span><span class="o">+</span><span class="n">gJoN</span><span class="o">/</span><span class="no">UofwBQIVh19fAPPG</span><span class="p">\</span><span class="n">nTPL0Mf4n2zIylJudYQbiaL3Honx1L73hmzBeNMR1BbbE</span><span class="o">/</span><span class="n">u5ku3RhgYFetY</span><span class="o">+</span><span class="n">nxQRq</span><span class="p">\</span><span class="n">nxup8ekO3om6Q3Fd</span><span class="o">+</span><span class="mi">1</span><span class="n">gQw0EGdLvl5Jb7kCR5ZC6o9cB8vUl</span><span class="o">+</span><span class="n">f</span><span class="o">/</span><span class="n">c1jLm4Buz9AQXpq</span><span class="p">\</span><span class="n">nUAWIbJF2</span><span class="o">+</span><span class="n">g3nvGnPQBKHqyOqlzbDWgm4K</span><span class="o">+</span><span class="no">Bid8gGCUfL9oX4fzJ</span><span class="o">/</span><span class="no">DFzLZOpsCesQ</span><span class="p">\</span><span class="n">nKQIDAQAB</span><span class="p">\</span><span class="n">n</span><span class="o">-----</span><span class="k">END</span> <span class="no">PUBLIC</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">n</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-10-20T18:35:23+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:35 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/" title="Previous Post: App自动化测试平台搭建记录之rspec与appium的完美组合">&laquo; App自动化测试平台搭建记录之rspec与appium的完美组合</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="关于RSA加密的一些问题"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/10/20/about-rsa/">关于RSA加密的一些问题</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/">App自动化测试平台搭建记录之rspec与appium的完美组合</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/">App自动化测试平台搭建记录之如何优雅地找到控件</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">App自动化测试平台搭建记录之Android模拟器/真机的配置</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/">App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
