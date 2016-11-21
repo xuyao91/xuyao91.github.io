@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>老徐</title>
+  <title>Rails的各种web Application Server - 老徐</title>
   <meta name="author" content="Peter Xu">
 
   
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://xuyao.club/">
+  <link rel="canonical" href="http://xuyao.club/blog/2016/11/17/rails-web-server/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
@@ -65,15 +65,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2016/11/17/rails-web-server/">Rails的各种web Application Server</a></h1>
+      <h1 class="entry-title">Rails的各种web Application Server</h1>
     
     
       <p class="meta">
@@ -86,14 +83,14 @@
         
         <!-- doushuo commnet -->
         
-          | <a href="/blog/2016/11/17/rails-web-server/#comments">Comments</a>
+          | <a href="#comments">Comments</a>
          
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h3>Ruby app server是如何工作的</h3>
+<div class="entry-content"><h3>Ruby app server是如何工作的</h3>
 
 <p>但是在深入详细讲解之前，这里先对Ruby app server的概念进行一些介绍</p>
 
@@ -248,413 +245,67 @@ slow Client可以通过使用反向代理缓存解决，反向代理缓存可以
 <a href="http://baike.baidu.com/view/1298606.htm">http://baike.baidu.com/view/1298606.htm</a><br/>
 <a href="http://zh.wikipedia.org/zh-cn/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8">http://zh.wikipedia.org/zh-cn/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8</a></p>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/10/20/about-rsa/">关于RSA加密的一些问题</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-10-20T18:35:23+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:35 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/10/20/about-rsa/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>做支付的时候经常有各种加密，最常见的算是RSA加密了，以前一直不太明白RSA加密是什么样的，如何工作的，今天看了一些文档，有了一些基本了解，记录下来，做个备份</p>
-
-<h4>什么是RSA</h4>
-
-<p>RSA是一种非对称加密算法，在公开密钥加密和电子商业被广泛使用，名字是由三个创始人的名字首字母组成，更多信息请查看<a href="https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95">https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/10/20/about-rsa/">Read on&rarr;</a>
-    </footer>
   
 
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
 
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/">App自动化测试平台搭建记录之rspec与appium的完美组合</a></h1>
-    
-    
-      <p class="meta">
-        
 
 
 
 
-<time class='entry-date' datetime='2016-08-04T18:31:04+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:31 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我们的预期目标是每天定时跑测试代码，并生成相应的测试报告，所以这里需要一个比较完善的测试框架来做这些事情，这里我选择的是rspec，</p>
-
-<h4>rspec与appium组合</h4>
-
-<ul>
-<li>将app(ios和android)端每个页面封装成自己的类，页面中的每个控件实例成方法，使用到哪个页面只需将对应的类初始化一下。</li>
-<li>写测试用例的人员只需写对应的测试用例，而不需要关注每个页面的控件封闭，而写控件封装的人，则只需写类的封装，也不必关注测试用例，这样极大的提高了开发效率</li>
-<li>考虑到ios与android中大部分页面的控件以及逻辑都是一样的，所以针对ios和android测试，spec代码只需写一份，这样做的好处是将测试用例与逻辑代码分离，便于以后维护，同时测试用例的扩展性和重用性也大大得到的提高</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
+<time class='entry-date' datetime='2016-11-17T11:12:15+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>11:12 am</span></time>
       
-  <header>
+
+
+    </p>
     
-      <h1 class="entry-title"><a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/">App自动化测试平台搭建记录之如何优雅地找到控件</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-07-10T22:22:44+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:22 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>这篇讲一下如果找到对应ios/android里的UI控件，以便我们快速地写测试代码，本系列文章未特殊提到使用什么语言时，默认使用ruby脚本语言。ios/android设备的UI控件有很多种，下面讲一下使用appium Inspector和appium ruby console(arc)来查找UI控件</p>
-
+      <div class="sharing">
+  
+  
+  
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/">Read on&rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  
-    <article>
+    
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">App自动化测试平台搭建记录之Android模拟器/真机的配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-07-10T00:12:30+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:12 am</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>上一篇讲了安装appium及ios的配置，如果没看过这篇文章，建议先看一下，<a href="http://www.jianshu.com/p/8ac5491436b2">传送门</a>
-既然是配置Android模拟器，那么Java和Android sdk的安装是必不可少的了</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
+        <a class="basic-alignment left" href="/blog/2016/10/20/about-rsa/" title="Previous Post: 关于RSA加密的一些问题">&laquo; 关于RSA加密的一些问题</a>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/">App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-07-09T21:29:56+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:29 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>上一篇讲了什么是appium，这次讲一下如何安装appium，及怎样配置ios/android的模拟器/真机</p>
-
-<h4>系统选择</h4>
-
-<p>因为要跑ios的包的，所以我们肯定需要apple的系统来支持，而且ios版的appium也支持android，这样就完美了。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/">App自动化测试平台搭建记录之什么是appium</a></h1>
-    
-    
-      <p class="meta">
-        
+    </p>
+  </footer>
+</article>
 
 
 
-
-<time class='entry-date' datetime='2016-07-09T17:06:02+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>5:06 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>前言</h4>
-
-<p>目前我们的项目关于测试这块还是处于很初级阶段，rails后端的rspec也写的很少，app方面完全靠手动测试，基于此情况，我们决定搭建一个自动化测试平台，期望目标是移动端ios和android及h5每天定时拉取最新代码，进行部署，打包，最后进行回归测试，生成测试报告发送给测试人员，
-最后流程如下所示</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-04-06T16:19:32+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:19 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/04/06/about-sso-in-rails/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>前言</h3>
-
-<p>目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。</p>
-
-<p>这里主要针对doorkeeper作讲解</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/04/06/about-sso-in-rails/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-03-24T10:05:39+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:05 am</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/03/24/about-rails-cache/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
-存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便</p>
-
-<h3>ActiveSupport::Cache::Store</h3>
-
-<p>它是一个抽象类，有很多cache store的实现
-rails中的这个类提供了和缓存交互的很多基本的方法，包括(read,write,delete,exist?,fetch)，下面说下具体实现</p>
-
-<h3>ActiveSupport::Cache::FileStore</h3>
-
-<p>先说一下FileStore,这种存储方式Rails默认的存储方式，他是将数据存储到系统文件,默认将文件存储到项目的/tmp/cache下面，你可以修改它的存储路径</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">cache_store</span> <span class="o">=</span> <span class="ss">:file_store</span><span class="p">,</span> <span class="s2">&quot;/path/to/cache/directory&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面说FileStore是Rails默认的存储方式，看下面这句代码就知道了</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">class</span>  <span class="o">=&gt;</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">FileStore</span>
-</span></code></pre></td></tr></table></div></figure>
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Rails的各种web Application Server"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
 
 
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/03/24/about-rails-cache/">Read on&rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/29/include-vs-extend-in-ruby/">Ruby中include和extend的比较</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-06-29T12:21:35+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:21 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2015/06/29/include-vs-extend-in-ruby/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文翻译,改编自<a href="http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/">Include vs Extend in Ruby</a></p>
-
-<p>在类中引用一个模块,有两种方式,一种是include,另一种是extend,两种的大致区别就是:<br/>
-<strong><em>include是给class增加一个实例方法,而extend是增加一个类方法</em>  </strong><br/>
-我们看一下小例子.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/06/29/include-vs-extend-in-ruby/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-      <a class="prev" href="/posts/2">&larr; Older</a>
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
@@ -690,6 +341,7 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
 
   
 </aside>
+
 
     </div>
   </div>
