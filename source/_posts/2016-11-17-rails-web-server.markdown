@@ -100,6 +100,11 @@ run Rails.application
 slow Client可以通过使用反向代理缓存解决，反向代理缓存可以处理更大量的I/O并发。想象一下我们把百万的工作人员放到市政府外面。这些工作人员并没有受过处理文件的训练。于此相反，他们只是接收你的文件（缓存你的请求），把这些文件带到市政府内部，然后把带有印章的文件再返还给你（缓存你的响应）。这些外部的工作人员永远不会一直站在办公桌前面，所以他们永远不会引起slow client问题。因为这些外部工作人员只是受到过简单的训练，所以他们的雇佣费用很低（RAM占用低），我们可以雇佣很多。  
 反向代理通常来说就是Nginx，Nginx缓存了所有的东西，并且可以处理一个被虚拟化了的无限数量的client，像Puma这种多线程server不是很容易受到影响，这是因为它们在市政府内部有更多的办公桌，但是这些办公桌在数量上仍然是有限的，因为比起市政府外面雇佣费用很低的工作人员来说，内部的工作人员需要更多的训练（占用更多的RAM）。  
 ![bufferingreverseproxy](http://7xjibn.com1.z0.glb.clouddn.com/bufferingreverseproxy.jpg)
+
+######题外阅读
+###Raptor
+[Raptor](https://github.com/garybernhardt/raptor)是一款全新的app server,自称性能好的无人能比
+http://www.akitaonrails.com/2014/10/19/the-new-kid-on-the-block-for-ruby-servers-raptor#.VEdVfvmSxb8
 ######参考资料  
 http://blog.gauravchande.com/what-is-rack-in-ruby-rails
 http://ohcoder.com/blog/2014/11/11/raptor-part-1/
