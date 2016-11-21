@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2016-11-21T13:31:32+08:00</updated>
+  <updated>2016-11-21T13:32:02+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -21,6 +21,9 @@
     <content type="html"><![CDATA[<h3>Ruby app server是如何工作的</h3>
 
 <p>但是在深入详细讲解之前，这里先对Ruby app server的概念进行一些介绍</p>
+
+<!-- more -->
+
 
 <h4>什么是rack</h4>
 
