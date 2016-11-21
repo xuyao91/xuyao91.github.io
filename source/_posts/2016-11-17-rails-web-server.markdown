@@ -7,6 +7,7 @@ categories:
 ---
 ###Ruby app server是如何工作的
 但是在深入详细讲解之前，这里先对Ruby app server的概念进行一些介绍
+<!-- more -->
 ####什么是rack
 它提供一个介于Webserver与ruby（或ruby框架）之间的一个非常小且又容易使用的接口  
 可以理解成就是一个ruby package,这个package提供了一个基于Ruby Net::HTTP库开发的easy-to-use interface
