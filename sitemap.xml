@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/</loc>
+<lastmod>2016-12-05T18:25:38+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2016/11/17/rails-web-server/</loc>
 <lastmod>2016-11-17T11:12:15+08:00</lastmod>
 </url>
