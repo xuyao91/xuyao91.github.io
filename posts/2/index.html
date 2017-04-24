@@ -9,8 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="本文翻译,改编自Include vs Extend in Ruby 在类中引用一个模块,有两种方式,一种是include,另一种是extend,两种的大致区别就是:
-include是给class增加一个实例方法,而extend是增加一个类方法 我们看一下小例子. ">
+  <meta name="description" content="前言 目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。 这里主要针对doorkeeper作讲解 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +66,108 @@ include是给class增加一个实例方法,而extend是增加一个类方法 我
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-06T16:19:32+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:19 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2016/04/06/about-sso-in-rails/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>前言</h3>
+
+<p>目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。</p>
+
+<p>这里主要针对doorkeeper作讲解</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/04/06/about-sso-in-rails/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-03-24T10:05:39+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:05 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2016/03/24/about-rails-cache/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
+存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便</p>
+
+<h3>ActiveSupport::Cache::Store</h3>
+
+<p>它是一个抽象类，有很多cache store的实现
+rails中的这个类提供了和缓存交互的很多基本的方法，包括(read,write,delete,exist?,fetch)，下面说下具体实现</p>
+
+<h3>ActiveSupport::Cache::FileStore</h3>
+
+<p>先说一下FileStore,这种存储方式Rails默认的存储方式，他是将数据存储到系统文件,默认将文件存储到项目的/tmp/cache下面，你可以修改它的存储路径</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">cache_store</span> <span class="o">=</span> <span class="ss">:file_store</span><span class="p">,</span> <span class="s2">&quot;/path/to/cache/directory&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面说FileStore是Rails默认的存储方式，看下面这句代码就知道了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">class</span>  <span class="o">=&gt;</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">FileStore</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/03/24/about-rails-cache/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -366,6 +467,14 @@ include是给class增加一个实例方法,而extend是增加一个类方法 我
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/01/16/review-2016/">回顾2016年</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/01/16/about-gem-rails-jwplayer/">关于rails-jwplayer Gem</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/">App自动化测试平台搭建记录之问题汇总</a>
       </li>
     
@@ -375,14 +484,6 @@ include是给class增加一个实例方法,而extend是增加一个类方法 我
     
       <li class="post">
         <a href="/blog/2016/10/20/about-rsa/">关于RSA加密的一些问题</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/">App自动化测试平台搭建记录之rspec与appium的完美组合</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-find-the-ui/">App自动化测试平台搭建记录之如何优雅地找到控件</a>
       </li>
     
   </ul>
@@ -398,7 +499,7 @@ include是给class增加一个实例方法,而extend是增加一个类方法 我
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2016 - Peter Xu -
+  Copyright &copy; 2017 - Peter Xu -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
