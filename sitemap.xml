@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2017/01/16/review-2016/</loc>
+<lastmod>2017-01-16T19:54:57+08:00</lastmod>
+</url>
+<url>
+<loc>http://xuyao.club/blog/2017/01/16/about-gem-rails-jwplayer/</loc>
+<lastmod>2017-01-16T19:54:57+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/</loc>
 <lastmod>2016-12-05T18:25:38+08:00</lastmod>
 </url>
@@ -65,5 +73,8 @@
 </url>
 <url>
 <loc>http://xuyao.club/</loc>
+</url>
+<url>
+<loc>http://xuyao.club/posts/2/</loc>
 </url>
 </urlset>
