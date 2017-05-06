@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch/</loc>
+<lastmod>2017-05-06T16:48:53+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2017/01/16/review-2016/</loc>
 <lastmod>2017-01-16T19:54:57+08:00</lastmod>
 </url>
@@ -73,5 +77,8 @@
 </url>
 <url>
 <loc>http://xuyao.club/</loc>
+</url>
+<url>
+<loc>http://xuyao.club/posts/2/</loc>
 </url>
 </urlset>
