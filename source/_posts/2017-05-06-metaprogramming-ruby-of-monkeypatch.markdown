@@ -6,7 +6,7 @@ comments: true
 categories: 
 ---
 
-####打开类
+###打开类
 先看一个例子，
 ```ruby
 3.times do 
@@ -41,7 +41,7 @@ day.eat     #= bone
 
 &emsp;像这种你总是可以重新打开一个已经存在的类并对它进行动态修改的技术，可以称之为***打开类(open class)***
 
-####猴子打补丁
+###猴子打补丁
 &emsp;你写了一个substitute方法，功能是在一个数组中，把一个指定的元素替换成另一个元素的,代码如下 
 ```ruby
   def substitute(array, from, to)
@@ -75,7 +75,7 @@ a.substitute("ja", "kr")
 
 &emsp;像这种在不改变源码的情况下，对功能进行动态追加、修改的技术叫做*__猴子补丁(Monkey patch)__*
 
-####猴子补丁引起的问题
+###猴子补丁引起的问题
 &emsp;如上所说，在Ruby中，可以很轻松地打开一个已经定义的类，并往类中塞方法（包括String,Array类）
  这时你突然发现substitute这个单词太长，影响使用，你已经想到了一个更好的方法名replace,于是你把代码又改了一次，如下： 
 ```ruby
@@ -101,13 +101,14 @@ a.replace([ "x", "y", "z" ])
 #=> [:replace] 
 ```
 
-&emsp;好了，你的问题找到了，是刚才你意想天开地在Array类中加了一个已经存在的方法(覆写了方法),你悄悄地把代码改回去，并让你同事pull一下代码，再试下，应该不会错，你同事pull了代码，运行一下果然没错，这时更一头雾水，你说没问题就行了，去吃饭。。。
-经过上面的事情，你总结出了几条经验
--   打开一个已定义的类，并往里面添加方法是很危险的，因为你并不知道类中是否已经存在这个方法，
--   猴子补丁是全局性的，一旦你修改了Array中的replace()方法，则系统中的所有数组都会加载这个方法
--   猴子补丁是不可见的，如果重定义了Array#replace()方法，则很难发现这个方法被修改了，由于是全局性的，你很难发现问题所在，也很难找出在哪个地方定义了这个方法。
+&emsp;好了，你的问题找到了，是刚才你意想天开地在Array类中加了一个已经存在的方法(覆写了方法),你悄悄地把代码改回去，并让你同事pull一下代码，再试下，应该不会错，你同事pull了代码，运行一下果然没错，这时更一头雾水，你说没问题就行了，去吃饭。。。  
 
-####如何避免猴子补丁引起的问题
+经过上面的事情，你总结出了几条经验  
+1.  打开一个已定义的类，并往里面添加方法是很危险的，因为你并不知道类中是否已经存在这个方法.  
+2.  猴子补丁是全局性的，一旦你修改了Array中的replace()方法，则系统中的所有数组都会加载这个方法  
+3.  猴子补丁是不可见的，如果重定义了Array#replace()  方法，则很难发现这个方法被修改了，由于是全局性的，你很难发现问题所在，也很难找出在哪个地方定义了这个方法。
+
+###如何避免猴子补丁引起的问题
 我们先来看个例子，
 ```ruby
 module M
@@ -151,7 +152,7 @@ end
 
 所以使用***命名空间(namespace)***可以有效地解决类名冲突，从而避免猴子补丁引起的问题
 
-####Rails中如何防止猴子补丁引起的问题
+###Rails中如何防止猴子补丁引起的问题
 &emsp;rails在ActviteRecord中，有个instance_method_already_implemented?()方法，点击[查看源码](https://github.com/rails/rails/blob/master/activerecord/lib/active_record/attribute_methods.rb),它会在你定义一个动态方法前，首先会检查有没有同名方法存在，如果有的话，方法会抛出一个异常，否则返回false,说明可以定义方法，举个栗子
 ```ruby
 class Patient < ActiveRecord::Base
@@ -165,7 +166,7 @@ Patient.instance_method_already_implemented?(:save)
 Patient.instance_method_already_implemented?(:aaaaaa)
  #=> false 
 ```
-####Rake中如何防止猴子补丁引起的问题
+###Rake中如何防止猴子补丁引起的问题
 &emsp;在rake 中有一个名为Module#rake_extension()的方法，这里看源码[点击查看](https://github.com/ruby/rake/blob/93e55a4ef1dbaee42f0f355f86d837c4e2551fc1/lib/rake/ext/core.rb)
 ```ruby
   def rake_extension(method) # :nodoc:
@@ -205,6 +206,6 @@ end
 《Ruby元编程》  
 https://en.wikipedia.org/wiki/Monkey_patch
 https://web.archive.org/web/20120730014107/http://wiki.zope.org/zope2/MonkeyPatch
-https://github.com/rails/rails
+https://github.com/rails/rails  
 http://thekaiway.com/2013/07/04/code-loading-of-rails/
 https://github.com/ruby/rake/blob/master/lib/rake/ext/core.rb
