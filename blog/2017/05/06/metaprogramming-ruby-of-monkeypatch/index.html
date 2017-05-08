@@ -1,0 +1,579 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Ruby元编程之猴子补丁 - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="打开类 先看一个例子， 1
+2
+3
+4
+5
+6
+7
+8
+3.times do class Dog puts &quot;wang...&quot; end
+end
+=&gt; wang... wang... wang... 上面的代码并非定义三个同名的类，而是第一次定义一个类， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>为了远方的自由</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Ruby元编程之猴子补丁</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-05-06T16:48:53+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>4:48 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>打开类</h4>
+
+<p>先看一个例子，</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Dog</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;wang...&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="n">wang</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>   <span class="n">wang</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>   <span class="n">wang</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>上面的代码并非定义三个同名的类，而是第一次定义一个类，其它两次是重新打开这个类。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;wang wang...&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">eat</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;bone&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dog</span> <span class="o">=</span> <span class="no">Dog</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">dog</span><span class="o">.</span><span class="n">say</span>    <span class="c1">#=&gt; wang wang...</span>
+</span><span class='line'><span class="n">day</span><span class="o">.</span><span class="n">eat</span>     <span class="c1">#= bone</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> 从上面的例子可以看出，当Ruby开始着手定义一个类，并定义say()方法，第二次再提及Dog类时，如果它已经存在，Ruby就不用再定义了，只需要重新打开这个已经存在的类，并定义eat()方法。</p>
+
+<p>&emsp;像这种你总是可以重新打开一个已经存在的类并对它进行动态修改的技术，可以称之为<strong><em>打开类(open class)</em></strong></p>
+
+<h4>猴子打补丁</h4>
+
+<p>&emsp;你写了一个substitute方法，功能是在一个数组中，把一个指定的元素替换成另一个元素的,代码如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">def</span> <span class="nf">substitute</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">array</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">array</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">to</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">from</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#=&gt; </span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;zh&quot;</span><span class="p">,</span> <span class="s2">&quot;usa&quot;</span><span class="p">,</span> <span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="s2">&quot;ck&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="n">substitute</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="s2">&quot;kr&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="o">[</span><span class="s2">&quot;zh&quot;</span><span class="p">,</span> <span class="s2">&quot;usa&quot;</span><span class="p">,</span> <span class="s2">&quot;kr&quot;</span><span class="p">,</span> <span class="s2">&quot;ck&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;果然是个好方法，用起来很方便，但是很快你发现其实这个方法可以再重构一下，把它定义成Array中的一个实例方法岂不是更好，于是你又改了一下，代码如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">substitute</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">to</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">from</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#=&gt; </span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;zh&quot;</span><span class="p">,</span> <span class="s2">&quot;usa&quot;</span><span class="p">,</span> <span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="s2">&quot;ck&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">substitute</span><span class="p">(</span><span class="s2">&quot;ja&quot;</span><span class="p">,</span> <span class="s2">&quot;kr&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="o">[</span><span class="s2">&quot;zh&quot;</span><span class="p">,</span> <span class="s2">&quot;usa&quot;</span><span class="p">,</span> <span class="s2">&quot;kr&quot;</span><span class="p">,</span> <span class="s2">&quot;ck&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;上面的代码是打开Array类，并再类中添加substitute()方法，可以看到，你并没有修改原始的Array类库，而仅仅是重新打开了它，再往里面增加方法，
+简直是太完美了，Array类中竟然缺少这么一个好用的方法，还好你把它加上了。</p>
+
+<p>&emsp;像这种在不改变源码的情况下，对功能进行动态追加、修改的技术叫做<em><strong>猴子补丁(Monkey patch)</strong></em></p>
+
+<h4>猴子补丁引起的问题</h4>
+
+<p>&emsp;如上所说，在Ruby中，可以很轻松地打开一个已经定义的类，并往类中塞方法（包括String,Array类）
+ 这时你突然发现substitute这个单词太长，影响使用，你已经想到了一个更好的方法名replace,于是你把代码又改了一次，如下： </p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">class</span> <span class="nc">Array</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="n">from</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>        <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">to</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">from</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;简直太完美了，你轻轻松松就在Ruby自己的类库中添加了方法，这时你旁边的同事一头雾水的在找bug,说自己明明没改过这块代码，怎么现在代码却报错了，你从容地凑过去看，帮他找bug, 代码如下。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="o">[</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span> <span class="o">]</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">[</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span> <span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt;[ &quot;x&quot;, &quot;y&quot;, &quot;z&quot; ]  #TODO 你同事预期出来的结果</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;天啦噜，你同事怎么这么快就用了你刚定义的replace()方法，还SB一样后面只带一个参数，我方法里面明明有两个参数。。。
+你同事说，我明明记得Array类中有个replace()方法，是把当前数组内容替换，怎么会报错呢？
+这时你好像明白了什么，Array类中本来就有replace()方法，我刚才无意中把这个replace()给覆写了，为了证明你的说法，你把刚才定义的方法去掉，并在Array中的方法找了一遍，看下是否有已经定义过的replace()方法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[].</span><span class="n">methods</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/replace/</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; [:replace] </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;好了，你的问题找到了，是刚才你意想天开地在Array类中加了一个已经存在的方法(覆写了方法),你悄悄地把代码改回去，并让你同事pull一下代码，再试下，应该不会错，你同事pull了代码，运行一下果然没错，这时更一头雾水，你说没问题就行了，去吃饭。。。
+经过上面的事情，你总结出了几条经验
+-   打开一个已定义的类，并往里面添加方法是很危险的，因为你并不知道类中是否已经存在这个方法，
+-   猴子补丁是全局性的，一旦你修改了Array中的replace()方法，则系统中的所有数组都会加载这个方法
+-   猴子补丁是不可见的，如果重定义了Array#replace()方法，则很难发现这个方法被修改了，由于是全局性的，你很难发现问题所在，也很难找出在哪个地方定义了这个方法。</p>
+
+<h4>如何避免猴子补丁引起的问题</h4>
+
+<p>我们先来看个例子，</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">M</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">my_method</span>
+</span><span class='line'>    <span class="s2">&quot;M#my_method()&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">C</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="n">M</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">D</span> <span class="o">&lt;</span> <span class="n">C</span><span class="p">;</span> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">D</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">my_method</span><span class="p">()</span>  <span class="c1">#=&gt;&quot;M#my_method()&quot;</span>
+</span><span class='line'><span class="c1">#TODO 查看类D的所的父类</span>
+</span><span class='line'><span class="n">D</span><span class="o">.</span><span class="n">ancestors</span>   <span class="c1">#=&gt; [D, C, M, Object, Kernel, BasicObject]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;从上面列子可以看到，当我们在一个类中包含(include)一个模块时，Ruby创建了一个封装该模块的匿名类，并把这个匿名类插入到祖先链中，其在链中的位置正好包含在它的类的上方，这些封装的类就叫做<strong><em>包含类(include class)</em></strong>,或者叫<strong><em>代理类(proxy class)</em></strong>。</p>
+
+<p>接下来我们重新打开ruby的irb,试着查看一下Array的祖先链</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">Array</span><span class="o">.</span><span class="n">ancestors</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="o">[</span><span class="nb">Array</span><span class="p">,</span> <span class="no">Enumerable</span><span class="p">,</span> <span class="no">Object</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">BasicObject</span><span class="o">]</span>
+</span><span class='line'><span class="c1">#TODO可以看到Ruby初始Array类中的祖先一共有5个</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;然后我们再打开rails环境下的console(命令rails console),其环境加载了包括rails的各种gems源码和你自己的代码，同样的查看Array中的祖先链</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">Array</span><span class="o">.</span><span class="n">ancestors</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="o">[</span><span class="nb">Array</span><span class="p">,</span> <span class="no">RQRCode</span><span class="o">::</span><span class="no">CoreExtensions</span><span class="o">::</span><span class="nb">Array</span><span class="o">::</span><span class="no">Behavior</span><span class="p">,</span> <span class="no">V8</span><span class="o">::</span><span class="no">Conversion</span><span class="o">::</span><span class="nb">Array</span><span class="p">,</span> <span class="no">JSON</span><span class="o">::</span><span class="no">Ext</span><span class="o">::</span><span class="no">Generator</span><span class="o">::</span><span class="no">GeneratorMethods</span><span class="o">::</span><span class="nb">Array</span><span class="p">,</span> <span class="no">Enumerable</span><span class="p">,</span> <span class="no">Object</span><span class="p">,</span> <span class="no">PP</span><span class="o">::</span><span class="no">ObjectMixin</span><span class="p">,</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Dependencies</span><span class="o">::</span><span class="no">Loadable</span><span class="p">,</span> <span class="no">V8</span><span class="o">::</span><span class="no">Conversion</span><span class="o">::</span><span class="no">Object</span><span class="p">,</span> <span class="no">JSON</span><span class="o">::</span><span class="no">Ext</span><span class="o">::</span><span class="no">Generator</span><span class="o">::</span><span class="no">GeneratorMethods</span><span class="o">::</span><span class="no">Object</span><span class="p">,</span> <span class="no">Kernel</span><span class="p">,</span> <span class="no">BasicObject</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;天呐，Array类怎么多出来这么多父类，为了找出原因，你随便找了个父类ActiveSupport::Dependencies::Loadable研究下，可以看到源码<a href="https://github.com/rails/rails/blob/f243e7f0d0b2cef350127fd518532fedb65f0bd0/activesupport/lib/active_support/dependencies.rb">点这里</a>,其中有一个hook!方法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">hook!</span>
+</span><span class='line'>  <span class="no">Object</span><span class="o">.</span><span class="n">class_eval</span> <span class="p">{</span> <span class="kp">include</span> <span class="no">Loadable</span> <span class="p">}</span>
+</span><span class='line'>  <span class="no">Module</span><span class="o">.</span><span class="n">class_eval</span> <span class="p">{</span> <span class="kp">include</span> <span class="no">ModuleConstMissing</span> <span class="p">}</span>
+</span><span class='line'>  <span class="no">Exception</span><span class="o">.</span><span class="n">class_eval</span> <span class="p">{</span> <span class="kp">include</span> <span class="no">Blamable</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;它的作用就是将所需的各种Meta Programming挂到Object和Module下，而其实这里ActiveSupport::Dependencies::Loadable并不是一个真正的类，看源码我们就可以发现，它其它是一个模块，被include到了Object类里，也就是我们上面讲到的，ActiveSupport::Dependencies::Loadable其实是一个代理类，那为什么要这样做呢，因为使用模块(带了各种namespace的)可以让猴子补丁更明显一些，想对而言比较容易追踪到他们，因为这种方式至少可以在祖先类中看到这个模块。</p>
+
+<p>所以使用<strong><em>命名空间(namespace)</em></strong>可以有效地解决类名冲突，从而避免猴子补丁引起的问题</p>
+
+<h4>Rails中如何防止猴子补丁引起的问题</h4>
+
+<p>&emsp;rails在ActviteRecord中，有个instance_method_already_implemented?()方法，点击<a href="https://github.com/rails/rails/blob/master/activerecord/lib/active_record/attribute_methods.rb">查看源码</a>,它会在你定义一个动态方法前，首先会检查有没有同名方法存在，如果有的话，方法会抛出一个异常，否则返回false,说明可以定义方法，举个栗子</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Patient</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">save</span>
+</span><span class='line'>    <span class="s1">&#39;already defined by Active Record&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Patient</span><span class="o">.</span><span class="n">instance_method_already_implemented?</span><span class="p">(</span><span class="ss">:save</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt;  ActiveRecord::DangerousAttributeError: save is defined by Active Record. Check to make sure that you don&#39;t have an attribute or method with the same name.</span>
+</span><span class='line'><span class="no">Patient</span><span class="o">.</span><span class="n">instance_method_already_implemented?</span><span class="p">(</span><span class="ss">:aaaaaa</span><span class="p">)</span>
+</span><span class='line'> <span class="c1">#=&gt; false </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Rake中如何防止猴子补丁引起的问题</h4>
+
+<p>&emsp;在rake 中有一个名为Module#rake_extension()的方法，这里看源码<a href="https://github.com/ruby/rake/blob/93e55a4ef1dbaee42f0f355f86d837c4e2551fc1/lib/rake/ext/core.rb">点击查看</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">def</span> <span class="nf">rake_extension</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span> <span class="c1"># :nodoc:</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nb">method_defined?</span><span class="p">(</span><span class="nb">method</span><span class="p">)</span>
+</span><span class='line'>      <span class="vg">$stderr</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;WARNING: Possible conflict with Rake extension: &quot;</span> <span class="o">+</span>
+</span><span class='line'>        <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="s2">#</span><span class="si">#{</span><span class="nb">method</span><span class="si">}</span><span class="s2"> already exists&quot;</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="k">yield</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;Rake在它想打开类来添加方法时，会使用rake_extension()方法检查它是否已经存在，如果错误地重定义一个已经存在的方法，那么rake_extension()会抛出一个警告信息</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rake&#39;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">rake_extension</span><span class="p">(</span><span class="s2">&quot;xyz&quot;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">xyz</span>
+</span><span class='line'>      <span class="s2">&quot;xyz&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="c1">#=&gt; :xyz</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="n">rake_extension</span><span class="p">(</span><span class="s2">&quot;to_s&quot;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">to_s</span>
+</span><span class='line'>      <span class="s2">&quot;to_s&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#=&gt; WARNING: Possible conflict with Rake extension: String#to_s already exists</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>&emsp;最后，在使用猴子补丁的时候，千万不要覆写、修改了原类中的方法，不然你会走上一条不归路的。</p>
+
+<h6>参考资料</h6>
+
+<p>《Ruby元编程》<br/>
+<a href="https://en.wikipedia.org/wiki/Monkey_patch">https://en.wikipedia.org/wiki/Monkey_patch</a>
+<a href="https://web.archive.org/web/20120730014107/http://wiki.zope.org/zope2/MonkeyPatch">https://web.archive.org/web/20120730014107/http://wiki.zope.org/zope2/MonkeyPatch</a>
+<a href="https://github.com/rails/rails">https://github.com/rails/rails</a>
+<a href="http://thekaiway.com/2013/07/04/code-loading-of-rails/">http://thekaiway.com/2013/07/04/code-loading-of-rails/</a>
+<a href="https://github.com/ruby/rake/blob/master/lib/rake/ext/core.rb">https://github.com/ruby/rake/blob/master/lib/rake/ext/core.rb</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2017-05-06T16:48:53+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>4:48 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2017/01/16/review-2016/" title="Previous Post: 回顾2016年">&laquo; 回顾2016年</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Ruby元编程之猴子补丁"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch/">Ruby元编程之猴子补丁</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/01/16/review-2016/">回顾2016年</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/01/16/about-gem-rails-jwplayer/">关于rails-jwplayer Gem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/">App自动化测试平台搭建记录之问题汇总</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/11/17/rails-web-server/">Rails的各种web Application Server</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2017 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
