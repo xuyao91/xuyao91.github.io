@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2017-05-06T17:07:13+08:00</updated>
+  <updated>2017-05-08T10:06:03+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -18,7 +18,7 @@
     <link href="http://xuyao.club/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch/"/>
     <updated>2017-05-06T16:48:53+08:00</updated>
     <id>http://xuyao.club/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch</id>
-    <content type="html"><![CDATA[<h4>打开类</h4>
+    <content type="html"><![CDATA[<h3>打开类</h3>
 
 <p>先看一个例子，</p>
 
@@ -83,7 +83,7 @@
 
 <p>&emsp;像这种你总是可以重新打开一个已经存在的类并对它进行动态修改的技术，可以称之为<strong><em>打开类(open class)</em></strong></p>
 
-<h4>猴子打补丁</h4>
+<h3>猴子打补丁</h3>
 
 <p>&emsp;你写了一个substitute方法，功能是在一个数组中，把一个指定的元素替换成另一个元素的,代码如下</p>
 
@@ -144,7 +144,7 @@
 
 <p>&emsp;像这种在不改变源码的情况下，对功能进行动态追加、修改的技术叫做<em><strong>猴子补丁(Monkey patch)</strong></em></p>
 
-<h4>猴子补丁引起的问题</h4>
+<h3>猴子补丁引起的问题</h3>
 
 <p>&emsp;如上所说，在Ruby中，可以很轻松地打开一个已经定义的类，并往类中塞方法（包括String,Array类）
  这时你突然发现substitute这个单词太长，影响使用，你已经想到了一个更好的方法名replace,于是你把代码又改了一次，如下： </p>
@@ -188,13 +188,14 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>&emsp;好了，你的问题找到了，是刚才你意想天开地在Array类中加了一个已经存在的方法(覆写了方法),你悄悄地把代码改回去，并让你同事pull一下代码，再试下，应该不会错，你同事pull了代码，运行一下果然没错，这时更一头雾水，你说没问题就行了，去吃饭。。。
-经过上面的事情，你总结出了几条经验
--   打开一个已定义的类，并往里面添加方法是很危险的，因为你并不知道类中是否已经存在这个方法，
--   猴子补丁是全局性的，一旦你修改了Array中的replace()方法，则系统中的所有数组都会加载这个方法
--   猴子补丁是不可见的，如果重定义了Array#replace()方法，则很难发现这个方法被修改了，由于是全局性的，你很难发现问题所在，也很难找出在哪个地方定义了这个方法。</p>
+<p>&emsp;好了，你的问题找到了，是刚才你意想天开地在Array类中加了一个已经存在的方法(覆写了方法),你悄悄地把代码改回去，并让你同事pull一下代码，再试下，应该不会错，你同事pull了代码，运行一下果然没错，这时更一头雾水，你说没问题就行了，去吃饭。。。</p>
 
-<h4>如何避免猴子补丁引起的问题</h4>
+<p>经过上面的事情，你总结出了几条经验<br/>
+1.  打开一个已定义的类，并往里面添加方法是很危险的，因为你并不知道类中是否已经存在这个方法.<br/>
+2.  猴子补丁是全局性的，一旦你修改了Array中的replace()方法，则系统中的所有数组都会加载这个方法<br/>
+3.  猴子补丁是不可见的，如果重定义了Array#replace()  方法，则很难发现这个方法被修改了，由于是全局性的，你很难发现问题所在，也很难找出在哪个地方定义了这个方法。</p>
+
+<h3>如何避免猴子补丁引起的问题</h3>
 
 <p>我们先来看个例子，</p>
 
@@ -272,7 +273,7 @@
 
 <p>所以使用<strong><em>命名空间(namespace)</em></strong>可以有效地解决类名冲突，从而避免猴子补丁引起的问题</p>
 
-<h4>Rails中如何防止猴子补丁引起的问题</h4>
+<h3>Rails中如何防止猴子补丁引起的问题</h3>
 
 <p>&emsp;rails在ActviteRecord中，有个instance_method_already_implemented?()方法，点击<a href="https://github.com/rails/rails/blob/master/activerecord/lib/active_record/attribute_methods.rb">查看源码</a>,它会在你定义一个动态方法前，首先会检查有没有同名方法存在，如果有的话，方法会抛出一个异常，否则返回false,说明可以定义方法，举个栗子</p>
 
@@ -299,7 +300,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h4>Rake中如何防止猴子补丁引起的问题</h4>
+<h3>Rake中如何防止猴子补丁引起的问题</h3>
 
 <p>&emsp;在rake 中有一个名为Module#rake_extension()的方法，这里看源码<a href="https://github.com/ruby/rake/blob/93e55a4ef1dbaee42f0f355f86d837c4e2551fc1/lib/rake/ext/core.rb">点击查看</a></p>
 
@@ -372,7 +373,7 @@
 <p>《Ruby元编程》<br/>
 <a href="https://en.wikipedia.org/wiki/Monkey_patch">https://en.wikipedia.org/wiki/Monkey_patch</a>
 <a href="https://web.archive.org/web/20120730014107/http://wiki.zope.org/zope2/MonkeyPatch">https://web.archive.org/web/20120730014107/http://wiki.zope.org/zope2/MonkeyPatch</a>
-<a href="https://github.com/rails/rails">https://github.com/rails/rails</a>
+<a href="https://github.com/rails/rails">https://github.com/rails/rails</a><br/>
 <a href="http://thekaiway.com/2013/07/04/code-loading-of-rails/">http://thekaiway.com/2013/07/04/code-loading-of-rails/</a>
 <a href="https://github.com/ruby/rake/blob/master/lib/rake/ext/core.rb">https://github.com/ruby/rake/blob/master/lib/rake/ext/core.rb</a></p>
 ]]></content>
