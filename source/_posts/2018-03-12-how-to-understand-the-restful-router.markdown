@@ -13,9 +13,10 @@ categories:
 ```ruby
 POST /create_product
 ```
+<!-- more --> 
 
-1.   首先URI上最好不要有create,pudate,get等这种动词，URI上只要描述他是什么东西就行了，且以复数最好吧，比如说products,users,orders等等  
-2.   如果接口是增加，删除，更新等操作可以在请求方式上来表现，常见的有以下这些：  
+*   首先URI上最好不要有create,pudate,get等这种动词，URI上只要描述他是什么东西就行了，且以复数最好吧，比如说products,users,orders等等  
+*   如果接口是增加，删除，更新等操作可以在请求方式上来表现，常见的有以下这些：  
     GET &emsp;&emsp;     ->获取一个资源   
     POST &emsp;&emsp;    ->添加一个资源   
     PUT &emsp;&emsp;     ->修改一个资源   
@@ -50,22 +51,18 @@ https://github.com/git/git/blob/master/block-sha1/sha1.h
 https://github.com/git/git/pulls
 https://github.com/git/git/pulls?state=closed
 ```
-关于URI设计技巧:
+关于URI设计技巧:  
 
-使用 _ 或 - 来让URI可读性更好，例如http://www.github.com/blog/translate-reward-plan。
-
-使用 / 来表示资源的层级关系，例如上面的/git/git/blob/master/block-sha1/sha1.h
-
-使用 ? 用来过滤资源，例如/git/pulls?state=closed用来表示git项目的所有推入请求中已经关闭的请求。
-
-使用,或;表示同级资源关系，例如/git/sha1/compare/ef7b53d18;bd638e8c1
+*   使用 _ 或 - 来让URI可读性更好，例如http://www.github.com/blog/translate-reward-plan。
+*   使用 / 来表示资源的层级关系，例如上面的/git/git/blob/master/block-sha1/sha1.h
+*   使用 ? 用来过滤资源，例如/git/pulls?state=closed用来表示git项目的所有推入请求中已经关闭的请求。
+*   使用,或;表示同级资源关系，例如/git/sha1/compare/ef7b53d18;bd638e8c1 
 
 
 ####1.2 统一资源接口
 RESTful架构应该遵循统一接口原则，统一接口包含了一组受限的预定义的操作，所有资源的访问接口应该使用标准的HTTP方法如GET，PUT，POST，DELETE，并遵循这些方法的语义。
 
 如果按照HTTP方法的语义来暴露资源，那么接口将会拥有安全性和幂等性的特性，例如GET和HEAD请求都是安全的， 无论请求多少次，都不会改变服务器状态。而GET、HEAD、PUT和DELETE请求都是幂等的，无论对资源操作多少次， 结果总是一样的，后面的请求并不会产生比第一次更多的影响。
-
 下面列出了GET，DELETE，PUT和POST的典型用法:
 ######GET
 &emsp;&emsp;安全且幂等 获取表示 变更时获取表示（缓存） 200（OK） - 表示已在响应中发出 204（无内容） - 资源有空表示 301（Moved Permanently） - 资源的URI已被更新 303（See Other） - 其他（如，负载均衡） 304（not modified）- 资源未更改（缓存） 400 （bad request）- 指代坏请求（如，参数错误） 404 （not found）- 资源不存在 406 （not acceptable）- 服务端不支持所需表示 500 （internal server error）- 通用错误响应 503 （Service Unavailable）- 服务端当前无法处理请求
