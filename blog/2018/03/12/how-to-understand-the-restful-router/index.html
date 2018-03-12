@@ -103,7 +103,12 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ol>
+<!-- more -->
+
+
+<p></p>
+
+<ul>
 <li>首先URI上最好不要有create,pudate,get等这种动词，URI上只要描述他是什么东西就行了，且以复数最好吧，比如说products,users,orders等等</li>
 <li>如果接口是增加，删除，更新等操作可以在请求方式上来表现，常见的有以下这些：<br/>
 GET &emsp;&emsp;     ->获取一个资源 <br/>
@@ -111,7 +116,7 @@ POST &emsp;&emsp;    ->添加一个资源 <br/>
 PUT &emsp;&emsp;     ->修改一个资源 <br/>
 DELETE &emsp;&emsp;  ->删除一个资源 <br/>
 比如说要增加一个商品，可以写成这样</li>
-</ol>
+</ul>
 
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -168,21 +173,20 @@ DELETE &emsp;&emsp;  ->删除一个资源 <br/>
 
 <p>关于URI设计技巧:</p>
 
-<p>使用 _ 或 - 来让URI可读性更好，例如<a href="http://www.github.com/blog/translate-reward-plan%E3%80%82">http://www.github.com/blog/translate-reward-plan%E3%80%82</a></p>
+<ul>
+<li>使用 _ 或 - 来让URI可读性更好，例如<a href="http://www.github.com/blog/translate-reward-plan%E3%80%82">http://www.github.com/blog/translate-reward-plan%E3%80%82</a></li>
+<li>使用 / 来表示资源的层级关系，例如上面的/git/git/blob/master/block-sha1/sha1.h</li>
+<li>使用 ? 用来过滤资源，例如/git/pulls?state=closed用来表示git项目的所有推入请求中已经关闭的请求。</li>
+<li>使用,或;表示同级资源关系，例如/git/sha1/compare/ef7b53d18;bd638e8c1</li>
+</ul>
 
-<p>使用 / 来表示资源的层级关系，例如上面的/git/git/blob/master/block-sha1/sha1.h</p>
-
-<p>使用 ? 用来过滤资源，例如/git/pulls?state=closed用来表示git项目的所有推入请求中已经关闭的请求。</p>
-
-<p>使用,或;表示同级资源关系，例如/git/sha1/compare/ef7b53d18;bd638e8c1</p>
 
 <h4>1.2 统一资源接口</h4>
 
 <p>RESTful架构应该遵循统一接口原则，统一接口包含了一组受限的预定义的操作，所有资源的访问接口应该使用标准的HTTP方法如GET，PUT，POST，DELETE，并遵循这些方法的语义。</p>
 
-<p>如果按照HTTP方法的语义来暴露资源，那么接口将会拥有安全性和幂等性的特性，例如GET和HEAD请求都是安全的， 无论请求多少次，都不会改变服务器状态。而GET、HEAD、PUT和DELETE请求都是幂等的，无论对资源操作多少次， 结果总是一样的，后面的请求并不会产生比第一次更多的影响。</p>
-
-<p>下面列出了GET，DELETE，PUT和POST的典型用法:</p>
+<p>如果按照HTTP方法的语义来暴露资源，那么接口将会拥有安全性和幂等性的特性，例如GET和HEAD请求都是安全的， 无论请求多少次，都不会改变服务器状态。而GET、HEAD、PUT和DELETE请求都是幂等的，无论对资源操作多少次， 结果总是一样的，后面的请求并不会产生比第一次更多的影响。
+下面列出了GET，DELETE，PUT和POST的典型用法:</p>
 
 <h6>GET</h6>
 
