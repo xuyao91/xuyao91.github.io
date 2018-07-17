@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="前言 密码学的基本目的是使得两个在不安全的信道上进行安全的通信，在计算机网络中，现假设有两个人Alice和Bob，Alice想发送消息给Bob，告诉他明天凌晨2点毒贩将在4号码头进行交易，请Bob配合缉毒。这里Alice有一个麻烦就是他怕在信息传输中可能会被敌人Oscar监听，甚至篡改消息内容， &hellip;">
+  <meta name="description" content="（一）代换密码（替换密码） 上一讲中，我们讲移位密码其实是将字母表中的字母一一对应到各数字，然后通过数字平移来进行加密，古典密码学中还有一种比较有名的加密方法，就是将明文中的字母表对应到一套密文的字母表，这种加密方法我们叫代换密码（substiution cipher）或叫替换密码， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,46 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/07/17/cryptography-of-substitution-cipher/">密码学(二)之代换密码</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-07-17T17:28:46+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:28 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2018/07/17/cryptography-of-substitution-cipher/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>（一）代换密码（替换密码）</h3>
+
+<p>上一讲中，我们讲移位密码其实是将字母表中的字母一一对应到各数字，然后通过数字平移来进行加密，古典密码学中还有一种比较有名的加密方法，就是将明文中的字母表对应到一套密文的字母表，这种加密方法我们叫<strong>代换密码（substiution cipher）</strong>或叫<strong>替换密码</strong>，下图就是一个简单的代换密码对应表</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/07/17/cryptography-of-substitution-cipher/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -450,53 +490,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/">App自动化测试平台搭建记录之rspec与appium的完美组合</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-08-04T18:31:04+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:31 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我们的预期目标是每天定时跑测试代码，并生成相应的测试报告，所以这里需要一个比较完善的测试框架来做这些事情，这里我选择的是rspec，</p>
-
-<h4>rspec与appium组合</h4>
-
-<ul>
-<li>将app(ios和android)端每个页面封装成自己的类，页面中的每个控件实例成方法，使用到哪个页面只需将对应的类初始化一下。</li>
-<li>写测试用例的人员只需写对应的测试用例，而不需要关注每个页面的控件封闭，而写控件封装的人，则只需写类的封装，也不必关注测试用例，这样极大的提高了开发效率</li>
-<li>考虑到ios与android中大部分页面的控件以及逻辑都是一样的，所以针对ios和android测试，spec代码只需写一份，这样做的好处是将测试用例与逻辑代码分离，便于以后维护，同时测试用例的扩展性和重用性也大大得到的提高</li>
-</ul>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -512,6 +505,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/07/17/cryptography-of-substitution-cipher/">密码学(二)之代换密码</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/07/13/cryptography-of-shift-cipher/">密码学(一)之移位密码(恺撒密码)</a>
       </li>
     
@@ -525,10 +522,6 @@
     
       <li class="post">
         <a href="/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch/">Ruby元编程之猴子补丁</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/01/16/review-2016/">回顾2016年</a>
       </li>
     
   </ul>
