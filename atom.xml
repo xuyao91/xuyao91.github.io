@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2018-07-13T14:41:12+08:00</updated>
+  <updated>2018-07-17T17:31:57+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,216 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[密码学(二)之代换密码]]></title>
+    <link href="http://xuyao.club/blog/2018/07/17/cryptography-of-substitution-cipher/"/>
+    <updated>2018-07-17T17:28:46+08:00</updated>
+    <id>http://xuyao.club/blog/2018/07/17/cryptography-of-substitution-cipher</id>
+    <content type="html"><![CDATA[<h3>（一）代换密码（替换密码）</h3>
+
+<p>上一讲中，我们讲移位密码其实是将字母表中的字母一一对应到各数字，然后通过数字平移来进行加密，古典密码学中还有一种比较有名的加密方法，就是将明文中的字母表对应到一套密文的字母表，这种加密方法我们叫<strong>代换密码（substiution cipher）</strong>或叫<strong>替换密码</strong>，下图就是一个简单的代换密码对应表</p>
+
+<!-- more -->
+
+
+<p></p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/1796624-db5bd0e79f37103e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image" /></p>
+
+<h3>（二）代换密码的加密</h3>
+
+<p>上面所说，代换密码其实就是将明文里的字母按照字母表替换成密文里的字母，还是举一个例子，假设现在有一个字符“welcome to china”，根据上面的密码替换表，将明文里面的每个字母依次换成对应的密文，如下：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">w</span><span class="o">-&gt;</span><span class="n">C</span>
+</span><span class='line'><span class="n">e</span><span class="o">-&gt;</span><span class="n">X</span>
+</span><span class='line'><span class="n">l</span><span class="o">-&gt;</span><span class="n">G</span>
+</span><span class='line'><span class="n">c</span><span class="o">-&gt;</span><span class="n">H</span>
+</span><span class='line'><span class="n">o</span><span class="o">-&gt;</span><span class="n">B</span>
+</span><span class='line'><span class="n">m</span><span class="o">-&gt;</span><span class="n">E</span>
+</span><span class='line'><span class="n">e</span><span class="o">-&gt;</span><span class="n">X</span>
+</span><span class='line'><span class="n">t</span><span class="o">-&gt;</span><span class="n">Q</span>
+</span><span class='line'><span class="n">o</span><span class="o">-&gt;</span><span class="n">B</span>
+</span><span class='line'><span class="n">c</span><span class="o">-&gt;</span><span class="n">H</span>
+</span><span class='line'><span class="n">h</span><span class="o">-&gt;</span><span class="n">T</span>
+</span><span class='line'><span class="n">i</span><span class="o">-&gt;</span><span class="n">J</span>
+</span><span class='line'><span class="n">n</span><span class="o">-&gt;</span><span class="n">N</span>
+</span><span class='line'><span class="n">a</span><span class="o">-&gt;</span><span class="n">W</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就可以得到密文CXGHBEXQBHTJNW</p>
+
+<h3>（三）代换密码的解密</h3>
+
+<p>代换密码的解密非常简单，只要将加密的替换表进行反向操作，这里不再操作</p>
+
+<p>这里可以发现，代换密码主要是要建立起一套明文与密文之间的加密对应的替换关系，只要有这套密码替换表，加、解密就变得很容易</p>
+
+<h3>（四）代换密码的破解</h3>
+
+<p>上一讲我们知道，移位密码其实是很好破解的，因为密钥总量一共就26位，只要我们试26次，就一定能试出一个正解的，那么代换密码是也可以通过穷举的方式来破解呢？</p>
+
+<p>我们知道代换密码是把明文的26个字母随机对应密文的26个字母上，也就意味着明文中第一个字母a可以对应到密文中A,B,C,D…Z 26个字母中的任一个，以此类推，我们就可以计算出代换密码的密钥总数为：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">26</span> <span class="n">x</span> <span class="mi">25</span> <span class="n">x</span> <span class="mi">24</span> <span class="n">x</span> <span class="mi">23</span> <span class="n">x22</span> <span class="n">x</span> <span class="mi">21</span> <span class="n">x</span> <span class="err">…</span> <span class="n">x</span> <span class="mi">1</span> <span class="o">=</span> <span class="mi">403291461126605635584000000</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>像这种一种密码能够使用的所有密钥的集合，叫做<strong>密钥空间（keyspace）</strong></p>
+
+<p>上面的密钥的量非常大，用穷举法来破译几乎是不可能的。</p>
+
+<p>使用穷举法不能破译，但并不能说明就是安全的，我们可以使用<a href="https://baike.baidu.com/item/%E5%AD%97%E6%AF%8D%E9%A2%91%E7%8E%87/9669044?fr=aladdin">频率分析</a>来破译代换密码，频率分析就是利用明文中的字母出现频率与密文中的字母的出现频率一致这一特性，</p>
+
+<p>下面是【密码学原理与实践】书中的一个例子，可以参考一下</p>
+
+<p>现假设有一段密文如下，现需将其解密出明文</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">YIFQFMZRWQFYVECFMDZPCVMRZWNMDZVEJBTXCDDUMJ</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">NDIFEFMDZCDMQZKCEYFCJMYRNCWJCSZREXCHZUNMXZ</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">NXUCDRJXYYSMRTMEYIFZWDYVZVYFZUMRZCRWNZDZJJ</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">XZWGCHSMRNMDHNCMFQCHZJMXJXWIFJYUCFWDJNZDIR</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这种密文的频率分析如下图：</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/1796624-3e73907eab25c8f3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image" /></p>
+
+<p>根据<a href="https://zh.wikipedia.org/wiki/%E5%AD%97%E6%AF%8D%E9%A2%91%E7%8E%87">英文字母出现的频率</a>排序统计，一般的排序是这样的e,t,a,o,I,n,s,h,r,d,l,u,c,m,f,w,y,p,v,b,g,k,j,q,x,z 而且一般英语文章中出现频率最高的的字母是e,这一点基本不会错的。</p>
+
+<p>根据上图所示，字母Z出现的次数是20，远远高于其它密文字母，所以我们可以假设Z->e。其它出现至少10余次的官方字母是C,D,F,J,M,R,Y，我们希望这些字母对应的是</p>
+
+<p>e t a o l n s h r中的一个子集，</p>
+
+<p>我们现在假设了Z->e，现注意一下形如-Z, Z-的两字母组，我们发现出现这种类型的最一般的两字母组是DZ和ZW,各都出现了4次；NZ和ZU出现3次，RZ HZ XZ FZ ZR ZV ZC ZD ZJ各出现2次；又因ZW出现4次，而WZ一次也未出现，同时W比许多其它字母出现的次娄少，所以我们可以假设W->d，又因为DZ出现4次而ZD出现2次，故可猜测D是{r,s,t}中的任一个，具体是哪个还不清楚。</p>
+
+<p>如上面猜测， Z->, D->d，再看看密文并注意到ZRW出现在密文的开始部分，RW后面也出现过，因为R在密文频繁地出现，而nd是一个常见的两字母组，所以我们可以假设R->n作为可能的情况，这样我们便有了如下的形式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">------</span><span class="k">end</span><span class="o">---------</span><span class="n">e</span><span class="o">-----</span><span class="n">ned</span><span class="o">--</span><span class="n">e</span><span class="o">------------</span>
+</span><span class='line'><span class="no">YIFQFMZRWQFYVECFMDZPCVMRZWNMDZVEJBTXCDDUMJ</span>
+</span><span class='line'><span class="o">--------</span><span class="n">e</span><span class="o">----</span><span class="n">e</span><span class="o">---------</span><span class="n">n</span><span class="o">-</span><span class="n">d</span><span class="o">----</span><span class="n">en</span><span class="o">----</span><span class="n">e</span><span class="o">----</span><span class="n">e</span>
+</span><span class='line'><span class="no">NDIFEFMDZCDMQZKCEYFCJMYRNCWJCSZREXCHZUNMXZ</span>
+</span><span class='line'><span class="o">-</span><span class="n">e</span><span class="o">---</span><span class="n">n</span><span class="o">------</span><span class="n">n</span><span class="o">------</span><span class="n">ed</span><span class="o">-----</span><span class="n">e</span><span class="o">-</span><span class="n">e</span><span class="o">--</span><span class="n">ne</span><span class="o">-</span><span class="n">nd</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">e</span><span class="o">--</span>
+</span><span class='line'><span class="no">NZUCDRJXYYSMRTMEYIFZWDYVZVYFZUMRZCRWNZDZJJ</span>
+</span><span class='line'><span class="o">-</span><span class="n">ed</span><span class="o">-----</span><span class="n">n</span><span class="o">-----------</span><span class="n">e</span><span class="o">----</span><span class="n">ed</span><span class="o">-------</span><span class="n">d</span><span class="o">---</span><span class="n">e</span><span class="o">--</span><span class="n">n</span>
+</span><span class='line'><span class="no">XZWGCHSMRNMDHNCMFQCHZJMXJZWIFJYUCFWDJNZDIR</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下来我们可以试试N->h，因为NZ是一个常见的两字组而ZN不是一个常见的两字母组，如果这个猜测是正确的，则明文ne-ndhe很可能说明C->a，结合这些收市，我们又进一步有:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">------</span><span class="k">end</span><span class="o">-----</span><span class="n">a</span><span class="o">---</span><span class="n">e</span><span class="o">-</span><span class="n">a</span><span class="o">--</span><span class="n">nedh</span><span class="o">--</span><span class="n">e</span><span class="o">------</span><span class="n">a</span><span class="o">-----</span>
+</span><span class='line'><span class="no">YIFQFMZRWQFYVECFMDZPCVMRZWNMDZVEJBTXCDDUMJ</span>
+</span><span class='line'><span class="n">h</span><span class="o">-------</span><span class="n">ea</span><span class="o">---</span><span class="n">e</span><span class="o">-</span><span class="n">a</span><span class="o">---</span><span class="n">a</span><span class="o">----</span><span class="n">ehad</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">en</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">h</span><span class="o">--</span><span class="n">e</span>
+</span><span class='line'><span class="no">NDIFEFMDZCDMQZKCEYFCJMYRNCWJCSZREXCHZUNMXZ</span>
+</span><span class='line'><span class="n">he</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">n</span><span class="o">------</span><span class="n">n</span><span class="o">------</span><span class="n">ed</span><span class="o">---</span><span class="n">e</span><span class="o">---</span><span class="n">e</span><span class="o">--</span><span class="n">neandhe</span><span class="o">-</span><span class="n">e</span><span class="o">--</span>
+</span><span class='line'><span class="no">NZUCDRJXYYSMRTMEYIFZWDYVZVYFZUMRZCRWNZDZJJ</span>
+</span><span class='line'><span class="o">-</span><span class="n">ed</span><span class="o">-</span><span class="n">a</span><span class="o">---</span><span class="n">nh</span><span class="o">---</span><span class="n">ha</span><span class="o">---</span><span class="n">a</span><span class="o">-</span><span class="n">e</span><span class="o">----</span><span class="n">ed</span><span class="o">-----</span><span class="n">a</span><span class="o">-</span><span class="n">d</span><span class="o">--</span><span class="n">he</span><span class="o">--</span><span class="n">n</span>
+</span><span class='line'><span class="no">XZWGCHSMRNMDHNCMFQCHZJMXJZWIFJYUCFWDJNZDIR</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在考虑出现次数高的密文字母M,由前面分析，密文段RNM密钥成nh-，这说明h-是一个词的开头，所以M很可能是一个元音，因为已经使用了a和e,所以猜测M->{i或o}，因为ai是一个比ao出现次数更高的明文组，所以首先猜测M->I，这样就有：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-----</span><span class="n">iend</span><span class="o">-----</span><span class="n">a</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">inedh</span><span class="o">--</span><span class="n">e</span><span class="o">------</span><span class="n">a</span><span class="o">---</span><span class="n">i</span><span class="o">-</span>
+</span><span class='line'><span class="no">YIFQFMZRWQFYVECFMDZPCVMRZWNMDZVEJBTXCDDUMJ</span>
+</span><span class='line'><span class="n">h</span><span class="o">-----</span><span class="n">i</span><span class="o">-</span><span class="n">ea</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">a</span><span class="o">---</span><span class="n">a</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">nhad</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">en</span><span class="o">--</span><span class="n">a</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">hi</span><span class="o">-</span><span class="n">e</span>
+</span><span class='line'><span class="no">NDIFEFMDZCDMQZKCEYFCJMYRNCWJCSZREXCHZUNMXZ</span>
+</span><span class='line'><span class="n">he</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">n</span><span class="o">-----</span><span class="k">in</span><span class="o">-</span><span class="n">i</span><span class="o">----</span><span class="n">ed</span><span class="o">---</span><span class="n">e</span><span class="o">---</span><span class="n">e</span><span class="o">-</span><span class="n">ineandhe</span><span class="o">--</span><span class="n">e</span><span class="o">-</span>
+</span><span class='line'><span class="no">NZUCDRJXYYSMRTMEYIFZWDYVZVYFZUMRZCRWNZDZJJ</span>
+</span><span class='line'><span class="o">-</span><span class="n">ed</span><span class="o">-</span><span class="n">a</span><span class="o">--</span><span class="n">inhi</span><span class="o">--</span><span class="n">hai</span><span class="o">--</span><span class="n">a</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">i</span><span class="o">---</span><span class="n">ed</span><span class="o">----</span><span class="n">a</span><span class="o">--</span><span class="n">d</span><span class="o">-</span><span class="n">he</span><span class="o">--</span><span class="n">n</span>
+</span><span class='line'><span class="no">XZWGCHSMRNMDHNCMFQCHZJMXJZWIFJYUCFWDJNZDIR</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面需要确定明文o对应的密文，因为为是一个经常出现的字母，所以我们猜测相应的密文字母是D F J Y 中的一个，Y似乎最有可能，否则将得到长元音，即从CFM或CJM中得到aoi,因此假设Y->o。</p>
+
+<p>剩下密文字母中三个最高频率的字母是D F J,我们猜测他们以某种次序解密成r s t， 三字母NMD两次出现说明很可能D->s,对应的明文三字母组为his，HNCMF可能是chair的加密，说明F->r,H->c，同时排除J->t，于是我们有了：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">o</span><span class="o">-</span><span class="n">r</span><span class="o">-</span><span class="n">riend</span><span class="o">-</span><span class="n">ro</span><span class="o">--</span><span class="n">arise</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">inedhise</span><span class="o">--</span><span class="n">t</span><span class="o">---</span><span class="n">ass</span><span class="o">-</span><span class="n">it</span>
+</span><span class='line'><span class="no">YIFQFMZRWQFYVECFMDZPCVMRZWNMDZVEJBTXCDDUMJ</span>
+</span><span class='line'><span class="n">hs</span><span class="o">-</span><span class="n">r</span><span class="o">-</span><span class="n">riseasi</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">a</span><span class="o">-</span><span class="n">orationhadta</span><span class="o">-</span><span class="n">en</span><span class="o">--</span><span class="n">ace</span><span class="o">-</span><span class="n">hi</span><span class="o">-</span><span class="n">e</span>
+</span><span class='line'><span class="no">NDIFEFMDZCDMQZKCEYFCJMYRNCWJCSZREXCHZUNMXZ</span>
+</span><span class='line'><span class="n">he</span><span class="o">-</span><span class="n">asnt</span><span class="o">-</span><span class="n">oo</span><span class="o">-</span><span class="k">in</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">o</span><span class="o">-</span><span class="n">redso</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">ore</span><span class="o">-</span><span class="n">ineandhesett</span>
+</span><span class='line'><span class="no">NZUCDRJXYYSMRTMEYIFZWDYVZVYFZUMRZCRWNZDZJJ</span>
+</span><span class='line'><span class="o">-</span><span class="n">ed</span><span class="o">-</span><span class="n">ac</span><span class="o">-</span><span class="n">inhischair</span><span class="o">-</span><span class="n">acet</span><span class="o">-</span><span class="n">i</span><span class="o">-</span><span class="n">ted</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">ardsthes</span><span class="o">-</span><span class="n">n</span>
+</span><span class='line'><span class="no">XZWGCHSMRNMDHNCMFQCHZJMXJZWIFJYUCFWDJNZDIR</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>有了上面的提示，就很容易确定出明文，解密明文如下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Our</span> <span class="n">friend</span> <span class="n">from</span> <span class="n">paris</span> <span class="n">examined</span> <span class="n">his</span> <span class="n">empty</span> <span class="n">glass</span> <span class="n">with</span> <span class="n">surprise</span><span class="p">,</span> <span class="n">as</span> <span class="n">ifevaporation</span> <span class="n">has</span> <span class="n">taken</span> <span class="n">place</span> <span class="k">while</span> <span class="n">he</span> <span class="n">wasn</span><span class="err">’</span><span class="n">t</span><span class="err"> </span><span class="n">looking</span><span class="p">,</span> <span class="n">I</span> <span class="n">poured</span> <span class="n">some</span> <span class="n">more</span> <span class="n">wine</span> <span class="ow">and</span> <span class="n">hesettled</span> <span class="n">back</span> <span class="k">in</span> <span class="n">his</span> <span class="n">chair</span><span class="p">,</span><span class="n">face</span> <span class="n">tilted</span> <span class="n">up</span> <span class="n">towards</span> <span class="n">the</span> <span class="n">sun</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>参考资料</h3>
+
+<p>【密码学原理与实践（第三版）】</p>
+
+<p>【图解密码技术】</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[密码学(一)之移位密码(恺撒密码)]]></title>
@@ -2878,133 +3088,6 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
 
 <p>这里full_name就是一个虚拟属性(virtual attributes)
 上面两个方法其实就是getter和setter(java中有这种概念)</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails 中alias Alias_method Alias_method_chain的使用]]></title>
-    <link href="http://xuyao.club/blog/2015/05/28/ruby-alias-methods/"/>
-    <updated>2015-05-28T22:03:17+08:00</updated>
-    <id>http://xuyao.club/blog/2015/05/28/ruby-alias-methods</id>
-    <content type="html"><![CDATA[<h5>首先看一下alias的用法，上一个实例是明了</h5>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
-</span><span class='line'>          <span class="nb">puts</span>  <span class="s2">&quot;say hello&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'> <span class="k">alias</span> <span class="ss">:wang</span> <span class="ss">:say</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">dog</span> <span class="o">=</span> <span class="no">Dog</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">dog</span><span class="o">.</span><span class="n">wang</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=&gt;</span> <span class="n">say</span> <span class="n">hello</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>在类中可以将一个实例方法重新命名,注意的是新方法在前面，用空格格开</p>
-
-<h5>alias_method的用法，</h5>
-
-<p>和alias一样，只是他是module的一个私有方法，而且它的方法名可以是字符中，而alias不行，看代码</p>
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Dog</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
-</span><span class='line'>          <span class="nb">puts</span>  <span class="s2">&quot;say hello&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">alias_method</span> <span class="s2">&quot;wang&quot;</span><span class="p">,</span> <span class="s2">&quot;say&quot;</span>
-</span><span class='line'><span class="c1">#alias_method :wang, :say</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Animal</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Dog</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Anima</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">wang</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=&gt;</span><span class="n">say</span> <span class="n">hello</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<h5>alias_method_chain 是ActiveSupport的一个公有实例方法，用法和alias_method是一样的，这里不举例，最后附上alias_method_chain的源码</h5>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">alias_method_chain</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1"># Strip out punctuation on predicates or bang methods since    </span>
-</span><span class='line'>  <span class="c1"># e.g. target?_without_feature is not a valid method name.    </span>
-</span><span class='line'>  <span class="n">aliased_target</span><span class="p">,</span> <span class="n">punctuation</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sr">/([?!=])$/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="vg">$1</span>
-</span><span class='line'>  <span class="k">yield</span><span class="p">(</span><span class="n">aliased_target</span><span class="p">,</span> <span class="n">punctuation</span><span class="p">)</span> <span class="k">if</span> <span class="nb">block_given?</span>
-</span><span class='line'>  <span class="n">with_method</span><span class="p">,</span> <span class="n">without_method</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">aliased_target</span><span class="si">}</span><span class="s2">_with_</span><span class="si">#{</span><span class="n">feature</span><span class="si">}#{</span><span class="n">punctuation</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">aliased_target</span><span class="si">}</span><span class="s2">_without_</span><span class="si">#{</span><span class="n">feature</span><span class="si">}#{</span><span class="n">punctuation</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="n">alias_method</span> <span class="n">without_method</span><span class="p">,</span> <span class="n">target</span>
-</span><span class='line'>  <span class="n">alias_method</span> <span class="n">target</span><span class="p">,</span> <span class="n">with_method</span>
-</span><span class='line'>  <span class="k">case</span>
-</span><span class='line'>    <span class="k">when</span> <span class="nb">public_method_defined?</span><span class="p">(</span><span class="n">without_method</span><span class="p">)</span>
-</span><span class='line'>      <span class="kp">public</span> <span class="n">target</span>
-</span><span class='line'>    <span class="k">when</span> <span class="nb">protected_method_defined?</span><span class="p">(</span><span class="n">without_method</span><span class="p">)</span>
-</span><span class='line'>      <span class="kp">protected</span> <span class="n">target</span>
-</span><span class='line'>    <span class="k">when</span> <span class="nb">private_method_defined?</span><span class="p">(</span><span class="n">without_method</span><span class="p">)</span>
-</span><span class='line'>    <span class="kp">private</span> <span class="n">target</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
 ]]></content>
   </entry>
   
