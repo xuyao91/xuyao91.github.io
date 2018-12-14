@@ -9,20 +9,8 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="首先看一下alias的用法，上一个实例是明了 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-class Dog def say puts &quot;say hello&quot; end alias :wang :say
-end dog = Dog.new
-dog.wang =&gt; say &hellip;">
+  <meta name="description" content="在网上看到关于rails virtual attributes 的例子,得觉挺好玩的,自己动手试一下,好叼 有时候在一张表里面有两个字段,但是实际表单里其实只有一个文本框输入,比如老外的名字分first_name last_name,
+在表里面是分开保存的,但其实是在一个文本框中输入的, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +67,47 @@ dog.wang =&gt; say &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">How to Understand Rails Virtual Attributes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-06-04T16:37:50+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:37 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>在网上看到关于rails  virtual attributes 的例子,得觉挺好玩的,自己动手试一下,好叼</h4>
+
+<p>有时候在一张表里面有两个字段,但是实际表单里其实只有一个文本框输入,比如老外的名字分first_name last_name,
+在表里面是分开保存的,但其实是在一个文本框中输入的,这里使用virtal attriubtes最恰当不过了,看表结构</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/06/04/how-to-understand-rails-virtual-attributes/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -201,6 +230,10 @@ dog.wang =&gt; say &hellip;">
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/07/17/cryptography-of-substitution-cipher/">密码学(二)之代换密码</a>
       </li>
     
@@ -214,10 +247,6 @@ dog.wang =&gt; say &hellip;">
     
       <li class="post">
         <a href="/blog/2018/01/09/about-pg-entrance-exam/">2017年考研记</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2017/05/06/metaprogramming-ruby-of-monkeypatch/">Ruby元编程之猴子补丁</a>
       </li>
     
   </ul>

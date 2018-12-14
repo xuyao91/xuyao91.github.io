@@ -1,0 +1,723 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Fabric多台服务器的部署(一) - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="1、前言 &emsp;Hyperledger Fabric是一个提供分布式账本解决方案的平台。Hyperledger Fabric由模块化架构支撑，并具备极佳的保密性、可伸缩性、灵活性和可扩展性。Hyperledger Fabric被设计成支持不同的模块组件直接拔插启用， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Fabric多台服务器的部署(一)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-14T11:55:10+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:55 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h3>1、前言</h3>
+
+<p>  &emsp;Hyperledger Fabric是一个提供分布式账本解决方案的平台。Hyperledger Fabric由模块化架构支撑，并具备极佳的保密性、可伸缩性、灵活性和可扩展性。Hyperledger Fabric被设计成支持不同的模块组件直接拔插启用，并能适应在经济生态系统中错综复杂的各种场景。
+ &emsp;目前Fabric在区块链溯源场景应用的挺多，农产品，奢侈品，艺术品，红酒等方面都看过到案例，区块链可以保存产品各个环节的数据，并上链，用户最后可能只需扫描一个二维码，就可以查出某个产品整个的生产过程，与中心化数据不同的是，区块链溯源项目数据一旦上链后不可更改，而且数据公开透明，任何一方都没有权利来更改它，同时每个环节需要为你上链的数据负责，如果哪天消费查出某个环节的数据是假的，由于账本数据是分布式的、不可更改的，大家只相信数据，商家也无法抵赖，最后商家只能认错，名誉扫地，所以区块链本质上是解决一个多方协作的一个信任问题，而对于一件事情需要多方协作，共同记账来一起完成的，Fabric作为联盟链，显然很符合这种需求。</p>
+
+<!-- more -->
+
+
+<p></p>
+
+<h3>2、环境安装及服务器配置</h3>
+
+<h5>2.1 环境安装</h5>
+
+<p>在配置Fabric网络之前，需要安装一下相关环境，包括GO语言安装和Docker的安装</p>
+
+<h6>2.1.1 GO语言安装</h6>
+
+<p>1、从官网下载它的安装包，地址：<a href="https://golang.org/dl/">https://golang.org/dl/</a>，根据自己电脑或服务器不同系统下载对应的安装包。
+2、下载后解压包</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、配置GO的环境变量</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export PATH=$PATH:/usr/local/go/bin
+</span><span class='line'>export GOPATH=/opt/gopath</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后执行source命令，使其生效</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>source profile</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后打印一下GO版本</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go version
+</span><span class='line'>go version go1.10.1 darwin/amd64</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>ubuntu系统下安装</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo add-apt-repository ppa:longsleep/golang-backports
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>sudo apt-get install golang-go</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置环境变量</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export GOPATH=$HOME/go
+</span><span class='line'>export PATH=$PATH:$GOROOT/bin:$GOPATH/bin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>不同系统安装略有不同，具体建议查看官方文档 <a href="https://golang.org/doc/install">https://golang.org/doc/install</a></p>
+
+<h5>2.1.2 Docker、Docker-Compose的安装</h5>
+
+<p>docker安装不同系统也是有区别的，我是mac电脑，安装也相对简单，到docker<a href="https://www.docker.com/products/docker-desktop">官网</a>下载一个包，直接安装就行，装好后可以查一下docker的版本，值得注意的是，mac电脑只安装docker就行，docker版本已经包括了compose和其它docker应用，所以无需再另行安装compose</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker version
+</span><span class='line'>#docker的版本信息
+</span><span class='line'>Client:
+</span><span class='line'> Version:           18.06.1-ce
+</span><span class='line'> API version:       1.38
+</span><span class='line'> Go version:        go1.10.3
+</span><span class='line'> Git commit:        e68fc7a
+</span><span class='line'> Built:             Tue Aug 21 17:21:31 2018
+</span><span class='line'> OS/Arch:           darwin/amd64
+</span><span class='line'> Experimental:      false
+</span><span class='line'>
+</span><span class='line'>Server:
+</span><span class='line'> Engine:
+</span><span class='line'>  Version:          18.06.1-ce
+</span><span class='line'>  API version:      1.38 (minimum version 1.12)
+</span><span class='line'>  Go version:       go1.10.3
+</span><span class='line'>  Git commit:       e68fc7a
+</span><span class='line'>  Built:            Tue Aug 21 17:29:02 2018
+</span><span class='line'>  OS/Arch:          linux/amd64
+</span><span class='line'>  Experimental:     true</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果是Linux系统，需要安装docker和docker-compose，可以参考这里<a href="https://yeasy.gitbooks.io/docker_practice/install/">https://yeasy.gitbooks.io/docker_practice/install/</a>,针对不同的linux系统，都有安装方法，写的比较详细，也可以参考官网信息<a href="https://docs.docker.com/compose/install/">https://docs.docker.com/compose/install/</a></p>
+
+<p><strong>ubuntu系统安装docker、docker-compose</strong></p>
+
+<p>卸载旧版本的docker</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get remove docker \
+</span><span class='line'>               docker-engine \
+</span><span class='line'>               docker.io</span></code></pre></td></tr></table></div></figure>
+
+
+<p>鉴于国内网络问题，强烈建议使用国内源，官方源请在注释中查看。
+为了确认所下载软件包的合法性，需要添加软件源的 GPG 密钥。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ curl -fsSL https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu/gpg | sudo apt-key add -
+</span><span class='line'>$ sudo add-apt-repository \
+</span><span class='line'>    "deb [arch=amd64] https://mirrors.ustc.edu.cn/docker-ce/linux/ubuntu \
+</span><span class='line'>    $(lsb_release -cs) \
+</span><span class='line'>    stable"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装docker-ce</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ sudo apt-get update
+</span><span class='line'>
+</span><span class='line'>$ sudo apt-get install docker-ce</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装docker-compose，在 Linux 上的也安装十分简单，从 <a href="https://github.com/docker/compose/releases">官方 GitHub Release</a> 处直接下载编译好的二进制文件即可。
+例如，在 Linux 64 位系统上直接下载对应的二进制包。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+</span><span class='line'>chmod +x /usr/local/bin/docker-compose</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>2.1.3 nodejs安装</h5>
+
+<p> &emsp;因为我们项目用的是nodejs SDK，所以实际项目中还需要安装nodejs和npm来跑项目，因为Fabric目前只支持nodejs v8.4.0~v9.0.0的版本（2018-10），所以建议安装的时候指定一个固定的版本，比如v8.9.0，我用的是这个版本，还是很稳定的，当然也可以先下载一个nvm来管理nodejs的版本，不同项目需要不同的node版本，使用nvm可以管理不同的node版本。
+1、安装nvm，执行下面命令下载安装脚本</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+</span><span class='line'>#输出
+</span><span class='line'>
+</span><span class='line'>=&gt; Close and reopen your terminal to start using nvm or run the following to use it now:
+</span><span class='line'>export NVM_DIR="$HOME/.nvm"
+</span><span class='line'>[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+</span><span class='line'>[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion</span></code></pre></td></tr></table></div></figure>
+
+
+<p>检查下是否安装成功</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>nvm --version
+</span><span class='line'>0.33.11</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2、安装nodejs，使用nvm ls-remote查看远程可安装的node版本</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>nvm ls-remote 
+</span><span class='line'>v8.0.0
+</span><span class='line'>v8.1.0
+</span><span class='line'>v8.1.1
+</span><span class='line'>v8.1.2
+</span><span class='line'>v8.1.3
+</span><span class='line'>v8.1.4
+</span><span class='line'>v8.2.0
+</span><span class='line'>v8.2.1
+</span><span class='line'>v8.3.0
+</span><span class='line'>v8.4.0
+</span><span class='line'>v8.5.0
+</span><span class='line'>v8.6.0
+</span><span class='line'>v8.7.0
+</span><span class='line'>v8.8.0
+</span><span class='line'>v8.8.1
+</span><span class='line'>v8.9.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>找到自己想要安装的版本来安装nodejs</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>nvm install 8.9.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用node命令查看是否安装成功</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>node -v
+</span><span class='line'>v8.9.1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以使用nvm ls来查看当前环境有几个node版本</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>nvm ls
+</span><span class='line'>
+</span><span class='line'>-&gt;       v8.9.1
+</span><span class='line'>         system
+</span><span class='line'>default -&gt; 8.9.1 (-&gt; v8.9.1)
+</span><span class='line'>node -&gt; stable (-&gt; v8.9.1) (default)
+</span><span class='line'>stable -&gt; 8.9 (-&gt; v8.9.1) (default)
+</span><span class='line'>iojs -&gt; N/A (default)
+</span><span class='line'>lts/* -&gt; lts/dubnium (-&gt; N/A)
+</span><span class='line'>lts/argon -&gt; v4.9.1 (-&gt; N/A)
+</span><span class='line'>lts/boron -&gt; v6.15.0 (-&gt; N/A)
+</span><span class='line'>lts/carbon -&gt; v8.14.0 (-&gt; N/A)
+</span><span class='line'>lts/dubnium -&gt; v10.14.1 (-&gt; N/A)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到目前只安装了8.9.0，而且系统默认使用的就是8.9.0，如果想改变系统的默认版本，可以使用如下命令</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>nvm use 8.9.0
+</span><span class='line'>Now using node v10.13.0 (npm v6.4.1)</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>2.1.4 Git工具安装</h5>
+
+<p>Git安装就简单了吧，做过开发的人应该都安装过，这里贴个安装教程，
+<a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">https://git-scm.com/book/en/v2/Getting-Started-Installing-Git</a>,跟着上面安装就行。</p>
+
+<h5>2.2 服务器配置说明</h5>
+
+<p> &emsp;说明一下服务器的整个情况，我申请了4台服务器， 做4个peer，两个orderer，具体的crypto-config.yaml配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>OrdererOrgs:
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  # Orderer
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  - Name: Orderer
+</span><span class='line'>    Domain: xuyao.com
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # "Specs" - See PeerOrgs below for complete description
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    Specs:
+</span><span class='line'>      - Hostname: orderer1
+</span><span class='line'>      - Hostname: orderer2
+</span><span class='line'># ---------------------------------------------------------------------------
+</span><span class='line'># "PeerOrgs" - Definition of organizations managing peer nodes
+</span><span class='line'># ---------------------------------------------------------------------------
+</span><span class='line'>PeerOrgs:
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  # Org1
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  - Name: Org1
+</span><span class='line'>    Domain: org1.xuyao.com
+</span><span class='line'>    EnableNodeOUs: true
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # "Specs"
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # Uncomment this section to enable the explicit definition of hosts in your
+</span><span class='line'>    # configuration.  Most users will want to use Template, below
+</span><span class='line'>    #
+</span><span class='line'>    # Specs is an array of Spec entries.  Each Spec entry consists of two fields:
+</span><span class='line'>    #   - Hostname:   (Required) The desired hostname, sans the domain.
+</span><span class='line'>    #   - CommonName: (Optional) Specifies the template or explicit override for
+</span><span class='line'>    #                 the CN.  By default, this is the template:
+</span><span class='line'>    #
+</span><span class='line'>    #                              "."
+</span><span class='line'>    #
+</span><span class='line'>    #                 which obtains its values from the Spec.Hostname and
+</span><span class='line'>    #                 Org.Domain, respectively.
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # Specs:
+</span><span class='line'>    #   - Hostname: foo # implicitly "foo.org1.example.com"
+</span><span class='line'>    #     CommonName: foo27.org5.example.com # overrides Hostname-based FQDN set above
+</span><span class='line'>    #   - Hostname: bar
+</span><span class='line'>    #   - Hostname: baz
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # "Template"
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # Allows for the definition of 1 or more hosts that are created sequentially
+</span><span class='line'>    # from a template. By default, this looks like "peer%d" from 0 to Count-1.
+</span><span class='line'>    # You may override the number of nodes (Count), the starting index (Start)
+</span><span class='line'>    # or the template used to construct the name (Hostname).
+</span><span class='line'>    #
+</span><span class='line'>    # Note: Template and Specs are not mutually exclusive.  You may define both
+</span><span class='line'>    # sections and the aggregate nodes will be created for you.  Take care with
+</span><span class='line'>    # name collisions
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>      # Start: 5
+</span><span class='line'>      # Hostname:  # default
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # "Users"
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    # Count: The number of user accounts _in addition_ to Admin
+</span><span class='line'>    # ---------------------------------------------------------------------------
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 1
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  # Org2: See "Org1" for full specification
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  - Name: Org2
+</span><span class='line'>    Domain: org2.xuyao.com
+</span><span class='line'>    EnableNodeOUs: true
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 1
+</span><span class='line'>
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  # Org3: See "Org1" for full specification
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  - Name: Org3
+</span><span class='line'>    Domain: org3.xuyao.com
+</span><span class='line'>    EnableNodeOUs: true
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 1
+</span><span class='line'>
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  # Org4: See "Org1" for full specification
+</span><span class='line'>  # ---------------------------------------------------------------------------
+</span><span class='line'>  - Name: Org4
+</span><span class='line'>    Domain: org4.xuyao.com
+</span><span class='line'>    EnableNodeOUs: true
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>每台服务器的运行大致如下</p>
+
+<ol>
+<li>server1: Org1, Peer1，Orderer1，Ca1，Kafka1, Zookeeper1</li>
+<li>server1:  Org2, Peer2，Orderer2，Ca2，Kafka2, Zookeeper2</li>
+<li>server3:  Org3, Peer3，Ca3，Kafka3, Zookeeper3</li>
+<li>server4:  Org4, Peer4，Ca4，Kafka4<br/>
+每台服务器一个Org组织，和一个节点， 其中两台服务器有Orderer服务，四台服务器都有Ca认证。
+
+<h6>未完待续&hellip;..</h6></li>
+</ol>
+
+
+<h5>参考资料</h5>
+
+<p><a href="https://golang.org/doc/install">https://golang.org/doc/install</a><br/>
+<a href="https://github.com/golang/go/wiki/Ubuntu">https://github.com/golang/go/wiki/Ubuntu</a>
+<a href="https://yeasy.gitbooks.io/docker_practice/install/">https://yeasy.gitbooks.io/docker_practice/install/</a><br/>
+<a href="https://github.com/docker/compose/releases">https://github.com/docker/compose/releases</a>
+<a href="https://linuxize.com/post/how-to-install-node-js-on-centos-7">https://linuxize.com/post/how-to-install-node-js-on-centos-7</a><br/>
+<a href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">https://git-scm.com/book/en/v2/Getting-Started-Installing-Git</a><br/>
+<a href="https://www.cnblogs.com/aberic/p/7527831.html">https://www.cnblogs.com/aberic/p/7527831.html</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-12-14T11:55:10+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:55 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/07/17/cryptography-of-substitution-cipher/" title="Previous Post: 密码学(二)之代换密码">&laquo; 密码学(二)之代换密码</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Fabric多台服务器的部署(一)"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/07/17/cryptography-of-substitution-cipher/">密码学(二)之代换密码</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/07/13/cryptography-of-shift-cipher/">密码学(一)之移位密码(恺撒密码)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/03/12/how-to-understand-the-restful-router/">如何理解RESTful</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/01/09/about-pg-entrance-exam/">2017年考研记</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
