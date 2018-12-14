@@ -9,7 +9,8 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="1、前言 &emsp;Hyperledger Fabric是一个提供分布式账本解决方案的平台。Hyperledger Fabric由模块化架构支撑，并具备极佳的保密性、可伸缩性、灵活性和可扩展性。Hyperledger Fabric被设计成支持不同的模块组件直接拔插启用， &hellip;">
+  <meta name="description" content="3、下载Fabric镜像 3.1.1 下载Fabric 源码 1、在后面的例子中，有些地方需要用到源码中提到的工具来编译和生成证书等，这里需要下载一下Fabric的源码，在本地下载Fabric官方提供的源码 1
+git clone git@github.com:hyperledger/fabric &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +67,66 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Fabric多台服务器的部署(二)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-14T14:27:46+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>2:27 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>3、下载Fabric镜像</h3>
+
+<h5>3.1.1 下载Fabric 源码</h5>
+
+<p> 1、在后面的例子中，有些地方需要用到源码中提到的工具来编译和生成证书等，这里需要下载一下Fabric的源码，在本地下载Fabric官方提供的源码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git@github.com:hyperledger/fabric.git</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要注意的时候，需要把下载好的源码放在$GOPATH里，这个环境变量是最初安装GO的设置的，如</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>echo $GOPATH
+</span><span class='line'>/Users/xuyao/go</span></code></pre></td></tr></table></div></figure>
+
+
+<p>那么fabric的源码地址路径应该是</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>/Users/xuyao/go/src/github.com/hyperledger/fabric/</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -449,46 +510,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/11/17/rails-web-server/">Rails的各种web Application Server</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-11-17T11:12:15+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>11:12 am</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/11/17/rails-web-server/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>Ruby app server是如何工作的</h3>
-
-<p>但是在深入详细讲解之前，这里先对Ruby app server的概念进行一些介绍</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/11/17/rails-web-server/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -504,6 +525,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Fabric多台服务器的部署(二)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a>
       </li>
     
@@ -517,10 +542,6 @@
     
       <li class="post">
         <a href="/blog/2018/03/12/how-to-understand-the-restful-router/">如何理解RESTful</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/01/09/about-pg-entrance-exam/">2017年考研记</a>
       </li>
     
   </ul>
