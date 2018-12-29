@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="Ruby app server是如何工作的 但是在深入详细讲解之前，这里先对Ruby app server的概念进行一些介绍 ">
+  <meta name="description" content="&emsp;年过完了，假期也没了，压岁钱也发光了，是时候坐下来写写总结了。 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,118 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/01/16/review-2016/">回顾2016年</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-01-16T19:54:57+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>7:54 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2017/01/16/review-2016/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&emsp;年过完了，假期也没了，压岁钱也发光了，是时候坐下来写写总结了。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2017/01/16/review-2016/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/01/16/about-gem-rails-jwplayer/">关于rails-jwplayer Gem</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-01-16T19:54:57+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>7:54 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2017/01/16/about-gem-rails-jwplayer/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>&emsp;这几天公司有个业务，有一些课程（视频播放）需要统计用户的观看数据，包括用户看了多长时间，在哪些地方快进了，哪些地方暂停了，哪些地方重复看了等一些用户的行为操作，调查了一翻，H5自带的video是不支持这些功能，好在发现国外有个<a href="https://www.jwplayer.com/">jwplayer</a>的视频播放插件，功能不是一般的强大，支持各种自定义功能，于是看完文档后，自己就集成了一个基于jwplayer的rails gem（<a href="https://github.com/xuyao91/rails-jwplayer">rails-jwplayer</a>），便于以后自己用。</p>
+
+<p>&emsp;目前功能做的比较简单，就是集成了一些基本的功能，后期会把spec测试补齐，及再做一些深度的集可成。
+具体如何使用，可以到github上看下<a href="https://github.com/xuyao91/rails-jwplayer/blob/master/README.md">rails-jwplayer</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/">App自动化测试平台搭建记录之问题汇总</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-12-05T18:25:38+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:25 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>搭建测试平台及写测试case时，遇到了一些问题，现在统一做个汇总，记录一下</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -356,150 +468,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/06/about-sso-in-rails/">About Sso in Rails</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-04-06T16:19:32+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:19 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/04/06/about-sso-in-rails/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>前言</h3>
-
-<p>目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。</p>
-
-<p>这里主要针对doorkeeper作讲解</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/04/06/about-sso-in-rails/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/03/24/about-rails-cache/">About Rails Cache</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-03-24T10:05:39+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:05 am</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/03/24/about-rails-cache/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
-存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便</p>
-
-<h3>ActiveSupport::Cache::Store</h3>
-
-<p>它是一个抽象类，有很多cache store的实现
-rails中的这个类提供了和缓存交互的很多基本的方法，包括(read,write,delete,exist?,fetch)，下面说下具体实现</p>
-
-<h3>ActiveSupport::Cache::FileStore</h3>
-
-<p>先说一下FileStore,这种存储方式Rails默认的存储方式，他是将数据存储到系统文件,默认将文件存储到项目的/tmp/cache下面，你可以修改它的存储路径</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">cache_store</span> <span class="o">=</span> <span class="ss">:file_store</span><span class="p">,</span> <span class="s2">&quot;/path/to/cache/directory&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面说FileStore是Rails默认的存储方式，看下面这句代码就知道了</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">class</span>  <span class="o">=&gt;</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">FileStore</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/03/24/about-rails-cache/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/29/include-vs-extend-in-ruby/">Ruby中include和extend的比较</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-06-29T12:21:35+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:21 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2015/06/29/include-vs-extend-in-ruby/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>本文翻译,改编自<a href="http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/">Include vs Extend in Ruby</a></p>
-
-<p>在类中引用一个模块,有两种方式,一种是include,另一种是extend,两种的大致区别就是:<br/>
-<strong><em>include是给class增加一个实例方法,而extend是增加一个类方法</em>  </strong><br/>
-我们看一下小例子.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/06/29/include-vs-extend-in-ruby/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -517,23 +485,23 @@ rails中的这个类提供了和缓存交互的很多基本的方法，包括(re
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Fabric多台服务器的部署(四)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">Fabric多台服务器的部署(三)</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Fabric多台服务器的部署(二)</a>
       </li>
     
       <li class="post">
         <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/07/17/cryptography-of-substitution-cipher/">密码学(二)之代换密码</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/07/13/cryptography-of-shift-cipher/">密码学(一)之移位密码(恺撒密码)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/03/12/how-to-understand-the-restful-router/">如何理解RESTful</a>
       </li>
     
   </ul>

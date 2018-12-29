@@ -1,0 +1,953 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Fabric多台服务器的部署(四) - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="7、创建channel和chaincode &emsp; 之前我们说过，本项目是一个nodejs的项目，是根据https://github.com/hyperledger/fabric-samples里的balance_transfer稍作修改来的， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Fabric多台服务器的部署(四)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-29T16:51:08+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:51 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>7、创建channel和chaincode</h4>
+
+<p> &emsp; 之前我们说过，本项目是一个nodejs的项目，是根据<a href="https://github.com/hyperledger/fabric-samples">https://github.com/hyperledger/fabric-samples</a>里的balance_transfer稍作修改来的，所以这里我们创建channel和chaincode，包括数据上链都会用nodejs sdk来做。</p>
+
+<h6>7.1、启动nodejs服务</h6>
+
+<p> &emsp;进入我们的trace_wine项目，使用npm安装项目所需的package,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>npm install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完后，我们现在要启动node服务，我们可以看下，当前目录下面的个runApp.sh的脚本文件，看下里面内容就知道，这是个启动node服务的脚本</p>
+
+<!-- more -->
+
+
+<p><img src="https://upload-images.jianshu.io/upload_images/1796624-895fa4b8dae442f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="项目的基本文件" />
+现在我们来运行一下这个脚本文件，使用命令</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./runApp.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看是否启动成功，进入项目下的logs文件夹，找到当前的日志文件，打开看一下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tail -f 2018-11-28.log
+</span><span class='line'>
+</span><span class='line'>[2018-11-28 15:06:48.699] [INFO] Helper - Successfully loaded member from persistence
+</span><span class='line'>[2018-11-28 15:07:15.485] [INFO] app - ****************** SERVER STARTED ************************
+</span><span class='line'>[2018-11-28 15:07:15.488] [INFO] app - ***************  http://localhost:4000  ******************</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到node服务已经启动成功，且端口号为4000，具体的文档可查看官方的<a href="https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/README.md">readme</a></p>
+
+<h6>7.2、创建Ca用户</h6>
+
+<p> &emsp;Fabric CA为每个上链、查询者提供了注册用户，生成用户证书(ECerts)的功能，我们现在可以通过REST APIs来与ca server交互，我们先看下node里注册用户，生成证书的代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>///////////////////////////////////////////////////////////////////////////////
+</span><span class='line'>///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
+</span><span class='line'>///////////////////////////////////////////////////////////////////////////////
+</span><span class='line'>// Register and enroll user
+</span><span class='line'>app.post('/users', async function(req, res) {
+</span><span class='line'>  var username = req.body.username;
+</span><span class='line'>  var orgName = req.body.orgName;
+</span><span class='line'>  logger.debug('End point : /users');
+</span><span class='line'>  logger.debug('User name : ' + username);
+</span><span class='line'>  logger.debug('Org name  : ' + orgName);
+</span><span class='line'>  if (!username) {
+</span><span class='line'>      res.json(getErrorMessage('\'username\''));
+</span><span class='line'>      return;
+</span><span class='line'>  }
+</span><span class='line'>  if (!orgName) {
+</span><span class='line'>      res.json(getErrorMessage('\'orgName\''));
+</span><span class='line'>      return;
+</span><span class='line'>  }
+</span><span class='line'>  var token = jwt.sign({
+</span><span class='line'>      exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
+</span><span class='line'>      username: username,
+</span><span class='line'>      orgName: orgName
+</span><span class='line'>  }, app.get('secret'));
+</span><span class='line'>  let response = await helper.getRegisteredUser(username, orgName, true);
+</span><span class='line'>  logger.debug('-- returned from registering the username %s for organization %s',username,orgName);
+</span><span class='line'>  if (response && typeof response !== 'string') {
+</span><span class='line'>      logger.debug('Successfully registered the username %s for organization %s',username,orgName);
+</span><span class='line'>      response.token = token;
+</span><span class='line'>      res.json(response);
+</span><span class='line'>  } else {
+</span><span class='line'>      logger.debug('Failed to register the username %s for organization %s with::%s',username,orgName,response);
+</span><span class='line'>      res.json({success: false, message: response});
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到当用户传进来username和orgName时，node首先会使用jwt将他们生成一个Token，然后通过getRegisteredUser()方法生成用户的证书，最终将jwt生成的token返回给用户。<br/>
+ &emsp;下面我们来调用一个这个接口</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#在Org1上注册和生成一个新用户，用户名为Jim
+</span><span class='line'>curl -s -X POST http://localhost:4000/users -H "content-type: application/x-www-form-urlencoded" -d 'username=Jim&orgName=Org1'</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#返回结果
+</span><span class='line'>{
+</span><span class='line'>  "success": true,
+</span><span class='line'>  "secret": "RaxhMgevgJcm",
+</span><span class='line'>  "message": "Jim enrolled Successfully",
+</span><span class='line'>  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDQ1MjIxMTgsInVzZXJuYW1lIjoiZG9jIiwib3JnTmFtZSI6Ik9yZzEiLCJpYXQiOjE1NDQ0MzU3MTh9.X8DuFxUSmsRTe7v7iMft8A7LxzpvGyhnufBLQTZ3F8I"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的token就是我们想要的，之后每次请求接口都会用token来验证用户信息,更多的jwt信息，可以查看这里<a href="https://jwt.io/">https://jwt.io/</a>，另外用户生成的证书保存在服务器端，是标准的X.509证书格式，可以打开看一下这个证书</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"name":"Jim","mspid":"Org1MSP","roles":null,"affiliation":"","enrollmentSecret":"",
+</span><span class='line'>"enrollment":{"signingIdentity":"72d623e2104955b39ca6b6383a278b4b0a253e45a83b26044edf193563655367","
+</span><span class='line'>identity":{"certificate":"
+</span><span class='line'>-----BEGIN CERTIFICATE-----
+</span><span class='line'>\nMIICkDCCAjegAwIBAgIUX+durkyChVVZ5LNZekudT17CcJUwCgYIKoZIzj0EAwIw\n
+</span><span class='line'>eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh\n
+</span><span class='line'>biBGcmFuY2lzY28xHDAaBgNVBAoTE29yZzEubWJhc2VjaGFpbi5jb20xHzAdBgNV\n
+</span><span class='line'>BAMTFmNhLm9yZzEubWJhc2VjaGFpbi5jb20wHhcNMTgxMTIzMDk0NjAwWhcNMTkx\n
+</span><span class='line'>MTIzMDk1MTAwWjBAMTAwDQYDVQQLEwZjbGllbnQwCwYDVQQLEwRvcmcxMBIGA1UE\n
+</span><span class='line'>CxMLZGVwYXJ0bWVudDExDDAKBgNVBAMTA2RvYzBZMBMGByqGSM49AgEGCCqGSM49\n
+</span><span class='line'>AwEHA0IABGUZz9n5KvXF9H0l4HSdCvegNE2A0pkk2w1oQLcJW9FaZvr7rBDG3/bl\nauV26OoHJX7Yo/N
+</span><span class='line'>x2JyQrQzYRoPKfOWjgdUwgdIwDgYDVR0PAQH/BAQDAgeAMAwG\n
+</span><span class='line'>A1UdEwEB/wQCMAAwHQYDVR0OBBYEFCGGAIKaIFfBpkYuR2rjxvGle+uRMCsGA1Ud\n
+</span><span class='line'>IwQkMCKAIGyyJr5K7JgVQebL3WZ0ITnBFX6Ir+Bu37FvEuzDBWv1MGYGCCoDBAUG\n
+</span><span class='line'>BwgBBFp7ImF0dHJzIjp7ImhmLkFmZmlsaWF0aW9uIjoib3JnMS5kZXBhcnRtZW50\n
+</span><span class='line'>MSIsImhmLkVucm9sbG1lbnRJRCI6ImRvYyIsImhmLlR5cGUiOiJjbGllbnQifX0w\n
+</span><span class='line'>CgYIKoZIzj0EAwIDRwAwRAIgYnTD6Pkx1+R4R77TztW3/oQb1h+5/3ELYtAsIuz7\n
+</span><span class='line'>D8wCIBiOmE/uySQvkgzUcCsVRtaUMg0M9zioKBYHiPUxeNJo\n
+</span><span class='line'>-----END CERTIFICATE-----\n"}}}%</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.2、创建Channel</h6>
+
+<p> &emsp; 同样我们使用node服务提供的接口来创建Channel通道，具体创建channel的js代码可以看<a href="https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/app.js#L142">这里</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels \
+</span><span class='line'>  -H "authorization: Bearer Token" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "channelName":"mychannel",
+</span><span class='line'>  "channelConfigPath":"../artifacts/channel/mychannel.tx"
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>authorization里的Token是上面我们得到的token， channelName是我们要创建通道的名字，channelConfigPath指定mychannel.tx文件路径，创建成功，返回如下结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Channel 'mychannel' created Successfully"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.3、将Channel加入到Org里</h6>
+
+<p> &emsp;现在我们需要将channel加入到Org里，这样Org就可以使用这个channel，同样是通过node接口来实现</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels/mychannel/peers \
+</span><span class='line'>  -H "authorization: Bearer Token" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "peers": ["peer0.org1.xuyao.com","peer1.org1.xuyao.com"]
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>返回结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Successfully joined peers in organization Org1 to the channel:mychannel"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4、编写和安装智能合约(chaincode)</h6>
+
+<h6>7.4.1、编写智能合约(chaincode)</h6>
+
+<p> &emsp;channel安装好后，我们需要编写智能合约，这里我贴一个我用go写的一个chaincode,功能很简单就是把数据上链，查询</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package main
+</span><span class='line'>
+</span><span class='line'>import (
+</span><span class='line'>  "bytes"
+</span><span class='line'>  "fmt"
+</span><span class='line'>
+</span><span class='line'>  "github.com/hyperledger/fabric/core/chaincode/shim"
+</span><span class='line'>  pb "github.com/hyperledger/fabric/protos/peer"
+</span><span class='line'>)
+</span><span class='line'>
+</span><span class='line'>//Chaincode implementation
+</span><span class='line'>type SimpleChaincode struct {
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>// ===================================================================================
+</span><span class='line'>// Main
+</span><span class='line'>// ===================================================================================
+</span><span class='line'>func main() {
+</span><span class='line'>  err := shim.Start(new(SimpleChaincode))
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      fmt.Printf("Error starting Simple chaincode: %s", err)
+</span><span class='line'>  }
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// Init initializes chaincode
+</span><span class='line'>// ===========================
+</span><span class='line'>func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+</span><span class='line'>  return shim.Success(nil)
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// Invoke - Our entry point for Invocations
+</span><span class='line'>// ========================================
+</span><span class='line'>func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+</span><span class='line'>  function, args := stub.GetFunctionAndParameters()
+</span><span class='line'>  fmt.Printf("function: %s,args: %s\n", function, args)
+</span><span class='line'>
+</span><span class='line'>  // Handle different functions
+</span><span class='line'>  if function == "save" { //create a new marble
+</span><span class='line'>      return t.save(stub, args)
+</span><span class='line'>  } else if function == "query" { //find Data based on an ad hoc rich query
+</span><span class='line'>      return t.query(stub, args)
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  fmt.Println("invoke did not find func: " + function) //error
+</span><span class='line'>  return shim.Error("Received unknown function invocation")
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// ============================================================
+</span><span class='line'>// - create a new data, store into chaincode state
+</span><span class='line'>// ============================================================
+</span><span class='line'>func (t *SimpleChaincode) save(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+</span><span class='line'>  
+</span><span class='line'>  if len(args) != 2 {
+</span><span class='line'>      return shim.Error("Incorrect number of arguments. Expecting 2")
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  err := stub.PutState(args[0], []byte(args[1]))
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      return shim.Error(err.Error())
+</span><span class='line'>  }
+</span><span class='line'>  fmt.Println("- end save business")
+</span><span class='line'>  return shim.Success(nil)
+</span><span class='line'>  
+</span><span class='line'>
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// ===== Add hoc rich query ========================================================
+</span><span class='line'>// query method uses a query string to perform a query for data.
+</span><span class='line'>// Query string matching state database syntax is passed in and executed as is.
+</span><span class='line'>// Supports ad hoc queries that can be defined at runtime by the client.
+</span><span class='line'>// Only available on state databases that support rich query (e.g. CouchDB)
+</span><span class='line'>// =========================================================================================
+</span><span class='line'>func (t *SimpleChaincode) query(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+</span><span class='line'>
+</span><span class='line'>  //   0
+</span><span class='line'>  // "queryString"
+</span><span class='line'>  if len(args) &lt; 1 {
+</span><span class='line'>      return shim.Error("Incorrect number of arguments. Expecting 1")
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  queryString := args[0]
+</span><span class='line'>
+</span><span class='line'>  queryResults, err := getQueryResultForQueryString(stub, queryString)
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      return shim.Error(err.Error())
+</span><span class='line'>  }
+</span><span class='line'>  return shim.Success(queryResults)
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// =========================================================================================
+</span><span class='line'>// getQueryResultForQueryString executes the passed in query string.
+</span><span class='line'>// Result set is built and returned as a byte array containing the JSON results.
+</span><span class='line'>// =========================================================================================
+</span><span class='line'>func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]byte, error) {
+</span><span class='line'>
+</span><span class='line'>  fmt.Printf("- getQueryResultForQueryString queryString:\n%s\n", queryString)
+</span><span class='line'>
+</span><span class='line'>  resultsIterator, err := stub.GetQueryResult(queryString)
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      return nil, err
+</span><span class='line'>  }
+</span><span class='line'>  defer resultsIterator.Close()
+</span><span class='line'>
+</span><span class='line'>  // buffer is a JSON array containing QueryRecords
+</span><span class='line'>  var buffer bytes.Buffer
+</span><span class='line'>  buffer.WriteString("[")
+</span><span class='line'>
+</span><span class='line'>  bArrayMemberAlreadyWritten := false
+</span><span class='line'>  for resultsIterator.HasNext() {
+</span><span class='line'>      queryResponse, err := resultsIterator.Next()
+</span><span class='line'>      if err != nil {
+</span><span class='line'>          return nil, err
+</span><span class='line'>      }
+</span><span class='line'>      // Add a comma before array members, suppress it for the first array member
+</span><span class='line'>      if bArrayMemberAlreadyWritten == true {
+</span><span class='line'>          buffer.WriteString(",")
+</span><span class='line'>      }
+</span><span class='line'>      buffer.WriteString("{\"Key\":")
+</span><span class='line'>      buffer.WriteString("\"")
+</span><span class='line'>      buffer.WriteString(queryResponse.Key)
+</span><span class='line'>      buffer.WriteString("\"")
+</span><span class='line'>
+</span><span class='line'>      buffer.WriteString(", \"Record\":")
+</span><span class='line'>      // Record is a JSON object, so we write as-is
+</span><span class='line'>      buffer.WriteString(string(queryResponse.Value))
+</span><span class='line'>      buffer.WriteString("}")
+</span><span class='line'>      bArrayMemberAlreadyWritten = true
+</span><span class='line'>  }
+</span><span class='line'>  buffer.WriteString("]")
+</span><span class='line'>
+</span><span class='line'>  fmt.Printf("- getQueryResultForQueryString queryResult:\n%s\n", buffer.String())
+</span><span class='line'>
+</span><span class='line'>  return buffer.Bytes(), nil
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>save()函数将传上来的数据上链，query()函数通过交易id来查询区块, getQueryResultForQueryString()函数通过交易里的字段来查询区块，目前只支持couchdb查询，leveldb不支持这样查。</p>
+
+<h6>7.4.2、 安装chaincode</h6>
+
+<p>现在我们来安装chaincode</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/chaincodes \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "peers": ["peer0.org1.xuyao.com","peer1.org1.xuyao.com"],
+</span><span class='line'>  "chaincodeName":"mycc",
+</span><span class='line'>  "chaincodePath":"github.com/example_cc/go",
+</span><span class='line'>  "chaincodeType": "golang",
+</span><span class='line'>  "chaincodeVersion":"v0"
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>chaincodeName是智能合约的名字， chaincodePath是智能合约的路径， chaincodeType是编写智能合约的语言，是golang和nodejs两种，chaincodeVersion是智能合约的版本号，值得注意的是如果是升级智能合约的话，需要加上upgrade: true的参数，而且版本号也要向上升级。这是升级的接口，如下:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/chaincodes \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>    "peers": ["peer0.org1.xuyao.com","peer1.org1.xuyao.com"],
+</span><span class='line'>    "chaincodeName":"mycc",
+</span><span class='line'>    "chaincodePath":"github.com/example_cc/go",
+</span><span class='line'>    "chaincodeType": "golang",
+</span><span class='line'>    "chaincodeVersion":"v1",
+</span><span class='line'>    "upgrade": "true"
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装成功后，返回如下结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Successfully install chaincode"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4.3、实例化chaincode</h6>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels/mychannel/chaincodes \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "chaincodeName":"mycc",
+</span><span class='line'>  "chaincodeVersion":"v0",
+</span><span class='line'>  "chaincodeType": "golang",
+</span><span class='line'>  "args":["a","100","b","200"]
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>成功返回结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Successfully instantiate chaingcode in organization Org1 to the channel 'mychannel'"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4.4、数据上链</h6>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/api/v1/save\
+</span><span class='line'>  -H "authorization: Bearer $ORG1_TOKEN" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>        "godsCode": "2018092900004",
+</span><span class='line'>        "jsonInfo":
+</span><span class='line'>          {
+</span><span class='line'>          "discern":"1",
+</span><span class='line'>          "godsIssuerName":"2",
+</span><span class='line'>          "godsIssuerCode":"3",
+</span><span class='line'>          "godsTypeName":"4",
+</span><span class='line'>          "godsMarketValue":"4",
+</span><span class='line'>          "companyName":"5",
+</span><span class='line'>          "issuePrice":"6",
+</span><span class='line'>          "godsCode":"7",
+</span><span class='line'>          "sort":"9",
+</span><span class='line'>          "orgCompanyName":"8",
+</span><span class='line'>          "orgCode":"",
+</span><span class='line'>          "reportId":"",
+</span><span class='line'>          "linkTime":"",
+</span><span class='line'>          "linkUser":"",
+</span><span class='line'>          "linkRole":"",
+</span><span class='line'>          "orgSignTime":"",
+</span><span class='line'>          "godsSignTime":"",
+</span><span class='line'>          "files":[{"fileName":"文件名称.xml","fileHash":"4564613243454546884464"}],
+</span><span class='line'>          "attr":[{"key":"name","value":"val"}],
+</span><span class='line'>          "companyArea":"所属国家/地区",
+</span><span class='line'>          "linkmanPhone":"企业联系电话",
+</span><span class='line'>          "linkmanEmail":"企业邮箱",
+</span><span class='line'>          "legalPerson":"法人姓名"
+</span><span class='line'>        } 
+</span><span class='line'>      }'</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4.5、数据查询</h6>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#通过区块查询
+</span><span class='line'>curl -s -X GET \
+</span><span class='line'>  "http://localhost:4000/channels/mychannel/blocks/1?peer=peer0.org1.example.com" \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json"
+</span><span class='line'>
+</span><span class='line'>#通过TransactionID
+</span><span class='line'>curl -s -X GET \
+</span><span class='line'>http://localhost:4000/channels/mychannel/transactions/&lt;put transaction id here&gt;?peer=peer0.org1.example.com \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json"
+</span><span class='line'>
+</span><span class='line'>#根据自己的业务ID查询
+</span><span class='line'>curl -s -X POST \
+</span><span class='line'>    "http://localhost:4000/api/v1/query" \
+</span><span class='line'>  -H "authorization: Bearer $ORG1_TOKEN" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '
+</span><span class='line'>    {
+</span><span class='line'>      "godsCode": "2018092900004"
+</span><span class='line'>    }
+</span><span class='line'>  '</span></code></pre></td></tr></table></div></figure>
+
+
+<p>返回结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"code":200,"message":"操作成功","data":[{"godsCode":"2018092900004","jsonInfo":{"companyArea":"所属国家/地区","companyName":"5","discern":"1","files":[{"fileHash":"4564613243454546884464","fileName":"文件名称.xml"}],"godsCode":"7","godsIssuerCode":"3","godsIssuerName":"2","godsMarketValue":"4","godsSignTime":"","godsTypeName":"4","issuePrice":"6","legalPerson":"法人姓名","linkRole":"","linkTime":"","linkUser":"","linkmanEmail":"企业邮箱","linkmanPhone":"企业联系电话","orgCode":"","orgCompanyName":"8","orgSignTime":"","reportId":"","sort":"9"},"userName":"doc"}]}</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>未完待续。。。</h5>
+
+<h4>参考资料</h4>
+
+<p>1、<a href="https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/README.md">https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/README.md</a><br/>
+2、<a href="https://jwt.io/">https://jwt.io/</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-12-29T16:51:08+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:51 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/" title="Previous Post: Fabric多台服务器的部署(三)">&laquo; Fabric多台服务器的部署(三)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/" title="Next Post: Fabric多台服务器的部署(五)">Fabric多台服务器的部署(五) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Fabric多台服务器的部署(四)"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Fabric多台服务器的部署(四)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">Fabric多台服务器的部署(三)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Fabric多台服务器的部署(二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1077 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Fabric多台服务器的部署(三) - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="6、启动Fabric网络 &emsp;完成上面的工作后，我们已经生成了Fabric所需要的证书和创世纪块等一些必要文件后，现在我们就需要配置docker文件，来启动Fabric网络，之前我们讲过需要启动的一些服务，现在在列一下，服务器一共有4台， 跑4个peer，4个ca, 4个kafka， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Fabric多台服务器的部署(三)</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-29T16:48:58+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:48 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>6、启动Fabric网络</h4>
+
+<p>&emsp;完成上面的工作后，我们已经生成了Fabric所需要的证书和创世纪块等一些必要文件后，现在我们就需要配置docker文件，来启动Fabric网络，之前我们讲过需要启动的一些服务，现在在列一下，服务器一共有4台， 跑4个peer，4个ca, 4个kafka，3个zookeeper, 2个orderer，具体信息如下：<br/>
+1、Server1：  peer1、Ca1、 Kafka1、Zookeeper1、Orderer1<br/>
+2、Server2：  peer2、Ca2、 Kafka2、Zookeeper2、Orderer2<br/>
+3、Server3：   peer3、Ca3、 Kafka3、Zookeeper31<br/>
+4、Server4：   peer4、Ca4、 Kafka4<br/>
+现在我们需要在各台服务器上启动这些服务，需要说明一下，我们需要先启动zookeeper，再启动kafka，然后启动orderer和peer，这些是有先后顺序的，因为各服务之间有依赖关系，不按顺序启动，最后可能各服务之间的通讯有问题，下面依次来启动这些服务。</p>
+
+<!-- more -->
+
+
+<h5>6.1、启动Zookeeper集群</h5>
+
+<h6>6.1.1、配置docker-zookeeper.yaml文件，</h6>
+
+<p>&emsp;之前我们假设已经把trace_redwine项目push到远程仓库上，现在我们需要在四台服务器上分别把代码pull下来，进入/artifacts文件夹来配置docker的配置文件。<br/>
+&emsp;因为我们前三台服务器都需要docker-zookeeper.yaml文件，所以为了方便配置，我们不防生成三个zookeeper的配置文件，分别用于三台服务器配置上，依次命名如下：docker-zookeeper0.yaml、docker-zookeeper1.yaml、docker-zookeeper2.yaml，下面是docker-zookeeper0.yaml的配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  zookeeper0:
+</span><span class='line'>    image: hyperledger/fabric-zookeeper
+</span><span class='line'>    container_name: zookeeper0
+</span><span class='line'>    hostname: zookeeper0
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - ZOO_MY_ID=1
+</span><span class='line'>      - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+</span><span class='line'>    ports:
+</span><span class='line'>      - 2181:2181
+</span><span class='line'>      - 2888:2888
+</span><span class='line'>      - 3888:3888
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:0.0.0.0"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面配置的参数有几点说明下：<br/>
+1、image是指定使用的镜像名称。<br/>
+2、container_name是启动容器时的名字。<br/>
+3、environment是设置Compose主机上对应的环境变量<br/>
+4、ports是暴露端口信息，格式是 宿主端口：容器端口 (HOST:CONTAINER)，<br/>
+5、extra_hosts是指定额外的 host 名称映射信息，当节点启动后，服务容器会在 /etc/hosts   文件中添加上面的配置的IP和名称，上面有配置会在/etc/hosts文件中添加如下配置。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>10.99.22.103 kafka0
+</span><span class='line'>10.99.22.109 kafka1
+</span><span class='line'>10.99.22.101kafka2
+</span><span class='line'>10.99.22.121 kafka3
+</span><span class='line'>0.0.0.0 zookeeper0
+</span><span class='line'>10.99.22.109 zookeeper1
+</span><span class='line'>10.99.22.101 zookeeper2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>6、ZOO_MY_ID是指zookeeper当前服务节点的id， 这个id值是一定需要填的，且唯一的，值的范围在1~255之间。<br/>
+10、ZOO_SERVERS是zookeeper集群服务器的列表。</p>
+
+<p>docker-zookeeper1.yaml、docker-zookeeper2.yaml文件配置整体不变，只需要修改一些变量名、环境变量就可以，docker-zookeeper1.yaml的配置文件是:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  zookeeper0:
+</span><span class='line'>    image: hyperledger/fabric-zookeeper
+</span><span class='line'>    container_name: zookeeper1
+</span><span class='line'>    hostname: zookeeper1
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - ZOO_MY_ID=2
+</span><span class='line'>      - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+</span><span class='line'>    ports:
+</span><span class='line'>      - 2181:2181
+</span><span class='line'>      - 2888:2888
+</span><span class='line'>      - 3888:3888
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:10.99.22.103"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要注意的是我们现在是在多台服务器上，所以每个zookeeper服务的端口可以一样，因为不在一台服务器上，如果我们在本地上跑多个zookeeper，那么这里的端口是需要修改的；docker-zookeeper2.yaml的文件与上面类似，这里不再列出。</p>
+
+<h6>6.1.2、启动Zookeeper</h6>
+
+<p>现在我们分别登录server1,server2,server3三台服务器，来启动这三个zookeeper服务，进入项目的/artifacts文件夹，找到每台服务器对应的docker zookeeper配置文件，使用docker-compose来启动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动zookeeper0
+</span><span class='line'>docker-compose -f docker-zookeeper0.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动之后的输出</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Starting zookeeper0 ... done</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果需要看启动的输出日志，则在上面启动命令后不要加 -d, 这样可以直接在启动的时候查看日志输出</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker-compose -f docker-zookeeper0.yaml up</span></code></pre></td></tr></table></div></figure>
+
+
+<p>server2,server3的启动跟上面一样，命令分别如下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动zookeeper1
+</span><span class='line'>docker-compose -f docker-zookeeper1.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动zookeeper2
+</span><span class='line'>docker-compose -f docker-zookeeper2.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动成功后，可以使用docker命令查看运行状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到zookeeper0是正在运行的状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>980c8bb7190d        hyperledger/fabric-zookeeper                                                                                   "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:2181-&gt;2181/tcp, 0.0.0.0:2888-&gt;2888/tcp, 0.0.0.0:3888-&gt;3888/tcp, 0.0.0.0:32773-&gt;2181/tcp, 0.0.0.0:32772-&gt;2888/tcp, 0.0.0.0:32771-&gt;3888/tcp   zookeeper0</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.2、启动Kafka集群</h5>
+
+<h6>6.2.1、配置docker-kafka.yaml文件</h6>
+
+<p>因为我们有4个kafka服务，所以我们可以生成4个配置文件来启动这4个服务，配置文件分别如下docker-kafka0.yaml、docker-kafka1.yaml、docker-kafka2.yaml、docker-kafka3.yaml。
+docker-kafka0.yaml的配置文件如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  kafka0:
+</span><span class='line'>    image: hyperledger/fabric-kafka
+</span><span class='line'>    container_name: kafka0
+</span><span class='line'>    hostname: kafka0
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - KAFKA_BROKER_ID=0
+</span><span class='line'>      - KAFKA_MIN_INSYNC_REPLICAS=2
+</span><span class='line'>      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+</span><span class='line'>      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+</span><span class='line'>      - KAFKA_MESSAGE_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+</span><span class='line'>      - KAFKA_LOG_RETENTION_MS=-1
+</span><span class='line'>      - KAFKA_LOG.DIRS=/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    volumes:
+</span><span class='line'>       - ../mount/kafka0/var/hyperledger/production:/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    ports:
+</span><span class='line'>      - 9092:9092
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:10.99.22.103"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明几点：<br/>
+1、KAFKA_BROKER_ID是BROKER的唯一标识，不可重复，且非负整数。  <br/>
+2、KAFKA_ZOOKEEPER_CONNECT是指向zookeeper节点的集合。<br/>
+3、volumes是docker里数据卷所挂载路径设置，可以设置宿主机路径 （HOST:CONTAINER） 或加上访问模式（HOST:CONTAINER:ro）。</p>
+
+<p>docker-kafka1.yaml、docker-kafka2.yaml、docker-kafka3.yaml的配置基本与上面的一样，只要修改一下KAFKA_BROKER_ID参数就可以，如docker-kafka1.yaml的配置文件是：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  kafka1:
+</span><span class='line'>    image: hyperledger/fabric-kafka
+</span><span class='line'>    container_name: kafka1
+</span><span class='line'>    hostname: kafka1
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - KAFKA_BROKER_ID=1
+</span><span class='line'>      - KAFKA_MIN_INSYNC_REPLICAS=2
+</span><span class='line'>      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+</span><span class='line'>      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+</span><span class='line'>      - KAFKA_MESSAGE_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+</span><span class='line'>      - KAFKA_LOG_RETENTION_MS=-1
+</span><span class='line'>      - KAFKA_LOG.DIRS=/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    volumes:
+</span><span class='line'>       - ../mount/kafka0/var/hyperledger/production:/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    ports:
+</span><span class='line'>      - 9092:9092
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:10.99.22.103"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>docker-kafka2.yaml、docker-kafka3.yaml按照上面改就行，这里不一一列出。</p>
+
+<h6>6.2.2、启动Kafka集群</h6>
+
+<p>&emsp;现在我们分别登录4台服务器上，进入/artifacts项目路径下，找到刚才我们生成的那些docker-kafka.yaml的配置文件，使用命令依次启动各服务器上的kafka服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动kafka0
+</span><span class='line'>docker-compose -f docker-kafka0.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>server1，server2，server3启动方法和上面一样</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动kafka1
+</span><span class='line'>docker-compose -f docker-kafka1.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动kafka2
+</span><span class='line'>docker-compose -f docker-kafka2.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动kafka3
+</span><span class='line'>docker-compose -f docker-kafka3.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后可以在各服务器上使用docker 命令查看是否启动成功</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>4bde08ae4413        hyperledger/fabric-kafka                                                                                       "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:9092-&gt;9092/tcp, 9093/tcp, 0.0.0.0:32774-&gt;9092/tcp                                                                                           kafka0</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.3、启动Orderer集群</h5>
+
+<h6>6.3.1、配置docker-orderer.yaml文件</h6>
+
+<p> &emsp;orderer服务我们只有server1,server2上有，所以我们只需要两个启动配置文件就行，命名如下docker-orderer0.yaml,docker-orderer1.yaml，
+其中docker-orderer0.yaml的配置文件如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Copyright IBM Corp. All Rights Reserved.
+</span><span class='line'>#
+</span><span class='line'># SPDX-License-Identifier: Apache-2.0
+</span><span class='line'>#
+</span><span class='line'>
+</span><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  orderer0.xuyao.com:
+</span><span class='line'>      container_name: orderer0.xuyao.com
+</span><span class='line'>      image: hyperledger/fabric-orderer:latest
+</span><span class='line'>      environment:
+</span><span class='line'>        - ORDERER_GENERAL_LOGLEVEL=debug
+</span><span class='line'>        - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+</span><span class='line'>        - ORDERER_GENERAL_GENESISMETHOD=file
+</span><span class='line'>        - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ENABLED=true
+</span><span class='line'>        - GODEBUG=netdns=go
+</span><span class='line'>        - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
+</span><span class='line'>        - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerOrg1/tls/ca.crt, /etc/hyperledger/crypto/peerOrg2/tls/ca.crt, /etc/hyperledger/crypto/peerOrg3/tls/ca.crt, /etc/hyperledger/crypto/peerOrg4/tls/ca.crt]
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+</span><span class='line'>        - ORDERER_KAFKA_VERBOSE=true
+</span><span class='line'>      working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
+</span><span class='line'>      command: orderer
+</span><span class='line'>      ports:
+</span><span class='line'>        - 7050:7050
+</span><span class='line'>      volumes:
+</span><span class='line'>        - ./channel:/etc/hyperledger/configtx
+</span><span class='line'>        - ./channel/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer0.xuyao.com/:/etc/hyperledger/crypto/orderer
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peerOrg1
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org2.xuyao.com/peers/peer0.org2.xuyao.com/:/etc/hyperledger/crypto/peerOrg2
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org3.xuyao.com/peers/peer0.org3.xuyao.com/:/etc/hyperledger/crypto/peerOrg3
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org4.xuyao.com/peers/peer0.org4.xuyao.com/:/etc/hyperledger/crypto/peerOrg4
+</span><span class='line'>        - ../mount/orderer1/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>      extra_hosts:
+</span><span class='line'>        - "kafka0:10.99.22.103"
+</span><span class='line'>        - "kafka1:10.99.22.109"
+</span><span class='line'>        - "kafka2:10.99.22.101"
+</span><span class='line'>        - "kafka3:10.99.22.121"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明：<br/>
+1、ORDERER_GENERAL_TLS_PRIVATEKEY是为服务器证书设置私钥文件的位置。<br/>
+2、ORDERER_GENERAL_TLS_CERTIFICATE是为TLS设置服务器证书的位置。<br/>
+3、ORDERER_GENERAL_TLS_ROOTCAS是为TLS设置根证书的位置。</p>
+
+<p>docker-orderer1.yaml的配置文件基本与docker-orderer1.yaml差不多，如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  orderer1.xuyao.com:
+</span><span class='line'>      container_name: orderer1.xuyao.com
+</span><span class='line'>      image: hyperledger/fabric-orderer:latest
+</span><span class='line'>      environment:
+</span><span class='line'>        - ORDERER_GENERAL_LOGLEVEL=debug
+</span><span class='line'>        - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+</span><span class='line'>        - ORDERER_GENERAL_GENESISMETHOD=file
+</span><span class='line'>        - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ENABLED=true
+</span><span class='line'>        - GODEBUG=netdns=go
+</span><span class='line'>        - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
+</span><span class='line'>        - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerOrg1/tls/ca.crt, /etc/hyperledger/crypto/peerOrg2/tls/ca.crt, /etc/hyperledger/crypto/peerOrg3/tls/ca.crt, /etc/hyperledger/crypto/peerOrg4/tls/ca.crt]
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+</span><span class='line'>        - ORDERER_KAFKA_VERBOSE=true
+</span><span class='line'>      working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
+</span><span class='line'>      command: orderer
+</span><span class='line'>      ports:
+</span><span class='line'>        - 7050:7050
+</span><span class='line'>      volumes:
+</span><span class='line'>        - ./channel:/etc/hyperledger/configtx
+</span><span class='line'>        - ./channel/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer1.xuyao.com/:/etc/hyperledger/crypto/orderer
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peerOrg1
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org2.xuyao.com/peers/peer0.org2.xuyao.com/:/etc/hyperledger/crypto/peerOrg2
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org3.xuyao.com/peers/peer0.org3.xuyao.com/:/etc/hyperledger/crypto/peerOrg3
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org4.xuyao.com/peers/peer0.org4.xuyao.com/:/etc/hyperledger/crypto/peerOrg4
+</span><span class='line'>        - ../mount/orderer1/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>      extra_hosts:
+</span><span class='line'>        - "kafka0:10.99.22.103"
+</span><span class='line'>        - "kafka1:10.99.22.109"
+</span><span class='line'>        - "kafka2:10.99.22.101"
+</span><span class='line'>        - "kafka3:10.99.22.121"</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>6.3.2、启动Orderer集群</h6>
+
+<p> &emsp;我们分别在server1,server2上启动orderer，登录各服务器，进入各自的配置文件目录下，使用如下命令启动orderer</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动orderer0
+</span><span class='line'>docker-compose -f docker-orderer0.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动orderer1
+</span><span class='line'>docker-compose -f docker-orderer1.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用docker命令查看orderer状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>806f354f4e62        hyperledger/fabric-orderer:latest                                                                              "orderer"                7 days ago          Up 7 days           0.0.0.0:7050-&gt;7050/tcp                                                                                                                              orderer1.mbasechain.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.4、启动Peer集群</h5>
+
+<h6>6.4.1、配置docker-peer.yaml文件</h6>
+
+<p> &emsp;peer节点在四台服务器上都有，所以我们需要生成4个配置文件分别叫docker-peer0.yaml, docker-peer1yaml,docker-peer2.yaml,docker-peer3.yaml，下面对docker-peer0.yaml作配置</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  couchdb:
+</span><span class='line'>    container_name: couchdb
+</span><span class='line'>    image: hyperledger/fabric-couchdb:latest
+</span><span class='line'>    ports:
+</span><span class='line'>      - "5984:5984"
+</span><span class='line'>
+</span><span class='line'>  peer0.org1.xuyao.com:
+</span><span class='line'>    container_name: peer0.org1.xuyao.com
+</span><span class='line'>    image: hyperledger/fabric-peer:latest
+</span><span class='line'>    environment:
+</span><span class='line'>      - CORE_PEER_ID=peer0.org1.xuyao.com
+</span><span class='line'>      - CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>      - CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+</span><span class='line'>      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
+</span><span class='line'>      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+</span><span class='line'>      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+</span><span class='line'>      - CORE_LOGGING_LEVEL=debug
+</span><span class='line'>      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+</span><span class='line'>      - CORE_PEER_GOSSIP_ORGLEADER=false
+</span><span class='line'>      - GODEBUG=netdns=go
+</span><span class='line'>      # The following setting skips the gossip handshake since we are
+</span><span class='line'>      # are not doing mutual TLS
+</span><span class='line'>      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+</span><span class='line'>      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/crypto/peer/msp
+</span><span class='line'>      - CORE_PEER_TLS_ENABLED=true
+</span><span class='line'>      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
+</span><span class='line'>      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
+</span><span class='line'>      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/crypto/peer/tls/ca.crt
+</span><span class='line'>    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+</span><span class='line'>    command: peer node start
+</span><span class='line'>    ports:
+</span><span class='line'>      - 7051:7051
+</span><span class='line'>      - 7053:7053
+</span><span class='line'>    volumes:
+</span><span class='line'>        - /var/run/:/host/var/run/
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.mbasechain.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peer
+</span><span class='line'>        - ../mount/peer0.org1.xuyao.com/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>    depends_on:
+</span><span class='line'>        - couchdb
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "orderer0.mbasechain.com:10.99.22.103"
+</span><span class='line'>      - "orderer1.mbasechain.com:10.99.22.109"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明：<br/>
+1、CORE_PEER_ID是当前peer节点的id。<br/>
+2、CORE_PEER_LOCALMSPID是当前peer节点服务的成员服务提供者id。<br/>
+3、CORE_PEER_ADDRESS是当前peer节点在Fabric网络中的地址。</p>
+
+<p>docker-peer1.yaml,docker-peer2.yaml,docker-peer3.yaml文件配置和docker-peer0.yaml基本一样，修改一下主要的参数就行，这里不一一列出</p>
+
+<h6>6.4.2、启动Peer集群</h6>
+
+<p>&emsp; 我们4台服务器上都有peer节点，所以我们现在分别登录这4台服务器，把刚才的配置文件更新好后，就可以依次启动这4个peer节点了。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动peer0
+</span><span class='line'>docker-compose -f docker-peer0.yaml up -d 
+</span><span class='line'>
+</span><span class='line'>#启动peer1
+</span><span class='line'>docker-compose -f docker-peer1.yaml up -d 
+</span><span class='line'>
+</span><span class='line'>#启动peer2
+</span><span class='line'>docker-compose -f docker-peer2.yaml up -d 
+</span><span class='line'>
+</span><span class='line'>#启动peer3
+</span><span class='line'>docker-compose -f docker-peer3.yaml up -d </span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动成功后，我们再通过docker命令查看peer运行状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>#运行状态
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>7a2582136861        hyperledger/fabric-peer:latest                                                                                 "peer node start"        7 days ago          Up 7 days           0.0.0.0:7051-&gt;7051/tcp, 0.0.0.0:7053-&gt;7053/tcp                                                                                                      peer0.org1.mbasechain.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.5、启动Ca集群</h5>
+
+<h6>6.5.1、配置docker-ca-org.yaml文件</h6>
+
+<p>&emsp; ca在4台服务器也都有，所以我们需要生成4个文件来分别配置4个ca，现生成4个docker配置文件为 docker-ca-org0.yaml,docker-ca-org1.yaml,docker-ca-org2.yaml,docker-ca-org3.yaml,配置如下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  ca.org1.xuyao.com:
+</span><span class='line'>    container_name: ca
+</span><span class='line'>    image: hyperledger/fabric-ca:latest
+</span><span class='line'>    environment:
+</span><span class='line'>      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+</span><span class='line'>      - FABRIC_CA_SERVER_CA_NAME=ca.org1.xuyao.com
+</span><span class='line'>      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.ORG_NAME-cert.pem
+</span><span class='line'>      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9af18a6c9dd8f34db73a70c1d066e6948216db534af9e4f89029158089d56cf1_sk
+</span><span class='line'>      - FABRIC_CA_SERVER_TLS_ENABLED=true
+</span><span class='line'>      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.xuyao.com-cert.pem
+</span><span class='line'>      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9af18a6c9dd8f34db73a70c1d066e6948216db534af9e4f89029158089d56cf1_sk
+</span><span class='line'>    ports:
+</span><span class='line'>      - "7054:7054"
+</span><span class='line'>    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+</span><span class='line'>    volumes:
+</span><span class='line'>      - ./channel/crypto-config/peerOrganizations/org1.xuyao.com/ca/:/etc/hyperledger/fabric-ca-server-config
+</span><span class='line'>    container_name: ca.org1.xuyao.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其它三个配置文件根据ca的名字不同，改下一些参数名字就行，将这些文件配置好后，提交到远程仓库</p>
+
+<h6>6.5.2、启动Ca集群</h6>
+
+<p>&emsp; 现在我们分别登录4台服务器，把刚才修改的配置文件下来，准备启动ca服务，命令如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动ca-org0
+</span><span class='line'>docker-compose  -f docker-ca-org0.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动ca-org1
+</span><span class='line'>docker-compose  -f docker-ca-org1.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动ca-org2
+</span><span class='line'>docker-compose  -f docker-ca-org2.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动ca-org3
+</span><span class='line'>docker-compose  -f docker-ca-org3.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>至此整个Fabric网络所需的节点都已经启动完了，我们可以使用命令来查看各个服务器所有正在运行的服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#查看所以服务
+</span><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>96529e278e54        hyperledger/fabric-ca:latest                                                                                   "sh -c 'fabric-ca-se…"   7 days ago          Up 7 days           0.0.0.0:7054-&gt;7054/tcp                                                                                                                              ca.org1.mbasechain.com
+</span><span class='line'>7a2582136861        hyperledger/fabric-peer:latest                                                                                 "peer node start"        7 days ago          Up 7 days           0.0.0.0:7051-&gt;7051/tcp, 0.0.0.0:7053-&gt;7053/tcp                                                                                                      peer0.org1.mbasechain.com
+</span><span class='line'>49b5ee98950b        hyperledger/fabric-couchdb:latest                                                                              "tini -- /docker-ent…"   7 days ago          Up 7 days           4369/tcp, 9100/tcp, 0.0.0.0:5984-&gt;5984/tcp                                                                                                          couchdb
+</span><span class='line'>806f354f4e62        hyperledger/fabric-orderer:latest                                                                              "orderer"                7 days ago          Up 7 days           0.0.0.0:7050-&gt;7050/tcp                                                                                                                              orderer1.mbasechain.com
+</span><span class='line'>4bde08ae4413        hyperledger/fabric-kafka                                                                                       "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:9092-&gt;9092/tcp, 9093/tcp, 0.0.0.0:32774-&gt;9092/tcp                                                                                           kafka0
+</span><span class='line'>980c8bb7190d        hyperledger/fabric-zookeeper                                                                                   "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:2181-&gt;2181/tcp, 0.0.0.0:2888-&gt;2888/tcp, 0.0.0.0:3888-&gt;3888/tcp, 0.0.0.0:32773-&gt;2181/tcp, 0.0.0.0:32772-&gt;2888/tcp, 0.0.0.0:32771-&gt;3888/tcp   zookeeper0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到docker里运行了zookeeper,kafka,orderer, peer, ca, couchdb6个服务，到这里整个Fabric启动工作就全部做好了，下篇文章将写安装channel和chaincode</p>
+
+<h5>未完待续。。。</h5>
+
+<h4>参考资料</h4>
+
+<p>【HyperLedger Fabric 开发实战】
+<a href="https://www.jianshu.com/p/040a09e2098e">https://www.jianshu.com/p/040a09e2098e</a><br/>
+<a href="https://yeasy.gitbooks.io/docker_practice/data_management/volume.html">https://yeasy.gitbooks.io/docker_practice/data_management/volume.html</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-12-29T16:48:58+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:48 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/" title="Previous Post: Fabric多台服务器的部署(二)">&laquo; Fabric多台服务器的部署(二)</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/" title="Next Post: Fabric多台服务器的部署(四)">Fabric多台服务器的部署(四) &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Fabric多台服务器的部署(三)"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Fabric多台服务器的部署(四)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">Fabric多台服务器的部署(三)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Fabric多台服务器的部署(二)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

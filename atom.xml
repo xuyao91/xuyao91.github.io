@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2018-12-14T14:35:18+08:00</updated>
+  <updated>2018-12-29T17:01:35+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,1916 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fabric多台服务器的部署(五)]]></title>
+    <link href="http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/"/>
+    <updated>2018-12-29T16:57:34+08:00</updated>
+    <id>http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii</id>
+    <content type="html"><![CDATA[<h4>8、Fabric 浏览器的部署</h4>
+
+<h6>8.1 环境准备</h6>
+
+<p>1、nodejs安装，在第1节里已经说过node的安装，需要注意的是node版本应该是v9.x以下。<br/>
+2、PostgreSQL的安装，浏览器会把监听到的数据存储在pg里，所以需要安装pg数据。</p>
+
+<!-- more -->
+
+
+<p>ubuntu使用直接安装</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt update
+</span><span class='line'>sudo apt install postgresql postgresql-contrib</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装好后，可以使用cli查看一下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#切换用户
+</span><span class='line'>sudo -i -u postgres
+</span><span class='line'>#进入控制台
+</span><span class='line'>psql
+</span><span class='line'>#退出
+</span><span class='line'>postgres=# \q</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、安装Jq，jq是一个轻量级且灵活的命令行JSON处理器，安装很简单，见官网<a href="https://stedolan.github.io/jq/download/">https://stedolan.github.io/jq/download/</a></p>
+
+<h5>8.2、下载浏览器源码</h5>
+
+<p>&emsp; 在github上下载fabric 浏览器的源码，<a href="https://github.com/hyperledger/blockchain-explorer">https://github.com/hyperledger/blockchain-explorer</a>，把源码拉下来，根据自己的需要选择不用的版本，我目前使用的是1.1版本，所以我切换到对应的1.1分支上。</p>
+
+<h5>8.3、修改配置</h5>
+
+<h6>8.3.1 配置postgresql数据库</h6>
+
+<p>&emsp; 进入 app/persistence/postgreSQL/db/文件夹，找到pgconfig.json配置文件，修改连接pg数据库的配置，默认配置为</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "pg": {
+</span><span class='line'>    "host": "127.0.0.1",
+</span><span class='line'>    "port": "5432",
+</span><span class='line'>    "database": "fabricexplorer",
+</span><span class='line'>    "username": "hppoc",
+</span><span class='line'>    "passwd": "password"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改支运行createdb.sh脚本文件，创建浏览器所需的数据库和表名。</p>
+
+<h6>8.3.2、配置启动abric浏览器文件</h6>
+
+<p>进入 blockchain-explorer/app/platform/fabric，找到对应的config.json文件，配置对应的fabric网络信息，包括节点的请求接口，及监听接口，不同浏览器版本这个配置文件不太一样，1.1版本的配置文件如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "network-config": {
+</span><span class='line'>    "org1": {
+</span><span class='line'>      "name": "peerOrg1",
+</span><span class='line'>      "mspid": "Org1MSP",
+</span><span class='line'>      "peer1": {
+</span><span class='line'>        "requests": "grpcs://localhost:7051",
+</span><span class='line'>        "events": "grpcs://localhost:7053",
+</span><span class='line'>        "server-hostname": "peer0.org1.mbasechain.com",
+</span><span class='line'>        "tls_cacerts": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org1.mbasechain.com/peers/peer0.org1.mbasechain.com/tls/ca.crt"
+</span><span class='line'>      },
+</span><span class='line'>      "admin": {
+</span><span class='line'>        "key": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org1.mbasechain.com/users/Admin@org1.mbasechain.com/msp/keystore",
+</span><span class='line'>        "cert": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org1.mbasechain.com/users/Admin@org1.mbasechain.com/msp/signcerts"
+</span><span class='line'>      }
+</span><span class='line'>    },
+</span><span class='line'>    "org2": {
+</span><span class='line'>      "name": "peerOrg2",
+</span><span class='line'>      "mspid": "Org2MSP",
+</span><span class='line'>      "peer1": {
+</span><span class='line'>        "requests": "grpcs://localhost:7056",
+</span><span class='line'>        "events": "grpcs://localhost:7058",
+</span><span class='line'>        "server-hostname": "peer0.org2.mbasechain.com",
+</span><span class='line'>        "tls_cacerts": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org2.mbasechain.com/peers/peer0.org2.mbasechain.com/tls/ca.crt"
+</span><span class='line'>      },
+</span><span class='line'>      "admin": {
+</span><span class='line'>        "key": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org2.mbasechain.com/users/Admin@org2.mbasechain.com/msp/keystore",
+</span><span class='line'>        "cert": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org2.mbasechain.com/users/Admin@org2.mbasechain.com/msp/signcerts"
+</span><span class='line'>      }
+</span><span class='line'>    },
+</span><span class='line'>    "org3": {
+</span><span class='line'>      "name": "peerOrg3",
+</span><span class='line'>      "mspid": "Org3MSP",
+</span><span class='line'>      "peer1": {
+</span><span class='line'>        "requests": "grpcs://localhost:8051",
+</span><span class='line'>        "events": "grpcs://localhost:8053",
+</span><span class='line'>        "server-hostname": "peer0.org3.mbasechain.com",
+</span><span class='line'>        "tls_cacerts": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org3.mbasechain.com/peers/peer0.org3.mbasechain.com/tls/ca.crt"
+</span><span class='line'>      },
+</span><span class='line'>      "admin": {
+</span><span class='line'>        "key": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org3.mbasechain.com/users/Admin@org3.mbasechain.com/msp/keystore",
+</span><span class='line'>        "cert": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org3.mbasechain.com/users/Admin@org3.mbasechain.com/msp/signcerts"
+</span><span class='line'>      }
+</span><span class='line'>    },
+</span><span class='line'>    "org4": {
+</span><span class='line'>      "name": "peerOrg4",
+</span><span class='line'>      "mspid": "Org4MSP",
+</span><span class='line'>      "peer1": {
+</span><span class='line'>        "requests": "grpcs://localhost:8056",
+</span><span class='line'>        "events": "grpcs://localhost:9058",
+</span><span class='line'>        "server-hostname": "peer0.org4.mbasechain.com",
+</span><span class='line'>        "tls_cacerts": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org4.mbasechain.com/peers/peer0.org4.mbasechain.com/tls/ca.crt"
+</span><span class='line'>      },
+</span><span class='line'>      "admin": {
+</span><span class='line'>        "key": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org4.mbasechain.com/users/Admin@org4.mbasechain.com/msp/keystore",
+</span><span class='line'>        "cert": "/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/peerOrganizations/org4.mbasechain.com/users/Admin@org4.mbasechain.com/msp/signcerts"
+</span><span class='line'>      }
+</span><span class='line'>    }
+</span><span class='line'>  },
+</span><span class='line'>  "channel": "mychannel",
+</span><span class='line'>  "orderers":[
+</span><span class='line'>    {
+</span><span class='line'>      "mspid": "OrdererMSP",
+</span><span class='line'>      "server-hostname":"orderer1.mbasechain.com",
+</span><span class='line'>      "requests":"grpcs://localhost:7050",
+</span><span class='line'>      "tls_cacerts":"/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/ordererOrganizations/mbasechain.com/orderers/orderer1.mbasechain.com/tls/ca.crt"
+</span><span class='line'>    },
+</span><span class='line'>    {
+</span><span class='line'>      "mspid": "OrdererMSP",
+</span><span class='line'>      "server-hostname":"orderer2.mbasechain.com",
+</span><span class='line'>      "requests":"grpcs://localhost:8050",
+</span><span class='line'>      "tls_cacerts":"/Users/xuyao/Workspaces/trace_kingland/artifacts/channel/crypto-config/ordererOrganizations/mbasechain.com/orderers/orderer2.mbasechain.com/tls/ca.crt"
+</span><span class='line'>    }
+</span><span class='line'>  ],
+</span><span class='line'>  "keyValueStore": "/tmp/fabric-client-kvs",
+</span><span class='line'>  "configtxgenToolPath": "/Users/xuyao/Workspaces/goworkspace/src/blockchain/fabric/v1.2.0/fabric-samples/bin",
+</span><span class='line'>  "SYNC_START_DATE_FORMAT":"YYYY/MM/DD",
+</span><span class='line'>  "syncStartDate":"2018/01/01",
+</span><span class='line'>  "eventWaitTime": "30000",
+</span><span class='line'>  "license": "Apache-2.0",
+</span><span class='line'>  "version": "1.1"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置各节点的信息及tls的ca证书，管理员的私钥及证书等信息。</p>
+
+<h6>8.3.3、构建node项目</h6>
+
+<p>1、进入blockchain-explorer/ 下，使用npm install 安装项目所需package，<br/>
+2、再进入blockchain-explorer/app/test/下，使用npm install 安装测试项目里的所需包，再跑测试脚本</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#安装包
+</span><span class='line'>npm install
+</span><span class='line'>
+</span><span class='line'>#运行测试脚本
+</span><span class='line'>npm run test</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、进入client/ 使用npm install 命令安装包</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>npm install
+</span><span class='line'>
+</span><span class='line'>npm test -- -u --coverage
+</span><span class='line'>
+</span><span class='line'>npm run build</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>8.4、启动fabric浏览器</h5>
+
+<p>&emsp; 使用脚本./start.sh来启动项目，启动成功后，可以打开浏览器查看一下.
+<img src="https://upload-images.jianshu.io/upload_images/1796624-c1112936dd3eabf3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="浏览器截图" />
+其中做了一些汉化。</p>
+
+<h5>已完结</h5>
+
+<h5>参考资料</h5>
+
+<p>1、<a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04">https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04</a><br/>
+2、<a href="https://github.com/hyperledger/blockchain-explorer">https://github.com/hyperledger/blockchain-explorer</a><br/>
+3、<a href="https://stedolan.github.io/jq/download/">https://stedolan.github.io/jq/download/</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Fabric多台服务器的部署(四)]]></title>
+    <link href="http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/"/>
+    <updated>2018-12-29T16:51:08+08:00</updated>
+    <id>http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii</id>
+    <content type="html"><![CDATA[<h4>7、创建channel和chaincode</h4>
+
+<p> &emsp; 之前我们说过，本项目是一个nodejs的项目，是根据<a href="https://github.com/hyperledger/fabric-samples">https://github.com/hyperledger/fabric-samples</a>里的balance_transfer稍作修改来的，所以这里我们创建channel和chaincode，包括数据上链都会用nodejs sdk来做。</p>
+
+<h6>7.1、启动nodejs服务</h6>
+
+<p> &emsp;进入我们的trace_wine项目，使用npm安装项目所需的package,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>npm install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完后，我们现在要启动node服务，我们可以看下，当前目录下面的个runApp.sh的脚本文件，看下里面内容就知道，这是个启动node服务的脚本</p>
+
+<!-- more -->
+
+
+<p><img src="https://upload-images.jianshu.io/upload_images/1796624-895fa4b8dae442f8.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="项目的基本文件" />
+现在我们来运行一下这个脚本文件，使用命令</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./runApp.sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看是否启动成功，进入项目下的logs文件夹，找到当前的日志文件，打开看一下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tail -f 2018-11-28.log
+</span><span class='line'>
+</span><span class='line'>[2018-11-28 15:06:48.699] [INFO] Helper - Successfully loaded member from persistence
+</span><span class='line'>[2018-11-28 15:07:15.485] [INFO] app - ****************** SERVER STARTED ************************
+</span><span class='line'>[2018-11-28 15:07:15.488] [INFO] app - ***************  http://localhost:4000  ******************</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到node服务已经启动成功，且端口号为4000，具体的文档可查看官方的<a href="https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/README.md">readme</a></p>
+
+<h6>7.2、创建Ca用户</h6>
+
+<p> &emsp;Fabric CA为每个上链、查询者提供了注册用户，生成用户证书(ECerts)的功能，我们现在可以通过REST APIs来与ca server交互，我们先看下node里注册用户，生成证书的代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>///////////////////////////////////////////////////////////////////////////////
+</span><span class='line'>///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
+</span><span class='line'>///////////////////////////////////////////////////////////////////////////////
+</span><span class='line'>// Register and enroll user
+</span><span class='line'>app.post('/users', async function(req, res) {
+</span><span class='line'>  var username = req.body.username;
+</span><span class='line'>  var orgName = req.body.orgName;
+</span><span class='line'>  logger.debug('End point : /users');
+</span><span class='line'>  logger.debug('User name : ' + username);
+</span><span class='line'>  logger.debug('Org name  : ' + orgName);
+</span><span class='line'>  if (!username) {
+</span><span class='line'>      res.json(getErrorMessage('\'username\''));
+</span><span class='line'>      return;
+</span><span class='line'>  }
+</span><span class='line'>  if (!orgName) {
+</span><span class='line'>      res.json(getErrorMessage('\'orgName\''));
+</span><span class='line'>      return;
+</span><span class='line'>  }
+</span><span class='line'>  var token = jwt.sign({
+</span><span class='line'>      exp: Math.floor(Date.now() / 1000) + parseInt(hfc.getConfigSetting('jwt_expiretime')),
+</span><span class='line'>      username: username,
+</span><span class='line'>      orgName: orgName
+</span><span class='line'>  }, app.get('secret'));
+</span><span class='line'>  let response = await helper.getRegisteredUser(username, orgName, true);
+</span><span class='line'>  logger.debug('-- returned from registering the username %s for organization %s',username,orgName);
+</span><span class='line'>  if (response && typeof response !== 'string') {
+</span><span class='line'>      logger.debug('Successfully registered the username %s for organization %s',username,orgName);
+</span><span class='line'>      response.token = token;
+</span><span class='line'>      res.json(response);
+</span><span class='line'>  } else {
+</span><span class='line'>      logger.debug('Failed to register the username %s for organization %s with::%s',username,orgName,response);
+</span><span class='line'>      res.json({success: false, message: response});
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>});</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到当用户传进来username和orgName时，node首先会使用jwt将他们生成一个Token，然后通过getRegisteredUser()方法生成用户的证书，最终将jwt生成的token返回给用户。<br/>
+ &emsp;下面我们来调用一个这个接口</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#在Org1上注册和生成一个新用户，用户名为Jim
+</span><span class='line'>curl -s -X POST http://localhost:4000/users -H "content-type: application/x-www-form-urlencoded" -d 'username=Jim&orgName=Org1'</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#返回结果
+</span><span class='line'>{
+</span><span class='line'>  "success": true,
+</span><span class='line'>  "secret": "RaxhMgevgJcm",
+</span><span class='line'>  "message": "Jim enrolled Successfully",
+</span><span class='line'>  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NDQ1MjIxMTgsInVzZXJuYW1lIjoiZG9jIiwib3JnTmFtZSI6Ik9yZzEiLCJpYXQiOjE1NDQ0MzU3MTh9.X8DuFxUSmsRTe7v7iMft8A7LxzpvGyhnufBLQTZ3F8I"
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面的token就是我们想要的，之后每次请求接口都会用token来验证用户信息,更多的jwt信息，可以查看这里<a href="https://jwt.io/">https://jwt.io/</a>，另外用户生成的证书保存在服务器端，是标准的X.509证书格式，可以打开看一下这个证书</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"name":"Jim","mspid":"Org1MSP","roles":null,"affiliation":"","enrollmentSecret":"",
+</span><span class='line'>"enrollment":{"signingIdentity":"72d623e2104955b39ca6b6383a278b4b0a253e45a83b26044edf193563655367","
+</span><span class='line'>identity":{"certificate":"
+</span><span class='line'>-----BEGIN CERTIFICATE-----
+</span><span class='line'>\nMIICkDCCAjegAwIBAgIUX+durkyChVVZ5LNZekudT17CcJUwCgYIKoZIzj0EAwIw\n
+</span><span class='line'>eTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNh\n
+</span><span class='line'>biBGcmFuY2lzY28xHDAaBgNVBAoTE29yZzEubWJhc2VjaGFpbi5jb20xHzAdBgNV\n
+</span><span class='line'>BAMTFmNhLm9yZzEubWJhc2VjaGFpbi5jb20wHhcNMTgxMTIzMDk0NjAwWhcNMTkx\n
+</span><span class='line'>MTIzMDk1MTAwWjBAMTAwDQYDVQQLEwZjbGllbnQwCwYDVQQLEwRvcmcxMBIGA1UE\n
+</span><span class='line'>CxMLZGVwYXJ0bWVudDExDDAKBgNVBAMTA2RvYzBZMBMGByqGSM49AgEGCCqGSM49\n
+</span><span class='line'>AwEHA0IABGUZz9n5KvXF9H0l4HSdCvegNE2A0pkk2w1oQLcJW9FaZvr7rBDG3/bl\nauV26OoHJX7Yo/N
+</span><span class='line'>x2JyQrQzYRoPKfOWjgdUwgdIwDgYDVR0PAQH/BAQDAgeAMAwG\n
+</span><span class='line'>A1UdEwEB/wQCMAAwHQYDVR0OBBYEFCGGAIKaIFfBpkYuR2rjxvGle+uRMCsGA1Ud\n
+</span><span class='line'>IwQkMCKAIGyyJr5K7JgVQebL3WZ0ITnBFX6Ir+Bu37FvEuzDBWv1MGYGCCoDBAUG\n
+</span><span class='line'>BwgBBFp7ImF0dHJzIjp7ImhmLkFmZmlsaWF0aW9uIjoib3JnMS5kZXBhcnRtZW50\n
+</span><span class='line'>MSIsImhmLkVucm9sbG1lbnRJRCI6ImRvYyIsImhmLlR5cGUiOiJjbGllbnQifX0w\n
+</span><span class='line'>CgYIKoZIzj0EAwIDRwAwRAIgYnTD6Pkx1+R4R77TztW3/oQb1h+5/3ELYtAsIuz7\n
+</span><span class='line'>D8wCIBiOmE/uySQvkgzUcCsVRtaUMg0M9zioKBYHiPUxeNJo\n
+</span><span class='line'>-----END CERTIFICATE-----\n"}}}%</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.2、创建Channel</h6>
+
+<p> &emsp; 同样我们使用node服务提供的接口来创建Channel通道，具体创建channel的js代码可以看<a href="https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/app.js#L142">这里</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels \
+</span><span class='line'>  -H "authorization: Bearer Token" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "channelName":"mychannel",
+</span><span class='line'>  "channelConfigPath":"../artifacts/channel/mychannel.tx"
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>authorization里的Token是上面我们得到的token， channelName是我们要创建通道的名字，channelConfigPath指定mychannel.tx文件路径，创建成功，返回如下结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Channel 'mychannel' created Successfully"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.3、将Channel加入到Org里</h6>
+
+<p> &emsp;现在我们需要将channel加入到Org里，这样Org就可以使用这个channel，同样是通过node接口来实现</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels/mychannel/peers \
+</span><span class='line'>  -H "authorization: Bearer Token" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "peers": ["peer0.org1.xuyao.com","peer1.org1.xuyao.com"]
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>返回结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Successfully joined peers in organization Org1 to the channel:mychannel"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4、编写和安装智能合约(chaincode)</h6>
+
+<h6>7.4.1、编写智能合约(chaincode)</h6>
+
+<p> &emsp;channel安装好后，我们需要编写智能合约，这里我贴一个我用go写的一个chaincode,功能很简单就是把数据上链，查询</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package main
+</span><span class='line'>
+</span><span class='line'>import (
+</span><span class='line'>  "bytes"
+</span><span class='line'>  "fmt"
+</span><span class='line'>
+</span><span class='line'>  "github.com/hyperledger/fabric/core/chaincode/shim"
+</span><span class='line'>  pb "github.com/hyperledger/fabric/protos/peer"
+</span><span class='line'>)
+</span><span class='line'>
+</span><span class='line'>//Chaincode implementation
+</span><span class='line'>type SimpleChaincode struct {
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>// ===================================================================================
+</span><span class='line'>// Main
+</span><span class='line'>// ===================================================================================
+</span><span class='line'>func main() {
+</span><span class='line'>  err := shim.Start(new(SimpleChaincode))
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      fmt.Printf("Error starting Simple chaincode: %s", err)
+</span><span class='line'>  }
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// Init initializes chaincode
+</span><span class='line'>// ===========================
+</span><span class='line'>func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+</span><span class='line'>  return shim.Success(nil)
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// Invoke - Our entry point for Invocations
+</span><span class='line'>// ========================================
+</span><span class='line'>func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
+</span><span class='line'>  function, args := stub.GetFunctionAndParameters()
+</span><span class='line'>  fmt.Printf("function: %s,args: %s\n", function, args)
+</span><span class='line'>
+</span><span class='line'>  // Handle different functions
+</span><span class='line'>  if function == "save" { //create a new marble
+</span><span class='line'>      return t.save(stub, args)
+</span><span class='line'>  } else if function == "query" { //find Data based on an ad hoc rich query
+</span><span class='line'>      return t.query(stub, args)
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  fmt.Println("invoke did not find func: " + function) //error
+</span><span class='line'>  return shim.Error("Received unknown function invocation")
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// ============================================================
+</span><span class='line'>// - create a new data, store into chaincode state
+</span><span class='line'>// ============================================================
+</span><span class='line'>func (t *SimpleChaincode) save(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+</span><span class='line'>  
+</span><span class='line'>  if len(args) != 2 {
+</span><span class='line'>      return shim.Error("Incorrect number of arguments. Expecting 2")
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  err := stub.PutState(args[0], []byte(args[1]))
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      return shim.Error(err.Error())
+</span><span class='line'>  }
+</span><span class='line'>  fmt.Println("- end save business")
+</span><span class='line'>  return shim.Success(nil)
+</span><span class='line'>  
+</span><span class='line'>
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// ===== Add hoc rich query ========================================================
+</span><span class='line'>// query method uses a query string to perform a query for data.
+</span><span class='line'>// Query string matching state database syntax is passed in and executed as is.
+</span><span class='line'>// Supports ad hoc queries that can be defined at runtime by the client.
+</span><span class='line'>// Only available on state databases that support rich query (e.g. CouchDB)
+</span><span class='line'>// =========================================================================================
+</span><span class='line'>func (t *SimpleChaincode) query(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+</span><span class='line'>
+</span><span class='line'>  //   0
+</span><span class='line'>  // "queryString"
+</span><span class='line'>  if len(args) &lt; 1 {
+</span><span class='line'>      return shim.Error("Incorrect number of arguments. Expecting 1")
+</span><span class='line'>  }
+</span><span class='line'>
+</span><span class='line'>  queryString := args[0]
+</span><span class='line'>
+</span><span class='line'>  queryResults, err := getQueryResultForQueryString(stub, queryString)
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      return shim.Error(err.Error())
+</span><span class='line'>  }
+</span><span class='line'>  return shim.Success(queryResults)
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>// =========================================================================================
+</span><span class='line'>// getQueryResultForQueryString executes the passed in query string.
+</span><span class='line'>// Result set is built and returned as a byte array containing the JSON results.
+</span><span class='line'>// =========================================================================================
+</span><span class='line'>func getQueryResultForQueryString(stub shim.ChaincodeStubInterface, queryString string) ([]byte, error) {
+</span><span class='line'>
+</span><span class='line'>  fmt.Printf("- getQueryResultForQueryString queryString:\n%s\n", queryString)
+</span><span class='line'>
+</span><span class='line'>  resultsIterator, err := stub.GetQueryResult(queryString)
+</span><span class='line'>  if err != nil {
+</span><span class='line'>      return nil, err
+</span><span class='line'>  }
+</span><span class='line'>  defer resultsIterator.Close()
+</span><span class='line'>
+</span><span class='line'>  // buffer is a JSON array containing QueryRecords
+</span><span class='line'>  var buffer bytes.Buffer
+</span><span class='line'>  buffer.WriteString("[")
+</span><span class='line'>
+</span><span class='line'>  bArrayMemberAlreadyWritten := false
+</span><span class='line'>  for resultsIterator.HasNext() {
+</span><span class='line'>      queryResponse, err := resultsIterator.Next()
+</span><span class='line'>      if err != nil {
+</span><span class='line'>          return nil, err
+</span><span class='line'>      }
+</span><span class='line'>      // Add a comma before array members, suppress it for the first array member
+</span><span class='line'>      if bArrayMemberAlreadyWritten == true {
+</span><span class='line'>          buffer.WriteString(",")
+</span><span class='line'>      }
+</span><span class='line'>      buffer.WriteString("{\"Key\":")
+</span><span class='line'>      buffer.WriteString("\"")
+</span><span class='line'>      buffer.WriteString(queryResponse.Key)
+</span><span class='line'>      buffer.WriteString("\"")
+</span><span class='line'>
+</span><span class='line'>      buffer.WriteString(", \"Record\":")
+</span><span class='line'>      // Record is a JSON object, so we write as-is
+</span><span class='line'>      buffer.WriteString(string(queryResponse.Value))
+</span><span class='line'>      buffer.WriteString("}")
+</span><span class='line'>      bArrayMemberAlreadyWritten = true
+</span><span class='line'>  }
+</span><span class='line'>  buffer.WriteString("]")
+</span><span class='line'>
+</span><span class='line'>  fmt.Printf("- getQueryResultForQueryString queryResult:\n%s\n", buffer.String())
+</span><span class='line'>
+</span><span class='line'>  return buffer.Bytes(), nil
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>save()函数将传上来的数据上链，query()函数通过交易id来查询区块, getQueryResultForQueryString()函数通过交易里的字段来查询区块，目前只支持couchdb查询，leveldb不支持这样查。</p>
+
+<h6>7.4.2、 安装chaincode</h6>
+
+<p>现在我们来安装chaincode</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/chaincodes \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "peers": ["peer0.org1.xuyao.com","peer1.org1.xuyao.com"],
+</span><span class='line'>  "chaincodeName":"mycc",
+</span><span class='line'>  "chaincodePath":"github.com/example_cc/go",
+</span><span class='line'>  "chaincodeType": "golang",
+</span><span class='line'>  "chaincodeVersion":"v0"
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>chaincodeName是智能合约的名字， chaincodePath是智能合约的路径， chaincodeType是编写智能合约的语言，是golang和nodejs两种，chaincodeVersion是智能合约的版本号，值得注意的是如果是升级智能合约的话，需要加上upgrade: true的参数，而且版本号也要向上升级。这是升级的接口，如下:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/chaincodes \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>    "peers": ["peer0.org1.xuyao.com","peer1.org1.xuyao.com"],
+</span><span class='line'>    "chaincodeName":"mycc",
+</span><span class='line'>    "chaincodePath":"github.com/example_cc/go",
+</span><span class='line'>    "chaincodeType": "golang",
+</span><span class='line'>    "chaincodeVersion":"v1",
+</span><span class='line'>    "upgrade": "true"
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装成功后，返回如下结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Successfully install chaincode"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4.3、实例化chaincode</h6>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels/mychannel/chaincodes \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "chaincodeName":"mycc",
+</span><span class='line'>  "chaincodeVersion":"v0",
+</span><span class='line'>  "chaincodeType": "golang",
+</span><span class='line'>  "args":["a","100","b","200"]
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>成功返回结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"success":true,"message":"Successfully instantiate chaingcode in organization Org1 to the channel 'mychannel'"}</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4.4、数据上链</h6>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/api/v1/save\
+</span><span class='line'>  -H "authorization: Bearer $ORG1_TOKEN" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>        "godsCode": "2018092900004",
+</span><span class='line'>        "jsonInfo":
+</span><span class='line'>          {
+</span><span class='line'>          "discern":"1",
+</span><span class='line'>          "godsIssuerName":"2",
+</span><span class='line'>          "godsIssuerCode":"3",
+</span><span class='line'>          "godsTypeName":"4",
+</span><span class='line'>          "godsMarketValue":"4",
+</span><span class='line'>          "companyName":"5",
+</span><span class='line'>          "issuePrice":"6",
+</span><span class='line'>          "godsCode":"7",
+</span><span class='line'>          "sort":"9",
+</span><span class='line'>          "orgCompanyName":"8",
+</span><span class='line'>          "orgCode":"",
+</span><span class='line'>          "reportId":"",
+</span><span class='line'>          "linkTime":"",
+</span><span class='line'>          "linkUser":"",
+</span><span class='line'>          "linkRole":"",
+</span><span class='line'>          "orgSignTime":"",
+</span><span class='line'>          "godsSignTime":"",
+</span><span class='line'>          "files":[{"fileName":"文件名称.xml","fileHash":"4564613243454546884464"}],
+</span><span class='line'>          "attr":[{"key":"name","value":"val"}],
+</span><span class='line'>          "companyArea":"所属国家/地区",
+</span><span class='line'>          "linkmanPhone":"企业联系电话",
+</span><span class='line'>          "linkmanEmail":"企业邮箱",
+</span><span class='line'>          "legalPerson":"法人姓名"
+</span><span class='line'>        } 
+</span><span class='line'>      }'</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>7.4.5、数据查询</h6>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#通过区块查询
+</span><span class='line'>curl -s -X GET \
+</span><span class='line'>  "http://localhost:4000/channels/mychannel/blocks/1?peer=peer0.org1.example.com" \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json"
+</span><span class='line'>
+</span><span class='line'>#通过TransactionID
+</span><span class='line'>curl -s -X GET \
+</span><span class='line'>http://localhost:4000/channels/mychannel/transactions/&lt;put transaction id here&gt;?peer=peer0.org1.example.com \
+</span><span class='line'>  -H "authorization: Bearer &lt;put JSON Web Token here&gt;" \
+</span><span class='line'>  -H "content-type: application/json"
+</span><span class='line'>
+</span><span class='line'>#根据自己的业务ID查询
+</span><span class='line'>curl -s -X POST \
+</span><span class='line'>    "http://localhost:4000/api/v1/query" \
+</span><span class='line'>  -H "authorization: Bearer $ORG1_TOKEN" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '
+</span><span class='line'>    {
+</span><span class='line'>      "godsCode": "2018092900004"
+</span><span class='line'>    }
+</span><span class='line'>  '</span></code></pre></td></tr></table></div></figure>
+
+
+<p>返回结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{"code":200,"message":"操作成功","data":[{"godsCode":"2018092900004","jsonInfo":{"companyArea":"所属国家/地区","companyName":"5","discern":"1","files":[{"fileHash":"4564613243454546884464","fileName":"文件名称.xml"}],"godsCode":"7","godsIssuerCode":"3","godsIssuerName":"2","godsMarketValue":"4","godsSignTime":"","godsTypeName":"4","issuePrice":"6","legalPerson":"法人姓名","linkRole":"","linkTime":"","linkUser":"","linkmanEmail":"企业邮箱","linkmanPhone":"企业联系电话","orgCode":"","orgCompanyName":"8","orgSignTime":"","reportId":"","sort":"9"},"userName":"doc"}]}</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>未完待续。。。</h5>
+
+<h4>参考资料</h4>
+
+<p>1、<a href="https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/README.md">https://github.com/hyperledger/fabric-samples/blob/release-1.3/balance-transfer/README.md</a><br/>
+2、<a href="https://jwt.io/">https://jwt.io/</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Fabric多台服务器的部署(三)]]></title>
+    <link href="http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/"/>
+    <updated>2018-12-29T16:48:58+08:00</updated>
+    <id>http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii</id>
+    <content type="html"><![CDATA[<h4>6、启动Fabric网络</h4>
+
+<p>&emsp;完成上面的工作后，我们已经生成了Fabric所需要的证书和创世纪块等一些必要文件后，现在我们就需要配置docker文件，来启动Fabric网络，之前我们讲过需要启动的一些服务，现在在列一下，服务器一共有4台， 跑4个peer，4个ca, 4个kafka，3个zookeeper, 2个orderer，具体信息如下：<br/>
+1、Server1：  peer1、Ca1、 Kafka1、Zookeeper1、Orderer1<br/>
+2、Server2：  peer2、Ca2、 Kafka2、Zookeeper2、Orderer2<br/>
+3、Server3：   peer3、Ca3、 Kafka3、Zookeeper31<br/>
+4、Server4：   peer4、Ca4、 Kafka4<br/>
+现在我们需要在各台服务器上启动这些服务，需要说明一下，我们需要先启动zookeeper，再启动kafka，然后启动orderer和peer，这些是有先后顺序的，因为各服务之间有依赖关系，不按顺序启动，最后可能各服务之间的通讯有问题，下面依次来启动这些服务。</p>
+
+<!-- more -->
+
+
+<h5>6.1、启动Zookeeper集群</h5>
+
+<h6>6.1.1、配置docker-zookeeper.yaml文件，</h6>
+
+<p>&emsp;之前我们假设已经把trace_redwine项目push到远程仓库上，现在我们需要在四台服务器上分别把代码pull下来，进入/artifacts文件夹来配置docker的配置文件。<br/>
+&emsp;因为我们前三台服务器都需要docker-zookeeper.yaml文件，所以为了方便配置，我们不防生成三个zookeeper的配置文件，分别用于三台服务器配置上，依次命名如下：docker-zookeeper0.yaml、docker-zookeeper1.yaml、docker-zookeeper2.yaml，下面是docker-zookeeper0.yaml的配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  zookeeper0:
+</span><span class='line'>    image: hyperledger/fabric-zookeeper
+</span><span class='line'>    container_name: zookeeper0
+</span><span class='line'>    hostname: zookeeper0
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - ZOO_MY_ID=1
+</span><span class='line'>      - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+</span><span class='line'>    ports:
+</span><span class='line'>      - 2181:2181
+</span><span class='line'>      - 2888:2888
+</span><span class='line'>      - 3888:3888
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:0.0.0.0"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面配置的参数有几点说明下：<br/>
+1、image是指定使用的镜像名称。<br/>
+2、container_name是启动容器时的名字。<br/>
+3、environment是设置Compose主机上对应的环境变量<br/>
+4、ports是暴露端口信息，格式是 宿主端口：容器端口 (HOST:CONTAINER)，<br/>
+5、extra_hosts是指定额外的 host 名称映射信息，当节点启动后，服务容器会在 /etc/hosts   文件中添加上面的配置的IP和名称，上面有配置会在/etc/hosts文件中添加如下配置。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>10.99.22.103 kafka0
+</span><span class='line'>10.99.22.109 kafka1
+</span><span class='line'>10.99.22.101kafka2
+</span><span class='line'>10.99.22.121 kafka3
+</span><span class='line'>0.0.0.0 zookeeper0
+</span><span class='line'>10.99.22.109 zookeeper1
+</span><span class='line'>10.99.22.101 zookeeper2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>6、ZOO_MY_ID是指zookeeper当前服务节点的id， 这个id值是一定需要填的，且唯一的，值的范围在1~255之间。<br/>
+10、ZOO_SERVERS是zookeeper集群服务器的列表。</p>
+
+<p>docker-zookeeper1.yaml、docker-zookeeper2.yaml文件配置整体不变，只需要修改一些变量名、环境变量就可以，docker-zookeeper1.yaml的配置文件是:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  zookeeper0:
+</span><span class='line'>    image: hyperledger/fabric-zookeeper
+</span><span class='line'>    container_name: zookeeper1
+</span><span class='line'>    hostname: zookeeper1
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - ZOO_MY_ID=2
+</span><span class='line'>      - ZOO_SERVERS=server.1=zookeeper0:2888:3888 server.2=zookeeper1:2888:3888 server.3=zookeeper2:2888:3888
+</span><span class='line'>    ports:
+</span><span class='line'>      - 2181:2181
+</span><span class='line'>      - 2888:2888
+</span><span class='line'>      - 3888:3888
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:10.99.22.103"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要注意的是我们现在是在多台服务器上，所以每个zookeeper服务的端口可以一样，因为不在一台服务器上，如果我们在本地上跑多个zookeeper，那么这里的端口是需要修改的；docker-zookeeper2.yaml的文件与上面类似，这里不再列出。</p>
+
+<h6>6.1.2、启动Zookeeper</h6>
+
+<p>现在我们分别登录server1,server2,server3三台服务器，来启动这三个zookeeper服务，进入项目的/artifacts文件夹，找到每台服务器对应的docker zookeeper配置文件，使用docker-compose来启动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动zookeeper0
+</span><span class='line'>docker-compose -f docker-zookeeper0.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动之后的输出</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Starting zookeeper0 ... done</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果需要看启动的输出日志，则在上面启动命令后不要加 -d, 这样可以直接在启动的时候查看日志输出</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker-compose -f docker-zookeeper0.yaml up</span></code></pre></td></tr></table></div></figure>
+
+
+<p>server2,server3的启动跟上面一样，命令分别如下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动zookeeper1
+</span><span class='line'>docker-compose -f docker-zookeeper1.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动zookeeper2
+</span><span class='line'>docker-compose -f docker-zookeeper2.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动成功后，可以使用docker命令查看运行状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到zookeeper0是正在运行的状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>980c8bb7190d        hyperledger/fabric-zookeeper                                                                                   "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:2181-&gt;2181/tcp, 0.0.0.0:2888-&gt;2888/tcp, 0.0.0.0:3888-&gt;3888/tcp, 0.0.0.0:32773-&gt;2181/tcp, 0.0.0.0:32772-&gt;2888/tcp, 0.0.0.0:32771-&gt;3888/tcp   zookeeper0</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.2、启动Kafka集群</h5>
+
+<h6>6.2.1、配置docker-kafka.yaml文件</h6>
+
+<p>因为我们有4个kafka服务，所以我们可以生成4个配置文件来启动这4个服务，配置文件分别如下docker-kafka0.yaml、docker-kafka1.yaml、docker-kafka2.yaml、docker-kafka3.yaml。
+docker-kafka0.yaml的配置文件如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  kafka0:
+</span><span class='line'>    image: hyperledger/fabric-kafka
+</span><span class='line'>    container_name: kafka0
+</span><span class='line'>    hostname: kafka0
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - KAFKA_BROKER_ID=0
+</span><span class='line'>      - KAFKA_MIN_INSYNC_REPLICAS=2
+</span><span class='line'>      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+</span><span class='line'>      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+</span><span class='line'>      - KAFKA_MESSAGE_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+</span><span class='line'>      - KAFKA_LOG_RETENTION_MS=-1
+</span><span class='line'>      - KAFKA_LOG.DIRS=/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    volumes:
+</span><span class='line'>       - ../mount/kafka0/var/hyperledger/production:/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    ports:
+</span><span class='line'>      - 9092:9092
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:10.99.22.103"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明几点：<br/>
+1、KAFKA_BROKER_ID是BROKER的唯一标识，不可重复，且非负整数。  <br/>
+2、KAFKA_ZOOKEEPER_CONNECT是指向zookeeper节点的集合。<br/>
+3、volumes是docker里数据卷所挂载路径设置，可以设置宿主机路径 （HOST:CONTAINER） 或加上访问模式（HOST:CONTAINER:ro）。</p>
+
+<p>docker-kafka1.yaml、docker-kafka2.yaml、docker-kafka3.yaml的配置基本与上面的一样，只要修改一下KAFKA_BROKER_ID参数就可以，如docker-kafka1.yaml的配置文件是：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  kafka1:
+</span><span class='line'>    image: hyperledger/fabric-kafka
+</span><span class='line'>    container_name: kafka1
+</span><span class='line'>    hostname: kafka1
+</span><span class='line'>    restart: always
+</span><span class='line'>    environment:
+</span><span class='line'>      - KAFKA_BROKER_ID=1
+</span><span class='line'>      - KAFKA_MIN_INSYNC_REPLICAS=2
+</span><span class='line'>      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+</span><span class='line'>      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+</span><span class='line'>      - KAFKA_MESSAGE_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+</span><span class='line'>      - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+</span><span class='line'>      - KAFKA_LOG_RETENTION_MS=-1
+</span><span class='line'>      - KAFKA_LOG.DIRS=/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    volumes:
+</span><span class='line'>       - ../mount/kafka0/var/hyperledger/production:/var/hyperledger/production/kafka0/kafka-logs
+</span><span class='line'>    ports:
+</span><span class='line'>      - 9092:9092
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "kafka0:10.99.22.103"
+</span><span class='line'>      - "kafka1:10.99.22.109"
+</span><span class='line'>      - "kafka2:10.99.22.101"
+</span><span class='line'>      - "kafka3:10.99.22.121"
+</span><span class='line'>      - "zookeeper0:10.99.22.103"
+</span><span class='line'>      - "zookeeper1:10.99.22.109"
+</span><span class='line'>      - "zookeeper2:10.99.22.101"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>docker-kafka2.yaml、docker-kafka3.yaml按照上面改就行，这里不一一列出。</p>
+
+<h6>6.2.2、启动Kafka集群</h6>
+
+<p>&emsp;现在我们分别登录4台服务器上，进入/artifacts项目路径下，找到刚才我们生成的那些docker-kafka.yaml的配置文件，使用命令依次启动各服务器上的kafka服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动kafka0
+</span><span class='line'>docker-compose -f docker-kafka0.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>server1，server2，server3启动方法和上面一样</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动kafka1
+</span><span class='line'>docker-compose -f docker-kafka1.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动kafka2
+</span><span class='line'>docker-compose -f docker-kafka2.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动kafka3
+</span><span class='line'>docker-compose -f docker-kafka3.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最后可以在各服务器上使用docker 命令查看是否启动成功</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>4bde08ae4413        hyperledger/fabric-kafka                                                                                       "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:9092-&gt;9092/tcp, 9093/tcp, 0.0.0.0:32774-&gt;9092/tcp                                                                                           kafka0</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.3、启动Orderer集群</h5>
+
+<h6>6.3.1、配置docker-orderer.yaml文件</h6>
+
+<p> &emsp;orderer服务我们只有server1,server2上有，所以我们只需要两个启动配置文件就行，命名如下docker-orderer0.yaml,docker-orderer1.yaml，
+其中docker-orderer0.yaml的配置文件如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Copyright IBM Corp. All Rights Reserved.
+</span><span class='line'>#
+</span><span class='line'># SPDX-License-Identifier: Apache-2.0
+</span><span class='line'>#
+</span><span class='line'>
+</span><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  orderer0.xuyao.com:
+</span><span class='line'>      container_name: orderer0.xuyao.com
+</span><span class='line'>      image: hyperledger/fabric-orderer:latest
+</span><span class='line'>      environment:
+</span><span class='line'>        - ORDERER_GENERAL_LOGLEVEL=debug
+</span><span class='line'>        - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+</span><span class='line'>        - ORDERER_GENERAL_GENESISMETHOD=file
+</span><span class='line'>        - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ENABLED=true
+</span><span class='line'>        - GODEBUG=netdns=go
+</span><span class='line'>        - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
+</span><span class='line'>        - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerOrg1/tls/ca.crt, /etc/hyperledger/crypto/peerOrg2/tls/ca.crt, /etc/hyperledger/crypto/peerOrg3/tls/ca.crt, /etc/hyperledger/crypto/peerOrg4/tls/ca.crt]
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+</span><span class='line'>        - ORDERER_KAFKA_VERBOSE=true
+</span><span class='line'>      working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
+</span><span class='line'>      command: orderer
+</span><span class='line'>      ports:
+</span><span class='line'>        - 7050:7050
+</span><span class='line'>      volumes:
+</span><span class='line'>        - ./channel:/etc/hyperledger/configtx
+</span><span class='line'>        - ./channel/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer0.xuyao.com/:/etc/hyperledger/crypto/orderer
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peerOrg1
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org2.xuyao.com/peers/peer0.org2.xuyao.com/:/etc/hyperledger/crypto/peerOrg2
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org3.xuyao.com/peers/peer0.org3.xuyao.com/:/etc/hyperledger/crypto/peerOrg3
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org4.xuyao.com/peers/peer0.org4.xuyao.com/:/etc/hyperledger/crypto/peerOrg4
+</span><span class='line'>        - ../mount/orderer1/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>      extra_hosts:
+</span><span class='line'>        - "kafka0:10.99.22.103"
+</span><span class='line'>        - "kafka1:10.99.22.109"
+</span><span class='line'>        - "kafka2:10.99.22.101"
+</span><span class='line'>        - "kafka3:10.99.22.121"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明：<br/>
+1、ORDERER_GENERAL_TLS_PRIVATEKEY是为服务器证书设置私钥文件的位置。<br/>
+2、ORDERER_GENERAL_TLS_CERTIFICATE是为TLS设置服务器证书的位置。<br/>
+3、ORDERER_GENERAL_TLS_ROOTCAS是为TLS设置根证书的位置。</p>
+
+<p>docker-orderer1.yaml的配置文件基本与docker-orderer1.yaml差不多，如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  orderer1.xuyao.com:
+</span><span class='line'>      container_name: orderer1.xuyao.com
+</span><span class='line'>      image: hyperledger/fabric-orderer:latest
+</span><span class='line'>      environment:
+</span><span class='line'>        - ORDERER_GENERAL_LOGLEVEL=debug
+</span><span class='line'>        - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+</span><span class='line'>        - ORDERER_GENERAL_GENESISMETHOD=file
+</span><span class='line'>        - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+</span><span class='line'>        - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ENABLED=true
+</span><span class='line'>        - GODEBUG=netdns=go
+</span><span class='line'>        - ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key
+</span><span class='line'>        - ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt
+</span><span class='line'>        - ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt, /etc/hyperledger/crypto/peerOrg1/tls/ca.crt, /etc/hyperledger/crypto/peerOrg2/tls/ca.crt, /etc/hyperledger/crypto/peerOrg3/tls/ca.crt, /etc/hyperledger/crypto/peerOrg4/tls/ca.crt]
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+</span><span class='line'>        - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+</span><span class='line'>        - ORDERER_KAFKA_VERBOSE=true
+</span><span class='line'>      working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderers
+</span><span class='line'>      command: orderer
+</span><span class='line'>      ports:
+</span><span class='line'>        - 7050:7050
+</span><span class='line'>      volumes:
+</span><span class='line'>        - ./channel:/etc/hyperledger/configtx
+</span><span class='line'>        - ./channel/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer1.xuyao.com/:/etc/hyperledger/crypto/orderer
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peerOrg1
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org2.xuyao.com/peers/peer0.org2.xuyao.com/:/etc/hyperledger/crypto/peerOrg2
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org3.xuyao.com/peers/peer0.org3.xuyao.com/:/etc/hyperledger/crypto/peerOrg3
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org4.xuyao.com/peers/peer0.org4.xuyao.com/:/etc/hyperledger/crypto/peerOrg4
+</span><span class='line'>        - ../mount/orderer1/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>      extra_hosts:
+</span><span class='line'>        - "kafka0:10.99.22.103"
+</span><span class='line'>        - "kafka1:10.99.22.109"
+</span><span class='line'>        - "kafka2:10.99.22.101"
+</span><span class='line'>        - "kafka3:10.99.22.121"</span></code></pre></td></tr></table></div></figure>
+
+
+<h6>6.3.2、启动Orderer集群</h6>
+
+<p> &emsp;我们分别在server1,server2上启动orderer，登录各服务器，进入各自的配置文件目录下，使用如下命令启动orderer</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动orderer0
+</span><span class='line'>docker-compose -f docker-orderer0.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动orderer1
+</span><span class='line'>docker-compose -f docker-orderer1.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用docker命令查看orderer状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>806f354f4e62        hyperledger/fabric-orderer:latest                                                                              "orderer"                7 days ago          Up 7 days           0.0.0.0:7050-&gt;7050/tcp                                                                                                                              orderer1.mbasechain.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.4、启动Peer集群</h5>
+
+<h6>6.4.1、配置docker-peer.yaml文件</h6>
+
+<p> &emsp;peer节点在四台服务器上都有，所以我们需要生成4个配置文件分别叫docker-peer0.yaml, docker-peer1yaml,docker-peer2.yaml,docker-peer3.yaml，下面对docker-peer0.yaml作配置</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  couchdb:
+</span><span class='line'>    container_name: couchdb
+</span><span class='line'>    image: hyperledger/fabric-couchdb:latest
+</span><span class='line'>    ports:
+</span><span class='line'>      - "5984:5984"
+</span><span class='line'>
+</span><span class='line'>  peer0.org1.xuyao.com:
+</span><span class='line'>    container_name: peer0.org1.xuyao.com
+</span><span class='line'>    image: hyperledger/fabric-peer:latest
+</span><span class='line'>    environment:
+</span><span class='line'>      - CORE_PEER_ID=peer0.org1.xuyao.com
+</span><span class='line'>      - CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>      - CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+</span><span class='line'>      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
+</span><span class='line'>      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+</span><span class='line'>      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+</span><span class='line'>      - CORE_LOGGING_LEVEL=debug
+</span><span class='line'>      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+</span><span class='line'>      - CORE_PEER_GOSSIP_ORGLEADER=false
+</span><span class='line'>      - GODEBUG=netdns=go
+</span><span class='line'>      # The following setting skips the gossip handshake since we are
+</span><span class='line'>      # are not doing mutual TLS
+</span><span class='line'>      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+</span><span class='line'>      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/crypto/peer/msp
+</span><span class='line'>      - CORE_PEER_TLS_ENABLED=true
+</span><span class='line'>      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
+</span><span class='line'>      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
+</span><span class='line'>      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/crypto/peer/tls/ca.crt
+</span><span class='line'>    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+</span><span class='line'>    command: peer node start
+</span><span class='line'>    ports:
+</span><span class='line'>      - 7051:7051
+</span><span class='line'>      - 7053:7053
+</span><span class='line'>    volumes:
+</span><span class='line'>        - /var/run/:/host/var/run/
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.mbasechain.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peer
+</span><span class='line'>        - ../mount/peer0.org1.xuyao.com/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>    depends_on:
+</span><span class='line'>        - couchdb
+</span><span class='line'>    extra_hosts:
+</span><span class='line'>      - "orderer0.mbasechain.com:10.99.22.103"
+</span><span class='line'>      - "orderer1.mbasechain.com:10.99.22.109"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>说明：<br/>
+1、CORE_PEER_ID是当前peer节点的id。<br/>
+2、CORE_PEER_LOCALMSPID是当前peer节点服务的成员服务提供者id。<br/>
+3、CORE_PEER_ADDRESS是当前peer节点在Fabric网络中的地址。</p>
+
+<p>docker-peer1.yaml,docker-peer2.yaml,docker-peer3.yaml文件配置和docker-peer0.yaml基本一样，修改一下主要的参数就行，这里不一一列出</p>
+
+<h6>6.4.2、启动Peer集群</h6>
+
+<p>&emsp; 我们4台服务器上都有peer节点，所以我们现在分别登录这4台服务器，把刚才的配置文件更新好后，就可以依次启动这4个peer节点了。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动peer0
+</span><span class='line'>docker-compose -f docker-peer0.yaml up -d 
+</span><span class='line'>
+</span><span class='line'>#启动peer1
+</span><span class='line'>docker-compose -f docker-peer1.yaml up -d 
+</span><span class='line'>
+</span><span class='line'>#启动peer2
+</span><span class='line'>docker-compose -f docker-peer2.yaml up -d 
+</span><span class='line'>
+</span><span class='line'>#启动peer3
+</span><span class='line'>docker-compose -f docker-peer3.yaml up -d </span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动成功后，我们再通过docker命令查看peer运行状态</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>#运行状态
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>7a2582136861        hyperledger/fabric-peer:latest                                                                                 "peer node start"        7 days ago          Up 7 days           0.0.0.0:7051-&gt;7051/tcp, 0.0.0.0:7053-&gt;7053/tcp                                                                                                      peer0.org1.mbasechain.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>6.5、启动Ca集群</h5>
+
+<h6>6.5.1、配置docker-ca-org.yaml文件</h6>
+
+<p>&emsp; ca在4台服务器也都有，所以我们需要生成4个文件来分别配置4个ca，现生成4个docker配置文件为 docker-ca-org0.yaml,docker-ca-org1.yaml,docker-ca-org2.yaml,docker-ca-org3.yaml,配置如下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  ca.org1.xuyao.com:
+</span><span class='line'>    container_name: ca
+</span><span class='line'>    image: hyperledger/fabric-ca:latest
+</span><span class='line'>    environment:
+</span><span class='line'>      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+</span><span class='line'>      - FABRIC_CA_SERVER_CA_NAME=ca.org1.xuyao.com
+</span><span class='line'>      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.ORG_NAME-cert.pem
+</span><span class='line'>      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9af18a6c9dd8f34db73a70c1d066e6948216db534af9e4f89029158089d56cf1_sk
+</span><span class='line'>      - FABRIC_CA_SERVER_TLS_ENABLED=true
+</span><span class='line'>      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.xuyao.com-cert.pem
+</span><span class='line'>      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/9af18a6c9dd8f34db73a70c1d066e6948216db534af9e4f89029158089d56cf1_sk
+</span><span class='line'>    ports:
+</span><span class='line'>      - "7054:7054"
+</span><span class='line'>    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+</span><span class='line'>    volumes:
+</span><span class='line'>      - ./channel/crypto-config/peerOrganizations/org1.xuyao.com/ca/:/etc/hyperledger/fabric-ca-server-config
+</span><span class='line'>    container_name: ca.org1.xuyao.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其它三个配置文件根据ca的名字不同，改下一些参数名字就行，将这些文件配置好后，提交到远程仓库</p>
+
+<h6>6.5.2、启动Ca集群</h6>
+
+<p>&emsp; 现在我们分别登录4台服务器，把刚才修改的配置文件下来，准备启动ca服务，命令如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#启动ca-org0
+</span><span class='line'>docker-compose  -f docker-ca-org0.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动ca-org1
+</span><span class='line'>docker-compose  -f docker-ca-org1.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动ca-org2
+</span><span class='line'>docker-compose  -f docker-ca-org2.yaml up -d
+</span><span class='line'>
+</span><span class='line'>#启动ca-org3
+</span><span class='line'>docker-compose  -f docker-ca-org3.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>至此整个Fabric网络所需的节点都已经启动完了，我们可以使用命令来查看各个服务器所有正在运行的服务</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#查看所以服务
+</span><span class='line'>docker ps -a
+</span><span class='line'>
+</span><span class='line'>CONTAINER ID        IMAGE                                                                                                          COMMAND                  CREATED             STATUS              PORTS                                                                                                                                               NAMES
+</span><span class='line'>96529e278e54        hyperledger/fabric-ca:latest                                                                                   "sh -c 'fabric-ca-se…"   7 days ago          Up 7 days           0.0.0.0:7054-&gt;7054/tcp                                                                                                                              ca.org1.mbasechain.com
+</span><span class='line'>7a2582136861        hyperledger/fabric-peer:latest                                                                                 "peer node start"        7 days ago          Up 7 days           0.0.0.0:7051-&gt;7051/tcp, 0.0.0.0:7053-&gt;7053/tcp                                                                                                      peer0.org1.mbasechain.com
+</span><span class='line'>49b5ee98950b        hyperledger/fabric-couchdb:latest                                                                              "tini -- /docker-ent…"   7 days ago          Up 7 days           4369/tcp, 9100/tcp, 0.0.0.0:5984-&gt;5984/tcp                                                                                                          couchdb
+</span><span class='line'>806f354f4e62        hyperledger/fabric-orderer:latest                                                                              "orderer"                7 days ago          Up 7 days           0.0.0.0:7050-&gt;7050/tcp                                                                                                                              orderer1.mbasechain.com
+</span><span class='line'>4bde08ae4413        hyperledger/fabric-kafka                                                                                       "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:9092-&gt;9092/tcp, 9093/tcp, 0.0.0.0:32774-&gt;9092/tcp                                                                                           kafka0
+</span><span class='line'>980c8bb7190d        hyperledger/fabric-zookeeper                                                                                   "/docker-entrypoint.…"   7 days ago          Up 7 days           0.0.0.0:2181-&gt;2181/tcp, 0.0.0.0:2888-&gt;2888/tcp, 0.0.0.0:3888-&gt;3888/tcp, 0.0.0.0:32773-&gt;2181/tcp, 0.0.0.0:32772-&gt;2888/tcp, 0.0.0.0:32771-&gt;3888/tcp   zookeeper0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到docker里运行了zookeeper,kafka,orderer, peer, ca, couchdb6个服务，到这里整个Fabric启动工作就全部做好了，下篇文章将写安装channel和chaincode</p>
+
+<h5>未完待续。。。</h5>
+
+<h4>参考资料</h4>
+
+<p>【HyperLedger Fabric 开发实战】
+<a href="https://www.jianshu.com/p/040a09e2098e">https://www.jianshu.com/p/040a09e2098e</a><br/>
+<a href="https://yeasy.gitbooks.io/docker_practice/data_management/volume.html">https://yeasy.gitbooks.io/docker_practice/data_management/volume.html</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Fabric多台服务器的部署(二)]]></title>
@@ -3810,418 +5720,6 @@ Appium is an open source test automation framework for use with native, <a href=
 <a href="https://github.com/appium/ruby_console">https://github.com/appium/ruby_console</a><br/>
 <a href="https://github.com/appium/ruby_lib">https://github.com/appium/ruby_lib</a><br/>
 <a href="https://ruby-china.org/topics/30074">https://ruby-china.org/topics/30074</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[About Sso in Rails]]></title>
-    <link href="http://xuyao.club/blog/2016/04/06/about-sso-in-rails/"/>
-    <updated>2016-04-06T16:19:32+08:00</updated>
-    <id>http://xuyao.club/blog/2016/04/06/about-sso-in-rails</id>
-    <content type="html"><![CDATA[<h3>前言</h3>
-
-<p>目前业务越来越多，很多业务可能需要拆分成不同的应用，不同的应用之间如何互享用户信息，这时就需要用到单点登录(Single Sign On），简称为 SSO。</p>
-
-<p>这里主要针对doorkeeper作讲解</p>
-
-<!-- more -->
-
-
-<p><img src="http://i2.piimg.com/285bc33bd4eab4b1.png" alt="查看图" /></p>
-
-<h3>需要用到的插件</h3>
-
-<ul>
-<li><a href="https://github.com/doorkeeper-gem/doorkeeper">Doorkeeper</a>  (<a href="http://oauth.net/2/">Oauth 2.0</a>协议的认证授权服务)</li>
-<li>Grape (提供 Resource Server APi)</li>
-<li>Devise (提供登录，暂时可能用不到)</li>
-</ul>
-
-
-<h3>需要用到的角色</h3>
-
-<ul>
-<li>Resource Owner (用户角色)</li>
-<li>Clients (第三方角色)</li>
-<li>Authorization Server (授权服务)</li>
-<li>Resource Server (用户信息读写服务,api形式)<br/>
-详情可查看<a href="https://github.com/jeansfish/RFC6749.zh-cn/blob/master/Section01/1.1.md">RFC6749</a></li>
-</ul>
-
-
-<h3>Authorization Server构建</h3>
-
-<p>安装doorkeeper及初始模型的建立</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;doorkeeper&#39;</span>
-</span><span class='line'><span class="c1">#bundle install</span>
-</span><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="ss">doorkeeper</span><span class="p">:</span><span class="n">install</span>
-</span><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="ss">doorkeeper</span><span class="p">:</span><span class="n">migration</span>
-</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>配置doorkeeper来提供resource_owner的model及授权</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Doorkeeper</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">resource_owner_authenticator</span> <span class="k">do</span>
-</span><span class='line'>    <span class="no">Patient</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="n">session</span><span class="o">[</span><span class="ss">:patient_id</span><span class="o">]</span><span class="p">,</span> <span class="ss">authentication_token</span><span class="p">:</span> <span class="n">session</span><span class="o">[</span><span class="ss">:patient_auth_token</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">first</span> <span class="o">||</span> <span class="n">redirect_to</span><span class="p">(</span><span class="n">login_url</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面操作会生成下面几张表</p>
-
-<ul>
-<li>oauth_applications  第三方(clients)表</li>
-<li>oauth_access_grants 用户授权code表</li>
-<li>oauth_access_tokens 授权服务token表</li>
-</ul>
-
-
-<h3>添加 Applications</h3>
-
-<p>授权前需要添加第三方应用的信息，doorkeeper提供了一个增加Clients的功能
-<a href="http://localhost:3001/oauth/applications">点击查看</a></p>
-
-<h3>Authorization Grant Code Flow</h3>
-
-<ul>
-<li> Resource Owner请求Client的Redirection URI</li>
-<li> Client转到Authorization Server</li>
-<li> Resource Owner 确认授权</li>
-<li> Authorization Server验证用户</li>
-<li> Authorization Server返回Authorization Code</li>
-<li> Resource Owner返回Redirection URI &amp; Authorization Code</li>
-<li> Client拿到Authorization Code请求Access Token</li>
-</ul>
-
-
-<p>具体<a href="https://tools.ietf.org/ht%EF%BC%8Cml/draft-ietf-oauth-v2-22#section-4.1">点击查看</a></p>
-
-<h3>获取Access Token</h3>
-
-<p>上面介绍了oauth 2的授权流程，得到Client信息后，就可以去Authorization Server获取Token,通过调用/oauth/token接口获得Token<br/>
-具体可以看  <a href="http://localhost:3001/oauth/applications">模拟操作</a></p>
-
-<h3>Resource Server构建</h3>
-
-<p>使用grape作Resource Server的接口,暂时可能需要如下接口</p>
-
-<p>1，获取用户信息<br/>
-2，修改用户信息<br/>
-查看swagger<a href="http://localhost:3001/documentation/api_v1">模拟操作</a></p>
-
-<h3>说明及问题</h3>
-
-<ol>
-<li>把Authorization Server部署在哪里
-
-<blockquote><p>部署在主项目里面，这样可以省去Authorization Server的登录，因为App登录后，Authorization Server可以通过session获得用户信息</p></blockquote></li>
-<li>目前只在App内授权，不提供外部登录
-
-<blockquote><p>我们的其它应用都是App内的页面，而且在外部有些可能不能用，所以在App里授权</p></blockquote></li>
-<li>Api部分可以不做验证</li>
-</ol>
-
-
-<h4>参考资料</h4>
-
-<p><a href="https://github.com/doorkeeper-gem/doorkeeper">https://github.com/doorkeeper-gem/doorkeeper</a><br/>
-<a href="https://github.com/sethherr/grape-doorkeeper">https://github.com/sethherr/grape-doorkeeper</a><br/>
-<a href="https://blog.yorkxin.org/posts/2013/10/10/oauth2-tutorial-grape-api-doorkeeper/">https://blog.yorkxin.org/posts/2013/10/10/oauth2-tutorial-grape-api-doorkeeper/</a><br/>
-<a href="http://tools.ietf.org/html/rfc6749">http://tools.ietf.org/html/rfc6749</a> <br/>
-<a href="https://github.com/jeansfish/RFC6749.zh-cn">https://github.com/jeansfish/RFC6749.zh-cn</a><br/>
-<a href="https://ruby-china.org/topics/15396">https://ruby-china.org/topics/15396</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[About Rails Cache]]></title>
-    <link href="http://xuyao.club/blog/2016/03/24/about-rails-cache/"/>
-    <updated>2016-03-24T10:05:39+08:00</updated>
-    <id>http://xuyao.club/blog/2016/03/24/about-rails-cache</id>
-    <content type="html"><![CDATA[<p>在项目中经常会存储一些短时候内比较重要的数据，或者一些临时数据，这种数据以前一般我都把它
-存到redis中，后来想想如果不是很重要的临时数据就没必要往redis里放了，直接用cache可能更方便</p>
-
-<h3>ActiveSupport::Cache::Store</h3>
-
-<p>它是一个抽象类，有很多cache store的实现
-rails中的这个类提供了和缓存交互的很多基本的方法，包括(read,write,delete,exist?,fetch)，下面说下具体实现</p>
-
-<h3>ActiveSupport::Cache::FileStore</h3>
-
-<p>先说一下FileStore,这种存储方式Rails默认的存储方式，他是将数据存储到系统文件,默认将文件存储到项目的/tmp/cache下面，你可以修改它的存储路径</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">cache_store</span> <span class="o">=</span> <span class="ss">:file_store</span><span class="p">,</span> <span class="s2">&quot;/path/to/cache/directory&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面说FileStore是Rails默认的存储方式，看下面这句代码就知道了</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">class</span>  <span class="o">=&gt;</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">FileStore</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<!-- more -->
-
-
-<p>cache有几种常用的方法</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;peter&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
-</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;age&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>cache中的key都是string型，而且区分大小写的，Hash和数据也或以当作key,上面的代码的key也可以用hash表示</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
-</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="o">==</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="kp">true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果你的cache是和其它程序公用的存储，你可以给他定义一个namespace，一旦namespace定义，就会在key前面加了个前缀
-其它一些参数
-:compress 是否压缩缓存，
-:compress_threshold 和compress一起使用，设定一个阈值，低于这个值就不压缩缓存。默认为 16 KB。
-:expires_in 为缓存记录设定一个过期时间，单位为秒，过期后把记录从缓存中删除。</p>
-
-<h3>ActiveSupport::Cache::MemoryStore</h3>
-
-<p>这种存储方式是把数据存储在内存中，而且存储空间的大小由:size决定，默认为32M，如果超出分配的大小，系统会清理缓存，把最不常使用的记录删除。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cache</span> <span class="o">=</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Cache</span><span class="o">::</span><span class="no">MemoryStore</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span><span class="s2">&quot;peter&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>  <span class="o">=&gt;</span> <span class="s2">&quot;peter&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>ActiveSupport::Cache::MemCacheStore</h3>
-
-<p>这种存储方式使用 Danga 开发的 memcached 服务器，为程序提供一个中心化的缓存存储。Rails 默认使用附带安装的 dalli gem 实现这种存储方式。这是目前在生产环境中使用最广泛的缓存存储方式，可以提供单个缓存存储，或者共享的缓存集群，性能高，冗余度低。</p>
-
-<p>初始化时要指定集群中所有 memcached 服务器的地址。如果没有指定地址，默认运行在本地主机的默认端口上，这对大型网站来说不是个好主意。</p>
-
-<p>在这种缓存存储中使用 write 和 fetch 方法还可指定两个额外的选项，充分利用 memcached 的特有功能。指定 :raw 选项可以直接把没有序列化的数据传给 memcached 服务器。在这种类型的数据上可以使用 memcached 的原生操作，例如 increment 和 decrement。如果不想让 memcached 覆盖已经存在的记录，可以指定 :unless_exist 选项。
-上面的这种我也没用过，只是摘了别人一段话来补补。。。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby中include和extend的比较]]></title>
-    <link href="http://xuyao.club/blog/2015/06/29/include-vs-extend-in-ruby/"/>
-    <updated>2015-06-29T12:21:35+08:00</updated>
-    <id>http://xuyao.club/blog/2015/06/29/include-vs-extend-in-ruby</id>
-    <content type="html"><![CDATA[<p>本文翻译,改编自<a href="http://www.railstips.org/blog/archives/2009/05/15/include-vs-extend-in-ruby/">Include vs Extend in Ruby</a></p>
-
-<p>在类中引用一个模块,有两种方式,一种是include,另一种是extend,两种的大致区别就是:<br/>
-<strong><em>include是给class增加一个实例方法,而extend是增加一个类方法</em>  </strong><br/>
-我们看一下小例子.</p>
-
-<!-- more -->
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;heyyyyoooo!&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># heyyyyoooo!</span>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># NoMethodError: undefined method ‘foo’ for Bar:Class</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Baz</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># heyyyyoooo!</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># NoMethodError: undefined method ‘foo’ for #&lt;Baz:0x1e708&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如你所见,include生成了一个类的实例foo方法,而extend生成了一个类本身的类方法.</p>
-
-<h5>Include 例子</h5>
-
-<p>如果你想了解更多module之间使用include共享方法,你可以阅读我另一则文章在<a href="http://railstips.org/2009/4/20/how-to-add-simple-permissions-into-your-simple-app-also-thoughtbot-rules">how I added simple permissions</a>,那篇文章中permissions模块被好几个models引入,所以可以共享方法,这就是我要说的,所以你想了解更多可以查看那篇文章</p>
-
-<h5>一个普遍的共识</h5>
-
-<p>虽然include是增加一个实例方法,但是有一个普遍的共识,你以后会明白在ruby中使用include即可以增加类方法也可以增加实例方法,原因就是include有一个self.included的钩子方法,你可以用它来修改类中对于模块的引入,据我所知,extend没有钩子方法(这是作者错误的想法,见下面说明),不过这是有争议的,但是因为经常使用所以我想我会提到它,让我们看个小例子</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="no">ClassMethods</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">bar</span>
-</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;class method&#39;</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;instance method&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Baz</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># class method</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># instance method</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># NoMethodError: undefined method ‘foo’ for Baz:Class</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># NoMethodError: undefined method ‘bar’ for #&lt;Baz:0x1e3d4&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>但是rails现在引入了<a href="http://api.rubyonrails.org/classes/ActiveSupport/Concern.html">ActiveSupport::Concern</a>,上面的方法就可以写成这样</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Concern</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
-</span><span class='line'>    <span class="k">def</span> <span class="nf">bar</span>
-</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;class method&#39;</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;instance method&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Baz</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># class method</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># instance method</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># NoMethodError: undefined method ‘foo’ for Baz:Class</span>
-</span><span class='line'><span class="no">Baz</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># NoMethodError: undefined method ‘bar’ for #&lt;Baz:0x1e3d4&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h5>说明</h5>
-
-<p>上面原作者说extend没有hook是错误的,extend其实有一个叫self.extended的方法,作用和include中的self.included是差不多的,可看下面的例子</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">extended</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;extended by class </span><span class="si">#{</span><span class="n">klass</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Baz</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">=&gt;</span> <span class="n">extended</span> <span class="n">by</span> <span class="k">class</span> <span class="nc">Baz</span>
-</span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
