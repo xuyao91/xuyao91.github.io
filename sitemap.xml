@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2019/01/10/fabric-adds-nodes-dynamically/</loc>
+<lastmod>2019-01-10T11:00:22+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/</loc>
 <lastmod>2018-12-29T16:57:34+08:00</lastmod>
 </url>

@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2018-12-29T17:02:39+08:00</updated>
+  <updated>2019-01-10T11:04:59+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,224 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Fabric动态增加节点（Peer）]]></title>
+    <link href="http://xuyao.club/blog/2019/01/10/fabric-adds-nodes-dynamically/"/>
+    <updated>2019-01-10T11:00:22+08:00</updated>
+    <id>http://xuyao.club/blog/2019/01/10/fabric-adds-nodes-dynamically</id>
+    <content type="html"><![CDATA[<h5>前言</h5>
+
+<p> &emsp; 在实际项目中，因为项目的需求变动，一般都会对fabric网络做一个修改，最常见的变动就是在现有的Fabric网络中增加一个节点，现在以之前搭建的fabric网络（版本1.1），balance-transfer为例做个介绍，整个过程其实也很简单，生成节点证书，增加新节点的docker配置文件并启动相应的服务，然后将新节点加到现有的channel当中，并在节点上安装智能合约（Chaincode），下午详情讲一下具体的操作步骤。</p>
+
+<h4>1、修改crypto-config.yaml文件并生成对应的节点证书。</h4>
+
+<p>首先我们确认我们需要在Org2里增加节点，那么我们在crypto-config.yaml文件里找到对应Org2的配置，把Template字段里的count参数修改成2，意思就是在此组织下生成两个节点，配置文件如下</p>
+
+<!-- more -->
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>- Name: Org2
+</span><span class='line'>    Domain: org2.xuyao.com
+</span><span class='line'>    EnableNodeOUs: true
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改好配置文件后，我们现在使用cryptogen来生成证书，在在artifacts/channel目录下执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./cryptogen extend --config=./crypto-config.yaml</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样我们就为新节点生成了证书，可以到Org2相应的目录上查看，发现已经新生成了一个节点，加上之前那个，一共有两个节点。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>peer0.org2.mbasechain.com peer1.org2.mbasechain.com</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>2、配置docker-compose文件并启动节点容器</h4>
+
+<p>接下来我们需要新增一个doceker-compose有配置文件，用来启动一个新节点容器，我们将新节点的配置文件全名为：Org2Peer1.yaml</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>version: '2'
+</span><span class='line'>
+</span><span class='line'>services:
+</span><span class='line'>
+</span><span class='line'>  couchdb:
+</span><span class='line'>    container_name: couchdb
+</span><span class='line'>    image: hyperledger/fabric-couchdb:latest
+</span><span class='line'>    ports:
+</span><span class='line'>      - "5984:5984"
+</span><span class='line'>
+</span><span class='line'>  peer1.org1.xuyao.com:
+</span><span class='line'>    container_name: peer1.org1.xuyao.com
+</span><span class='line'>    image: hyperledger/fabric-peer:latest
+</span><span class='line'>    environment:
+</span><span class='line'>      - CORE_PEER_ID=peer1.org1.xuyao.com
+</span><span class='line'>      - CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>      - CORE_PEER_ADDRESS=peer1.org1.xuyao.com:7051
+</span><span class='line'>      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+</span><span class='line'>      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
+</span><span class='line'>      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+</span><span class='line'>      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+</span><span class='line'>      - CORE_LOGGING_LEVEL=debug
+</span><span class='line'>      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+</span><span class='line'>      - CORE_PEER_GOSSIP_ORGLEADER=false
+</span><span class='line'>      - GODEBUG=netdns=go
+</span><span class='line'>      # The following setting skips the gossip handshake since we are
+</span><span class='line'>      # are not doing mutual TLS
+</span><span class='line'>      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+</span><span class='line'>      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/crypto/peer/msp
+</span><span class='line'>      - CORE_PEER_TLS_ENABLED=true
+</span><span class='line'>      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/crypto/peer/tls/server.key
+</span><span class='line'>      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/crypto/peer/tls/server.crt
+</span><span class='line'>      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/crypto/peer/tls/ca.crt
+</span><span class='line'>    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+</span><span class='line'>    command: peer node start
+</span><span class='line'>    ports:
+</span><span class='line'>      - 7051:7051
+</span><span class='line'>      - 7053:7053
+</span><span class='line'>    volumes:
+</span><span class='line'>        - /var/run/:/host/var/run/
+</span><span class='line'>        - ./channel/crypto-config/peerOrganizations/org1.mbasechain.com/peers/peer0.org1.xuyao.com/:/etc/hyperledger/crypto/peer
+</span><span class='line'>        - ../mount/peer0.org1.xuyao.com/var/hyperledger/production:/var/hyperledger/production
+</span><span class='line'>    depends_on:
+</span><span class='line'>        - couchdb</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个配置文件跟之前的peer节点的配置一样，只要改下相应的参数即可，接下来我们就来启动这个节点。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>docker-compose -f Org2Peer1.yaml up -d</span></code></pre></td></tr></table></div></figure>
+
+
+<p>启动过程也和之前的一样。</p>
+
+<h4>3、修改network-config.json配置文件</h4>
+
+<p>启动节点后，我们需要配置network-config.json，让应用与节点之前通信，在peers那块增加一个通讯节点就可以</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>peer1.org2.xuyao.com:
+</span><span class='line'>    url: grpcs://127.0.0.1:10051
+</span><span class='line'>    eventUrl: grpcs://127.0.0.1:10053
+</span><span class='line'>    grpcOptions:
+</span><span class='line'>      ssl-target-name-override: peer1.org2.xuyao.com
+</span><span class='line'>    tlsCACerts:
+</span><span class='line'>      path: artifacts/channel/crypto-config/peerOrganizations/org4.mbasechain.com/peers/peer1.org2.xuyao.com/tls/ca.crt</span></code></pre></td></tr></table></div></figure>
+
+
+<p>修改配置后，我们启动balance-transfer,运行runApp.sh,将项目跑起来。</p>
+
+<h4>4、将新节点加入到所需的Channel中</h4>
+
+<p>接下来我们需要将新节点加到某个Channel里，首先我们通过注册接口，在Org2里拿到用户的Token,再拿此Token请求中入Channel接口</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>  http://localhost:4000/channels/mychannel/peers \
+</span><span class='line'>  -H "authorization: Bearer $ORG2_TOKEN" \
+</span><span class='line'>  -H "content-type: application/json" \
+</span><span class='line'>  -d '{
+</span><span class='line'>  "peers": ["peer1.org2.xuyao.com"]
+</span><span class='line'>}'</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>5、安装Chaincode</h4>
+
+<p>加入channel后，peer3已经可以参与记账，但是不能指定该节点进行查询或交易，这时候需要发起请求安装chaincode：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl -s -X POST \
+</span><span class='line'>    http://localhost:$PORT/chaincodes \
+</span><span class='line'>    -H "authorization: Bearer $ORG1_TOKEN" \
+</span><span class='line'>    -H "content-type: application/json" \
+</span><span class='line'>    -d '{
+</span><span class='line'>    "peers": ["peer1.org2.xuyao.com"],
+</span><span class='line'>    "chaincodeName":"mycc",
+</span><span class='line'>    "chaincodePath":"github.com/example_cc",
+</span><span class='line'>    "chaincodeVersion":"v0"
+</span><span class='line'>  }'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装成功后指定新节点进行查询或交易操作，会自动生成该节点的chaincode镜像，并启动容器运行chaincode。在已有组织中新加节点的操作到这里就全部完成了！</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Fabric多台服务器的部署(五)]]></title>
@@ -5621,105 +5839,6 @@ Platform Version 要测试的iphone的版本好(设备和版本号一定要匹�
 
 <p><a href="http://appium.io/getting-started.html?lang=zh">http://appium.io/getting-started.html?lang=zh</a><br/>
 <a href="https://ruby-china.org/topics/30085">https://ruby-china.org/topics/30085</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[App自动化测试平台搭建记录之什么是appium]]></title>
-    <link href="http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium/"/>
-    <updated>2016-07-09T17:06:02+08:00</updated>
-    <id>http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-what-is-appium</id>
-    <content type="html"><![CDATA[<h4>前言</h4>
-
-<p>目前我们的项目关于测试这块还是处于很初级阶段，rails后端的rspec也写的很少，app方面完全靠手动测试，基于此情况，我们决定搭建一个自动化测试平台，期望目标是移动端ios和android及h5每天定时拉取最新代码，进行部署，打包，最后进行回归测试，生成测试报告发送给测试人员，
-最后流程如下所示</p>
-
-<!-- more -->
-
-
-<p><img src="http://7xjibn.com1.z0.glb.clouddn.com/appium%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%9B%BE%20%281%29.png" alt="img" /></p>
-
-<h4>为什么选择appium作为自动化测试框架</h4>
-
-<ul>
-<li>使用标准的api形式，能够同时支持ios，android，h5,接口保持统一，减少开发维护成本</li>
-<li>你可以使用任何你喜欢的开发工具，及支持多种脚本语言(ruby/python/java/php/javascript/C#/ Clojure/Perl)</li>
-<li>你可以使用任何的测试框架
-
-<h4>What is the Appium</h4>
-
-<p>具体什么是appium呢，引用了官方的一段话：
-Appium is an open source test automation framework for use with native, <a href="http://appium.io/slate/en/master/#hybrid.md">hybrid</a> and mobile web apps.</p></li>
-</ul>
-
-
-<h4>Appium Concepts（appium理念）</h4>
-
-<p><strong>Client/Server 设计风格</strong> <br/>
-   Appium本质是一个核心webserver,暴露一些REST API与手机设备交互, 而且之间通信是一标准的HTTP协议，client的test code语言几乎现在主流的语言都支持，写测试用例比较方便，下图是它servre端的GUI</p>
-
-<p><img src="http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" alt="CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" /></p>
-
-<p><strong>Session(会话)</strong><br/>
-  自动化每次都会在一个会话里面进行，client每次都会发送一个post /session 请求，服务器根据客户端信息起一个automation session和返回一个session ID用于后续操作</p>
-
-<p><strong>Desired Capabilities</strong><br/>
-  一组hash参数，告诉server端我们需要启动一个的怎样automation session,不同设备参数不同
-这是iOs一个demo</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="s1">&#39;appium-version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;platformName&#39;</span><span class="p">:</span> <span class="s1">&#39;iOS&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;platformVersion&#39;</span><span class="p">:</span> <span class="s1">&#39;8.2&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;deviceName&#39;</span><span class="p">:</span> <span class="s1">&#39;iPhone 6&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="s2">&quot;/Users/xuyao/Downloads/Cloudoc-Patient.app&quot;</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这是android的样本</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">capabilities</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="s1">&#39;appium-version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;platformName&#39;</span><span class="p">:</span> <span class="s1">&#39;Android&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;platformVersion&#39;</span><span class="p">:</span> <span class="s1">&#39;5.1&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;deviceName&#39;</span><span class="p">:</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="s1">&#39;/Users/xuyao/Downloads/Yydys0627.apk&#39;</span><span class="p">,</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><strong>Appium Server</strong><br/>
-  server端是用node.js写的</p>
-
-<p><strong>Appium Clients</strong><br/>
-  客户端的库有很多( Java, Ruby, Python, PHP, JavaScript, and C#)，这些都对WebDriver封装扩展过,所以不需要找个WebDriver client来做这些东西,如果使用ruby语言来写脚本，ruby里有个<a href="https://rubygems.org/gems/appium_lib">appium_lib</a> gem，里面集成了很多现成的方法，可以再安装一个<a href="https://github.com/appium/ruby_console">appium_console</a>，直接打开console进行调试</p>
-
-<h4>Appium Inspector</h4>
-
-<p>在控件台里面获取页面元素比较麻烦，往往需要一直定位，Appium提供了一个比较友好的GUI给我们操作，而且操作起来还容易，大大减少了我们查找元素的时间
-<img src="http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg" alt="Appium Inspector GUI" /></p>
-
-<h6>参考资料</h6>
-
-<p><a href="http://appium.io/">http://appium.io/</a><br/>
-<a href="https://github.com/appium/ruby_console">https://github.com/appium/ruby_console</a><br/>
-<a href="https://github.com/appium/ruby_lib">https://github.com/appium/ruby_lib</a><br/>
-<a href="https://ruby-china.org/topics/30074">https://ruby-china.org/topics/30074</a></p>
 ]]></content>
   </entry>
   
