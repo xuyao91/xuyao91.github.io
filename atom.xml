@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2019-01-10T11:04:59+08:00</updated>
+  <updated>2019-02-15T16:04:30+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,226 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ES6中如何删除数组中的重复项]]></title>
+    <link href="http://xuyao.club/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/"/>
+    <updated>2019-02-15T16:00:59+08:00</updated>
+    <id>http://xuyao.club/blog/2019/02/15/how-to-remove-array-duplicates-in-es6</id>
+    <content type="html"><![CDATA[<p>&emsp; ES6中，如何删除一个数组中的重复数据呢，以下是我总结的，从数组中过滤掉重复项并且返回唯一值的三种方法。我最喜欢的是使用Set因为它是最简单和最简单的😁</p>
+
+<!-- more -->
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>// 1: 'Set'
+</span><span class='line'>[... new Set(array)]
+</span><span class='line'>
+</span><span class='line'>// 2: 'Filter'
+</span><span class='line'>array.filter((item, index) =&gt; array.indexOf(item) === index)
+</span><span class='line'>
+</span><span class='line'>// 3: 'Reduce'
+</span><span class='line'>array.reduce((unique, item) =&gt; unique.includes(item) ? unique : [...unique, item], [])
+</span><span class='line'>
+</span><span class='line'>// 返回结果
+</span><span class='line'>[ '🐷', 1, 2, 3 ]</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>1. 使用Set</h4>
+
+<p>我先解释一下什么是Set:</p>
+
+<blockquote><p>Set是ES6中引入的新数据对象。Set只允许您存储唯一值。当传入数组时，它会删除任何重复的值。</p></blockquote>
+
+<p>ok，我们重新回到刚才的代码来分析一下发生了什么事情，（上面的代码）做了两件事情。
+1、首先，我们通过传递一个数组来创建了一个新的Set，因为Set只允许存储唯一的值，所以数组中那些重复的值会被删除。
+2、创建一个新的Set对象后，重复值已经被删除了，现在我们使用&hellip;运算符，将其转换回数组。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>// Step 1
+</span><span class='line'>const uniqueSet = new Set(array)
+</span><span class='line'># Set { '🐷', 1, 2, 3 }
+</span><span class='line'>
+</span><span class='line'>// Step 2
+</span><span class='line'>const backToArray = [...uniqueSet]
+</span><span class='line'># [ '🐷', 1, 2, 3 ]</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>使用Array.from 将Set转换为Array</h5>
+
+<p>或者你也可以使用Array.from将Set转化为数组</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>Array.from(new Set(array))
+</span><span class='line'># [ '🐷', 1, 2, 3 ]</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>2.使用Filter</h4>
+
+<p>为了便于理解，我们先来看下indexOf和filter会做什么事情</p>
+
+<h5>indexOf</h5>
+
+<p>indexOf方法会将我们提供的参数，在数组中找到该元素的第一个索引值并返回。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>array.indexOf('🐷') #=&gt; 0
+</span><span class='line'>array.indexOf(1) #=&gt; 1
+</span><span class='line'>array.indexOf(2) #=&gt; 2
+</span><span class='line'>array.indexOf(3) #=&gt; 5</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>filter</h4>
+
+<p>filter()方法会根据我们传递的条件，来创建一个新的元素数组。换句话说，如果元素通过并返回true，它将包含在已经过滤的数组中。任何失败元素或者返回为false的，都不会在过滤后的数组中。
+让我们一步步来分析数组循环时发生的事情</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>array.filter((item, index) =&gt; {
+</span><span class='line'>  console.log(
+</span><span class='line'>      // a. Item
+</span><span class='line'>      item,
+</span><span class='line'>      // b. Index
+</span><span class='line'>      index,
+</span><span class='line'>      // c. IndexOf
+</span><span class='line'>      array.indexOf(item),
+</span><span class='line'>      // d. Condition
+</span><span class='line'>      array.indexOf(item) === index,
+</span><span class='line'>  );
+</span><span class='line'>  return array.indexOf(item) === index
+</span><span class='line'>})</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下是上面显示的console.log的输出。重复项是索引与indexOf不匹配的位置。因此，在这些情况下，条件将为false，不会包含在我们的过滤数组中。
+<img src="https://upload-images.jianshu.io/upload_images/1796624-e1340356c5bd98fe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png" /></p>
+
+<h4>检索重复值</h4>
+
+<p>我们还可以使用filter方法从数组中检索重复值。我们可以通过简单地修改我们的条件就可以做到：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>array.filter((item, index) =&gt; array.indexOf(item) !== index)
+</span><span class='line'># [ '🐷', '🐷' ]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再次，如果我们一步一来执行上面的代码，可以查看输出：
+<img src="https://upload-images.jianshu.io/upload_images/1796624-37f124574645e5c6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png" /></p>
+
+<h4>3.使用 reduce</h4>
+
+<p>reduce方法用于减少数组的元素，并根据您传递的某些reducer函数将它们组合成最终数组。</p>
+
+<p>在这个例子中，我们的reducer函数检查我们的最终数组是否包含该项。如果没有，请将该项目推送到我们的最终数组中。否则，跳过该元素并按原样返回我们的最终数组（基本上跳过该元素）。</p>
+
+<p>reduce总是有点难以理解，所以让我们进入每个案例并查看输出：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>array.reduce((unique, item) =&gt; {
+</span><span class='line'>  console.log(
+</span><span class='line'>      // a. Item
+</span><span class='line'>      item,
+</span><span class='line'>      // b. Final Array (Accumulator)
+</span><span class='line'>      unique,
+</span><span class='line'>      // c. Condition (Remember it only get pushed if this return 'false')
+</span><span class='line'>      unique.includes(item),
+</span><span class='line'>      // d. Reducer Function Result
+</span><span class='line'>      unique.includes(item) ? unique : [...unique, item],
+</span><span class='line'>  );
+</span><span class='line'>  unique.includes(item) ? unique : [...unique, item]
+</span><span class='line'>}, [])
+</span><span class='line'>
+</span><span class='line'># [ '🐷', '🐷' ]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是console.log的输出：
+<img src="https://upload-images.jianshu.io/upload_images/1796624-8de3d95d35e6bf25.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png" /></p>
+
+<h4>参考资料</h4>
+
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set">MDN Web Docs — Set</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">MDN Web Docs — Filter</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce">MDN Web Docs — Reduce</a></li>
+<li><a href="https://gist.github.com/telekosmos/3b62a31a5c43f40849bb">GitHubGist: Remove duplicates from JS array</a></li>
+<li><a href="https://codehandbook.org/how-to-remove-duplicates-from-javascript-array/">CodeHandbook: How to Remove Duplicates from JavaScript Array</a></li>
+</ul>
+
+
+<h4>说明</h4>
+
+<p>本文翻译自<a href="https://medium.com/@samanthaming">Samantha Ming</a>的博客，原文地址<br/>
+<a href="https://medium.com/dailyjs/how-to-remove-array-duplicates-in-es6-5daa8789641c">https://medium.com/dailyjs/how-to-remove-array-duplicates-in-es6-5daa8789641c</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Fabric动态增加节点（Peer）]]></title>
@@ -5711,134 +5931,6 @@ platform Versiont选择的时候，如果是真机测试时，确定所选版本
 <h6>参考资料</h6>
 
 <p><a href="https://developer.android.com/studio/index.html">https://developer.android.com/studio/index.html</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[App自动化测试平台搭建记录之appium安装及ios模拟器/真机的配置]]></title>
-    <link href="http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config/"/>
-    <updated>2016-07-09T21:29:56+08:00</updated>
-    <id>http://xuyao.club/blog/2016/07/09/app-test-automation-platform-building-record-of-how-to-install-appium-and-setting-ios-config</id>
-    <content type="html"><![CDATA[<p>上一篇讲了什么是appium，这次讲一下如何安装appium，及怎样配置ios/android的模拟器/真机</p>
-
-<h4>系统选择</h4>
-
-<p>因为要跑ios的包的，所以我们肯定需要apple的系统来支持，而且ios版的appium也支持android，这样就完美了。</p>
-
-<!-- more -->
-
-
-<h6>iOS必备条件</h6>
-
-<ul>
-<li>Mac OS X 10.10 or 更高, 建议使用10.11.1</li>
-<li>XCode >= 6.0, 7.1.1</li>
-<li>Apple Developer Tools (iPhone simulator SDK, command line tools)</li>
-</ul>
-
-
-<h6>Android必备条件</h6>
-
-<ul>
-<li><a href="http://developer.android.com/">Android SDK</a> API >= 17 (Additional features require 18/19)</li>
-</ul>
-
-
-<h4>安装appium</h4>
-
-<p>appium服务器是使用node.js跑的,所以要确保你机子上安装了node.js</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">node</span> <span class="c1">#安装nodejs</span>
-</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="n">g</span> <span class="n">appium</span> <span class="c1">#安装appium</span>
-</span><span class='line'><span class="n">appium</span>  <span class="c1">#启动appium</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当然你还可以下载一个包，直接安装，<a href="https://bitbucket.org/appium/appium.app/downloads/">点击下载</a>
-如果不确实appium是否安装好，可以使用appium-doctor插件检测依赖环境是否安装成功</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="n">g</span> <span class="n">appium</span><span class="o">-</span><span class="n">doctor</span> <span class="c1"># 安装appium-doctor</span>
-</span><span class='line'><span class="n">appium</span><span class="o">-</span><span class="n">doctor</span> <span class="c1">#如果安装成功，会显示以下数据</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span> <span class="c1">### Diagnostic starting ###</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">Xcode</span> <span class="n">is</span> <span class="n">installed</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Applications/</span><span class="no">Xcode</span><span class="o">.</span><span class="n">app</span><span class="o">/</span><span class="no">Contents</span><span class="o">/</span><span class="no">Developer</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">Xcode</span> <span class="no">Command</span> <span class="no">Line</span> <span class="no">Tools</span> <span class="n">are</span> <span class="n">installed</span><span class="o">.</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">DevToolsSecurity</span> <span class="n">is</span> <span class="n">enabled</span><span class="o">.</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">The</span> <span class="no">Authorization</span> <span class="no">DB</span> <span class="n">is</span> <span class="n">set</span> <span class="n">up</span> <span class="n">properly</span><span class="o">.</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">The</span> <span class="no">Node</span><span class="o">.</span><span class="n">js</span> <span class="n">binary</span> <span class="n">was</span> <span class="n">found</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">node</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">HOME</span> <span class="n">is</span> <span class="n">set</span> <span class="ss">to</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">ANDROID_HOME</span> <span class="n">is</span> <span class="n">set</span> <span class="ss">to</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="no">JAVA_HOME</span> <span class="n">is</span> <span class="n">set</span> <span class="ss">to</span><span class="p">:</span> <span class="sr">/Library/</span><span class="no">Java</span><span class="o">/</span><span class="no">JavaVirtualMachines</span><span class="o">/</span><span class="n">jdk1</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mo">0_71</span><span class="o">.</span><span class="n">jdk</span><span class="o">/</span><span class="no">Contents</span><span class="o">/</span><span class="no">Home</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="n">adb</span> <span class="n">exists</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span><span class="o">/</span><span class="n">platform</span><span class="o">-</span><span class="n">tools</span><span class="o">/</span><span class="n">adb</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="n">android</span> <span class="n">exists</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">android</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>  <span class="err">✔</span> <span class="n">emulator</span> <span class="n">exists</span> <span class="ss">at</span><span class="p">:</span> <span class="sr">/Users/xu</span><span class="n">yao</span><span class="o">/</span><span class="no">Downloads</span><span class="o">/</span><span class="n">android</span><span class="o">-</span><span class="n">sdk</span><span class="o">-</span><span class="n">macosx</span><span class="o">/</span><span class="n">tools</span><span class="o">/</span><span class="n">emulator</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span> <span class="c1">### Diagnostic completed, no fix needed. ###</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span> <span class="no">Everything</span> <span class="n">looks</span> <span class="n">good</span><span class="p">,</span> <span class="n">bye!</span>
-</span><span class='line'><span class="n">info</span> <span class="no">AppiumDoctor</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>好了以上就是安装appium的步骤，安装好，就可以启动了，启动后的界面如下
-<img src="http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" alt="CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png" /></p>
-
-<h4>iOS模拟器/真机信息配置</h4>
-
-<p>正常情况下apple的包是.ipa文件，那里因为所有的ios设备使用的都的ARM处理器，但是我们现在配置的是模拟器的设备，而模拟器是基于Intel处理器,处理架构不一样，所以在编辑生成包的时候请选择.app文件，请看下图的配置参数
-<img src="http://7xjibn.com1.z0.glb.clouddn.com/apple-setting.png" alt="apple-setting" />
-App path就是apple包的路径<br/>
-BunleID就是苹果开发的bundle identifier，仅在真机测试时勾上并填写<br/>
-UDID苹果设备的唯一ID，仅在真机测试时勾上并填写<br/>
-Force Device 要测试的iphone设备
-Platform Version 要测试的iphone的版本好(设备和版本号一定要匹配)
-以上配置好后，点击launch按钮，启动appium服务，启动成功后，可看到如下信息</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">MJSONWP</span><span class="o">]</span> <span class="no">Responding</span> <span class="n">to</span> <span class="n">client</span> <span class="n">with</span> <span class="n">driver</span><span class="o">.</span><span class="n">getStatus</span><span class="p">()</span> <span class="ss">result</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;build&quot;</span><span class="p">:{</span><span class="s2">&quot;version&quot;</span><span class="ss">:&quot;1.5.3&quot;</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
-</span><span class='line'><span class="o">[</span><span class="no">HTTP</span><span class="o">]</span> <span class="o">&lt;--</span> <span class="no">GET</span> <span class="sr">/wd/</span><span class="n">hub</span><span class="o">/</span><span class="n">status</span> <span class="mi">200</span> <span class="mi">26</span> <span class="n">ms</span> <span class="o">-</span> <span class="mi">83</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接下来点击那个类似搜索的按钮来启动client端<br/>
-如果启动的时候报如下错误</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="no">MJSONWP</span><span class="o">]</span> <span class="no">Encountered</span> <span class="n">internal</span> <span class="n">error</span> <span class="n">running</span> <span class="ss">command</span><span class="p">:</span> <span class="ss">Error</span><span class="p">:</span> <span class="no">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="n">a</span> <span class="n">device</span> <span class="n">to</span> <span class="n">launch</span><span class="o">.</span> <span class="no">You</span> <span class="n">requested</span> <span class="s1">&#39;iPhone 6 (9.3 Simulator)&#39;</span><span class="p">,</span>
-</span><span class='line'><span class="n">but</span> <span class="n">the</span> <span class="n">available</span> <span class="n">devices</span> <span class="ss">were</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;Resizable iPad (8.2 Simulator) [341C7D49-B181-46B8-AB61-CF644C3250F1]&quot;</span><span class="p">,</span><span class="s2">&quot;Resizable iPhone (8.2 Simulator) [411D39CB-6DB6-41A9-9E6C-89CFDED27B69]&quot;</span><span class="p">,</span><span class="s2">&quot;iPad 2 (8.2 Simulator) [B3780274-2AE7-4677-831A-17CDDC92F2A5]&quot;</span><span class="p">,</span><span class="s2">&quot;iPad Air (8.2 Simulator) [C675C17C-9B79-4E57-B877-732A441F8DDA]&quot;</span><span class="p">,</span><span class="s2">&quot;iPad Retina (8.2 Simulator) [1C9FF2EF-A643-4D27-9268-4C3A4ADD8710]&quot;</span><span class="p">,</span><span class="s2">&quot;iPhone 4s (8.2 Simulator) [0AB005A2-63AD-44F8-AE80-8BFBB21BCDD2]&quot;</span><span class="p">,</span><span class="s2">&quot;iPhone 5 (8.2 Simulator) [15765CF4-96B1-4826-B397-6E23658AC89A]&quot;</span><span class="p">,</span><span class="s2">&quot;iPhone 5s (8.2 Simulator) </span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>那是因为你的设备和版本不对的原因，仔细看下log就发现了，改一下设备和版本信息重新启动<br/>
-启动成功后出现如下画面，启动成功后会帮你打开Appium Inspector，可以使用Inspector查找组件路径，自此苹果的设备就配置成功了
-<img src="http://7xjibn.com1.z0.glb.clouddn.com/iphone_5s_device.png" alt="iphone5" />
-<img src="http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg" alt="Appium Inspector GUI" /></p>
-
-<h5>参考资料</h5>
-
-<p><a href="http://appium.io/getting-started.html?lang=zh">http://appium.io/getting-started.html?lang=zh</a><br/>
-<a href="https://ruby-china.org/topics/30085">https://ruby-china.org/topics/30085</a></p>
 ]]></content>
   </entry>
   
