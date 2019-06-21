@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="前言 &emsp;&emsp;17年上半年，为了凑个首付，两人搭上了几年的所有积蓄，还找亲朋好友借了一堆，平常就不太喜欢找人借钱，脸皮薄，开不了口，这次没办法，急用钱。借钱还算顺利，除了几个姐姐主动借给我的，跟同学借的也都给了，之前也借过他们，所以借的比较顺利。那天刷卡时没太多知觉， &hellip;">
+  <meta name="description" content="什么是REST &emsp;&emsp;REST的全称是：Representational State Transfer,直接翻译过来就是：表现层状态转移，表现层的意思就是资源, 这个词语读着比较难理解，网上有一种叫法比较容易理解，叫：URL定位资源，用HTTP动词（GET,POST,PUT, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,56 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/03/12/how-to-understand-the-restful-router/">如何理解RESTful</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-03-12T11:07:56+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:07 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2018/03/12/how-to-understand-the-restful-router/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>什么是REST</h3>
+
+<p>&emsp;&emsp;REST的全称是：Representational State Transfer,直接翻译过来就是：表现层状态转移，表现层的意思就是资源, 这个词语读着比较难理解，网上有一种叫法比较容易理解，叫：URL定位资源，用HTTP动词（GET,POST,PUT,DELETE）描述操作。很简洁，就是看url就知道这个路由是什么了，然后看http的动词method就明白要做什么了，最后看他的 status code就知道返回结果了。REST最大的几个特点为：资源、统一接口、URI和无状态。</p>
+
+<h3>RESTful架构</h3>
+
+<p>&emsp;&emsp;RESTful 是现在比较流行的一种设计风格，它提供了一组设计原则和约束条件，主要用于客户端与服务器的交互。RESTful架构更简洁，更有层次，更易于实现缓存等机制。<br/>
+&emsp;&emsp;记得刚工作那会，代码写的比较烂，比如说要写增加商品的路由，会写成下面这样,从RESTful角度来说，这样写其实已经违背了他统一接口和对URI的意义的原则</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">POST</span> <span class="sr">/create_product</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/03/12/how-to-understand-the-restful-router/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -446,45 +496,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">App自动化测试平台搭建记录之Android模拟器/真机的配置</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-07-10T00:12:30+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:12 am</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>上一篇讲了安装appium及ios的配置，如果没看过这篇文章，建议先看一下，<a href="http://www.jianshu.com/p/8ac5491436b2">传送门</a>
-既然是配置Android模拟器，那么Java和Android sdk的安装是必不可少的了</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/07/10/app-test-automation-platform-building-record-of-how-to-setting-android-config/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -502,6 +513,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/06/21/the-tbaas-of-tencent/">腾讯云区块链服务平台介绍及接入</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/">ES6中如何删除数组中的重复项</a>
       </li>
     
@@ -515,10 +530,6 @@
     
       <li class="post">
         <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Fabric多台服务器的部署(四)</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">Fabric多台服务器的部署(三)</a>
       </li>
     
   </ul>
