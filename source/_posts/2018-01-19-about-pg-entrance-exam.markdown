@@ -34,43 +34,43 @@ categories:
 4、其实在写这篇文章的时候已经考完研了，而且我预料到我可能会挂在高数上，想想这半年多吃的苦，确实有点不甘心。  
 
 ####再贴几张复习时候的照片，留个念想
-考研上的辅导班,一般专业课几个班合在一起上，上课的人比较多![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG490.jpeg?imageMogr2/thumbnail/!50p)  
+考研上的辅导班,一般专业课几个班合在一起上，上课的人比较多![](http://blog.1nongfu.com/WechatIMG490.jpeg?imageMogr2/thumbnail/!50p)  
 
-考研前几天，晚上都在上政治课，![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG482.jpeg?imageMogr2/thumbnail/!50p)  
+考研前几天，晚上都在上政治课，![](http://blog.1nongfu.com/WechatIMG482.jpeg?imageMogr2/thumbnail/!50p)  
 
 万恶的高数和线代，考研里的微分学和积分学是真心难（也可能是我基础差），而且有些题计算量超大，考试时有些题真是会做，但就是没时间了，计算量太大
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG477.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG489.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG486.jpeg?imageMogr2/thumbnail/!50p)  
+![](http://blog.1nongfu.com/WechatIMG477.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG489.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG486.jpeg?imageMogr2/thumbnail/!50p)  
 
 复习时使用百词斩背英语单词，还是挺好用的，经常在ruby china上看到他们招ruby
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG491.jpeg?imageMogr2/thumbnail/!50p)  
+![](http://blog.1nongfu.com/WechatIMG491.jpeg?imageMogr2/thumbnail/!50p)  
 
 有次辅导班模拟考试，英语考了67分，比上次考次进步了不了
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG487.jpeg?imageMogr2/thumbnail/!50p)  
+![](http://blog.1nongfu.com/WechatIMG487.jpeg?imageMogr2/thumbnail/!50p)  
 
 上专业课，有三个老师，每个老师讲一门课，最后几天狂背软件工程的一些名词概念，结果考试时发现软件工程就出了一道概念题，其它全是画设计图，晕死，  
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG471.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG472.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG473.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG484.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG485.jpeg?imageMogr2/thumbnail/!50p)  
+![](http://blog.1nongfu.com/WechatIMG471.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG472.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG473.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG484.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG485.jpeg?imageMogr2/thumbnail/!50p)  
 
 考试前请了一个星期的假，在复旦大学主楼里自习，每天6点起床，赶到这里背政治，这个地方光线好，有太阳照进来，那几天特别冷  
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG481.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG478.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG479.jpeg?imageMogr2/thumbnail/!50p)  
+![](http://blog.1nongfu.com/WechatIMG481.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG478.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG479.jpeg?imageMogr2/thumbnail/!50p)  
 
 准考证和考场出来了  
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG492.jpeg?imageMogr2/thumbnail/!50p)
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG476.jpeg?imageMogr2/thumbnail/!50p)  
+![](http://blog.1nongfu.com/WechatIMG492.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG476.jpeg?imageMogr2/thumbnail/!50p)  
 
 考试当天起了个大早就赶去考场了
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG475.jpeg?imageMogr2/thumbnail/!50p)
+![](http://blog.1nongfu.com/WechatIMG475.jpeg?imageMogr2/thumbnail/!50p)
 排队进考场
-![](http://7xjibn.com1.z0.glb.clouddn.com/WechatIMG474.jpeg?imageMogr2/thumbnail/!50p)<br/>
+![](http://blog.1nongfu.com/WechatIMG474.jpeg?imageMogr2/thumbnail/!50p)<br/>
 ###后记
 &emsp;&emsp;路漫漫期修远兮，吾将上下而求索，“一三计划”才刚开始，未来的路还很长，不奢望前方的路有多平坦，自己尽心就好，不留遗憾。 
 如果考上了，会在这里更新一下我的录取通知书，如果没考上，那就算了。   
 &emsp;&emsp;最后用一句葛大爷在【甲方乙方】里经典的话作个结尾：2017年过去了，我很怀念。
-![](http://7xjibn.com1.z0.glb.clouddn.com/4fa2c09ct5f53e319895d.jpeg)
+![](http://blog.1nongfu.com/4fa2c09ct5f53e319895d.jpeg)

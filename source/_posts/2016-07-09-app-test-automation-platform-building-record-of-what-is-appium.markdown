@@ -9,7 +9,7 @@ categories:
 目前我们的项目关于测试这块还是处于很初级阶段，rails后端的rspec也写的很少，app方面完全靠手动测试，基于此情况，我们决定搭建一个自动化测试平台，期望目标是移动端ios和android及h5每天定时拉取最新代码，进行部署，打包，最后进行回归测试，生成测试报告发送给测试人员，
 最后流程如下所示
 <!-- more -->
-![img](http://7xjibn.com1.z0.glb.clouddn.com/appium%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%9B%BE%20%281%29.png)
+![img](http://blog.1nongfu.com/appium%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E5%9B%BE%20%281%29.png)
 
 ####为什么选择appium作为自动化测试框架
 *   使用标准的api形式，能够同时支持ios，android，h5,接口保持统一，减少开发维护成本
@@ -23,7 +23,7 @@ categories:
 **Client/Server 设计风格**   
    Appium本质是一个核心webserver,暴露一些REST API与手机设备交互, 而且之间通信是一标准的HTTP协议，client的test code语言几乎现在主流的语言都支持，写测试用例比较方便，下图是它servre端的GUI
 
-![CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png](http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png)
+![CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png](http://blog.1nongfu.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png)
 
 
 **Session(会话)**  
@@ -60,7 +60,7 @@ capabilities = {
 
 ####Appium Inspector
 在控件台里面获取页面元素比较麻烦，往往需要一直定位，Appium提供了一个比较友好的GUI给我们操作，而且操作起来还容易，大大减少了我们查找元素的时间
-![Appium Inspector GUI](http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg)
+![Appium Inspector GUI](http://blog.1nongfu.com/1796624-36371e4f4fe1beb2.jpeg)
 
 ######参考资料
 http://appium.io/  

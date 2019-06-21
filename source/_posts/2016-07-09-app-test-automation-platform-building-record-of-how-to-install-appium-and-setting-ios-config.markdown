@@ -47,10 +47,10 @@ info AppiumDoctor Everything looks good, bye!
 info AppiumDoctor 
 ```
 好了以上就是安装appium的步骤，安装好，就可以启动了，启动后的界面如下
-![CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png](http://7xjibn.com1.z0.glb.clouddn.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png)  
+![CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png](http://blog.1nongfu.com/CDF57F68-BBAE-496C-B12D-DA3F69B8A77D.png)  
 ####iOS模拟器/真机信息配置
 正常情况下apple的包是.ipa文件，那里因为所有的ios设备使用的都的ARM处理器，但是我们现在配置的是模拟器的设备，而模拟器是基于Intel处理器,处理架构不一样，所以在编辑生成包的时候请选择.app文件，请看下图的配置参数
-![apple-setting](http://7xjibn.com1.z0.glb.clouddn.com/apple-setting.png)
+![apple-setting](http://blog.1nongfu.com/apple-setting.png)
 App path就是apple包的路径  
 BunleID就是苹果开发的bundle identifier，仅在真机测试时勾上并填写  
 UDID苹果设备的唯一ID，仅在真机测试时勾上并填写  
@@ -69,8 +69,8 @@ but the available devices were: ["Resizable iPad (8.2 Simulator) [341C7D49-B181-
 ```
 那是因为你的设备和版本不对的原因，仔细看下log就发现了，改一下设备和版本信息重新启动  
 启动成功后出现如下画面，启动成功后会帮你打开Appium Inspector，可以使用Inspector查找组件路径，自此苹果的设备就配置成功了
-![iphone5](http://7xjibn.com1.z0.glb.clouddn.com/iphone_5s_device.png)
-![Appium Inspector GUI](http://7xjibn.com1.z0.glb.clouddn.com/1796624-36371e4f4fe1beb2.jpeg)
+![iphone5](http://blog.1nongfu.com/iphone_5s_device.png)
+![Appium Inspector GUI](http://blog.1nongfu.com/1796624-36371e4f4fe1beb2.jpeg)
 #####参考资料
 http://appium.io/getting-started.html?lang=zh  
 https://ruby-china.org/topics/30085

@@ -11,7 +11,7 @@ categories:
 ####什么是rack
 它提供一个介于Webserver与ruby（或ruby框架）之间的一个非常小且又容易使用的接口  
 可以理解成就是一个ruby package,这个package提供了一个基于Ruby Net::HTTP库开发的easy-to-use interface
-![rack-logo](http://7xjibn.com1.z0.glb.clouddn.com/rack-logo.png)
+![rack-logo](http://blog.1nongfu.com/rack-logo.png)
 Ruby web app通常情况下并不与HTTP的请求和响应直接发生关系，它是通过一个抽象层rack来与HTTP交互，它只需要处理一个抽象过的HTTP请求和响应，web app响应一个请求时会调用一个call方法，接受一个environment的hash参数，同时会响应一个数组，数组里面包括 The status, the headers, and the body.  
 ```ruby
 class App
@@ -32,12 +32,12 @@ end
 run Proc.new { |env| ['200', {'Content-Type' => 'text/html'}, ['get rack\'d']] }
 ```
 访问http://127.0.0.1:9292 ，就可以看到返回的body
-![body](http://7xjibn.com1.z0.glb.clouddn.com/FAFD25AD-7D90-4986-A499-CEBC456798E4.png)
+![body](http://blog.1nongfu.com/FAFD25AD-7D90-4986-A499-CEBC456798E4.png)
 
 Rack是Ruby的HTTP抽象层。所有的Ruby app server都实现了Rack接口，所以所有的Ruby web framework能够与所有Ruby app server进行无缝工作。
 所以app server的职责是接收和分析HTTP请求，然后在底层与web app通过Rack抽象协议进行对话，接着把Rack的响应（也就是application的返回值）转换回真正的HTTP响应。
 
-![rack-server](http://7xjibn.com1.z0.glb.clouddn.com/rack.jpg)
+![rack-server](http://blog.1nongfu.com/rack.jpg)
 
 
 ###Rails on Rack  
@@ -76,7 +76,7 @@ run Rails.application
 *  unicorn是热启动，nginx 式的二进制升级，不丢失连接。你可以升级 Unicorn、你的整个应用程序、库、甚至 Ruby 编辑器而不丢失客户端连接。 
 *  unicron是多进程阻塞I/O，每一个进程一次处理一个client。并发的实现是通过构造多个进程，
 如果对方没有数据发送，那么read操作就会被阻塞，如果对方接收数据太慢，那么write操作也会被阻塞。由于这种阻塞行为，一个application一次只能处理一个client。那么我们如何一次处理多个client呢？那就构造多个进程.  
-![unicorn_process](http://7xjibn.com1.z0.glb.clouddn.com/multi-process-io.jpg)  
+![unicorn_process](http://blog.1nongfu.com/multi-process-io.jpg)  
 缺点：  
 *  进程本身很重，开销大，所以如果你需要许多I/O并发（例如处理WebSocket，或者你的app需要做很多HTTP的API调用），那么用这种模型并不是太合适。假设我们生产环境有8个worker，每个worker占用内存250M，那么8个worker差不多需要2G的内存，消耗比较大。   
 *  unicorn多进程阻塞I/O模型,那么app server必须要通过使用“反向代理缓存（buffering reverse proxy）”进行保护，反向代理缓存可以处理更多数量的I/O并发。反向代理缓存的请求和响应是用以避免app server拒绝(against)slow client，这些个slow client会对application的其他方面进行阻塞，而反向代理缓存可以高效的将slow client进行纪录。 
@@ -85,7 +85,7 @@ run Rails.application
 *  puma是一个简洁、快速、多线程、高并发HTTP 1.1server专门为Ruby web applications打造的一个web server
 *  它可以用于任何支持Rack的application，可以用在开发环境和生产环境
 *  每一个进程有多个线程。每一个线程一次处理一个client。并发的实现通过构造小数量的进程，每一个进程包含有多个线程。
-![multithreaded](http://7xjibn.com1.z0.glb.clouddn.com/multithreaded-io.jpg)  
+![multithreaded](http://blog.1nongfu.com/multithreaded-io.jpg)  
 
 一个进程有多个线程，每一个线程一次处理一个client。因为线程是轻量级的，所以你可以用更少的内存处理相同数量的I/O并发，puma比unicorn最大的好处就是节省内存  
 
@@ -96,10 +96,10 @@ run Rails.application
 
 ###slow Client
 什么是“slow client”以及为什么这会成为一个问题？slow client可能是mobile client。mobile网络的高延迟非常的恶心。网络阻塞会让正常的client变成slow。一些client变成slow目的就是要攻击你的server，打个比方，把你的application想象成一个市政府，把app server想象成市政府里的办公桌。人们走近一张办公桌（发送一个请求），处理一些文件类的工作（在app内部进行处理），随后人们带着盖有印章的文件离开（收到一个响应）。slow client就像是人们走近一张办公桌，但是一直不离开，这个时候工作人员就无法帮助其他人。  
-![slowclientproblem](http://7xjibn.com1.z0.glb.clouddn.com/slowclientproblem.jpg)  
+![slowclientproblem](http://blog.1nongfu.com/slowclientproblem.jpg)  
 slow Client可以通过使用反向代理缓存解决，反向代理缓存可以处理更大量的I/O并发。想象一下我们把百万的工作人员放到市政府外面。这些工作人员并没有受过处理文件的训练。于此相反，他们只是接收你的文件（缓存你的请求），把这些文件带到市政府内部，然后把带有印章的文件再返还给你（缓存你的响应）。这些外部的工作人员永远不会一直站在办公桌前面，所以他们永远不会引起slow client问题。因为这些外部工作人员只是受到过简单的训练，所以他们的雇佣费用很低（RAM占用低），我们可以雇佣很多。  
 反向代理通常来说就是Nginx，Nginx缓存了所有的东西，并且可以处理一个被虚拟化了的无限数量的client，像Puma这种多线程server不是很容易受到影响，这是因为它们在市政府内部有更多的办公桌，但是这些办公桌在数量上仍然是有限的，因为比起市政府外面雇佣费用很低的工作人员来说，内部的工作人员需要更多的训练（占用更多的RAM）。  
-![bufferingreverseproxy](http://7xjibn.com1.z0.glb.clouddn.com/bufferingreverseproxy.jpg)
+![bufferingreverseproxy](http://blog.1nongfu.com/bufferingreverseproxy.jpg)
 
 ######题外阅读
 ###Raptor

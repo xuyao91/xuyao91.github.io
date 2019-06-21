@@ -13,7 +13,7 @@ categories:
 <!-- more -->
 ####（页面）类的封装
 测试开发流程具体如下，以app上的添加亲友为例
-![img](http://7xjibn.com1.z0.glb.clouddn.com/Screenshot_2016-08-06-17-58-40_com.yydys.png)
+![img](http://blog.1nongfu.com/Screenshot_2016-08-06-17-58-40_com.yydys.png)
 可以看到添加亲友页面上有4个控件，那么可以将这个页面封装成一个类，这些控件就是对应的实例方法
 ```ruby
 #android对应的类
@@ -180,7 +180,7 @@ end
 ```
 可以看到写测试用例的人员，不必关注底层控件的封装，只需按正常逻辑写测试用例就可
 ####测试报告
-![img](http://7xjibn.com1.z0.glb.clouddn.com/C8EA5B20-316A-45CB-A950-5F393B4AEC85.png)
+![img](http://blog.1nongfu.com/C8EA5B20-316A-45CB-A950-5F393B4AEC85.png)
 
 ####未完成的工作
 *   配置jenkins，使其每天定时打包最新的代码

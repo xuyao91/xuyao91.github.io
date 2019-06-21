@@ -13,14 +13,14 @@ categories:
 ####安装Android SDK  
 到Android[官网](https://developer.android.com/studio/index.html)，下载一个mac版的sdk,解压出来
 进入tools文件夹，执行android文件，出现如下界面，选择需要安装的版本
-![android_sdk_download](http://7xjibn.com1.z0.glb.clouddn.com/android_sdk_download.png)
+![android_sdk_download](http://blog.1nongfu.com/android_sdk_download.png)
 下载完成后,进入android sdk目录下面执行
 ```ruby
 android avd
 ```
 打开android avd管理界面，添加一个avd设备
-![avd_manger](http://7xjibn.com1.z0.glb.clouddn.com/avd_manger.png)
-![create_avd](http://7xjibn.com1.z0.glb.clouddn.com/create_avd.png)
+![avd_manger](http://blog.1nongfu.com/avd_manger.png)
+![create_avd](http://blog.1nongfu.com/create_avd.png)
 新建完成后，可以启动看一下android 虚拟设备  
 最后进入platform-tools使用命令，查看当前的android可用设备
 如果是真机测试的话，使用USB线连接电脑，打开开发者模式，同意此电脑连接设备，appium启动时,会查找当前可用的android设备
@@ -51,10 +51,10 @@ echo $JAVA_HOME
 /Library/Java/JavaVirtualMachines/jdk1.8.0_71.jdk/Contents/Home
 ```
 一切准备就绪，接下来就开始在appium里配置android信息了
-![android_config](http://7xjibn.com1.z0.glb.clouddn.com/android_config.png)
+![android_config](http://blog.1nongfu.com/android_config.png)
 platform Versiont选择的时候，如果是真机测试时，确定所选版本和机子上的android版本一样，否则会报错。
 配置完成后，接下来就是启动server和client,这里的步骤一ios是一样的，具体可查看上一篇文章，截一个android版本的client启动成功的Inspector gui的图
-![img](http://7xjibn.com1.z0.glb.clouddn.com/android_inspect.png)
+![img](http://blog.1nongfu.com/android_inspect.png)
 
 ######注意的地方
 如果启动client的时候报下面的错
