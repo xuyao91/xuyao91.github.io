@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Hello Everybody - 老徐</title>
+  <title>密码学(三)之对称加密与非对称加密 - 老徐</title>
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="hello everybody, this is my first post, I'am very happy, bescuse it is successful. 如果想了解微信相关开发的东西请到我的新浪博客
-">
+  <meta name="description" content="&emsp;这是之前在公司内部做技术分享的文档，主要是讲解了对称加密和非对称加密的基本原理以及一些例子，现将它上传到blog上，做个备份。
+PDF文件下载地址-> 对称加密与非对称加密 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://xuyao.club/blog/2015/05/26/my-first-post/">
+  <link rel="canonical" href="http://xuyao.club/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
@@ -70,7 +70,7 @@
   
   <header>
     
-      <h1 class="entry-title">Hello Everybody</h1>
+      <h1 class="entry-title">密码学(三)之对称加密与非对称加密</h1>
     
     
       <p class="meta">
@@ -79,7 +79,7 @@
 
 
 
-<time class='entry-date' datetime='2015-05-26T17:29:27+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>5:29 pm</span></time>
+<time class='entry-date' datetime='2019-09-09T14:26:46+08:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>2:26 pm</span></time>
         
         <!-- doushuo commnet -->
         
@@ -90,9 +90,35 @@
   </header>
 
 
-<div class="entry-content"><p>hello everybody, this is my first post, I'am very happy, bescuse it is successful.</p>
+<div class="entry-content"><p>&emsp;这是之前在公司内部做技术分享的文档，主要是讲解了对称加密和非对称加密的基本原理以及一些例子，现将它上传到blog上，做个备份。
+PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E4%B8%8E%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86.pdf">对称加密与非对称加密</a></p>
 
-<p>如果想了解微信相关开发的东西请到我的<a href="http://blog.sina.com.cn/xuyao90">新浪博客</a></p>
+<!-- more -->
+
+
+<p><img src="http://img.1nongfu.com/image-20190909143504582.png" alt="image-20190909143504582" />
+<img src="http://img.1nongfu.com/image-20190909143520880.png" alt="image-20190909143520880" />
+<img src="http://img.1nongfu.com/image-20190909143545320.png" alt="image-20190909143545320" />
+<img src="http://img.1nongfu.com/image-20190909144913397.png" alt="image-20190909144913397" />
+<img src="http://img.1nongfu.com/image-20190909144930588.png" alt="image-20190909144930588" />
+<img src="http://img.1nongfu.com/image-20190909144948085.png" alt="image-20190909144948085" />
+<img src="http://img.1nongfu.com/image-20190909145000065.png" alt="image-20190909145000065" />
+<img src="http://img.1nongfu.com/image-20190909145016128.png" alt="image-20190909145016128" />
+<img src="http://img.1nongfu.com/image-20190909145038512.png" alt="image-20190909145038512" />
+<img src="http://img.1nongfu.com/image-20190909145715696.png" alt="image-20190909145715696" />
+<img src="http://img.1nongfu.com/image-20190909145054241.png" alt="image-20190909145054241" />
+<img src="http://img.1nongfu.com/image-20190909145741242.png" alt="image-20190909145741242" />
+<img src="http://img.1nongfu.com/image-20190909145125180.png" alt="image-20190909145125180" />
+<img src="http://img.1nongfu.com/image-20190909145807527.png" alt="image-20190909145807527" />
+<img src="http://img.1nongfu.com/image-20190909145823090.png" alt="image-20190909145823090" />
+<img src="http://img.1nongfu.com/image-20190909145837767.png" alt="image-20190909145837767" />
+<img src="http://img.1nongfu.com/image-20190909145849776.png" alt="image-20190909145849776" />
+<img src="http://img.1nongfu.com/image-20190909145926888.png" alt="image-20190909145926888" />
+<img src="http://img.1nongfu.com/image-20190909145940375.png" alt="image-20190909145940375" />
+<img src="http://img.1nongfu.com/image-20190909151644589.png" alt="image-20190909151644589" />
+<img src="http://img.1nongfu.com/image-20190909150000693.png" alt="image-20190909150000693" />
+<img src="http://img.1nongfu.com/image-20190909150024876.png" alt="image-20190909150024876" />
+<img src="http://img.1nongfu.com/image-20190909150042448.png" alt="image-20190909150042448" /></p>
 </div>
 
 
@@ -108,7 +134,7 @@
 
 
 
-<time class='entry-date' datetime='2015-05-26T17:29:27+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>5:29 pm</span></time>
+<time class='entry-date' datetime='2019-09-09T14:26:46+08:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>2:26 pm</span></time>
       
 
 
@@ -123,8 +149,8 @@
     
     <p class="meta">
       
+        <a class="basic-alignment left" href="/blog/2019/06/21/the-tbaas-of-tencent/" title="Previous Post: 腾讯云区块链服务平台介绍及接入">&laquo; 腾讯云区块链服务平台介绍及接入</a>
       
-        <a class="basic-alignment right" href="/blog/2015/05/28/ruby-alias-methods/" title="Next Post: rails 中alias alias_method alias_method_chain的使用">rails 中alias alias_method alias_method_chain的使用 &raquo;</a>
       
     </p>
   </footer>
@@ -135,7 +161,7 @@
   <section>
     <h1>Comments</h1>
     <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
-	<div class="ds-thread" data-title="Hello Everybody"></div>
+	<div class="ds-thread" data-title="密码学(三)之对称加密与非对称加密"></div>
 <!-- 多说评论框 end -->
 <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">
