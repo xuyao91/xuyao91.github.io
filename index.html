@@ -9,8 +9,8 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="&emsp;这是之前在公司内部做技术分享的文档，主要是讲解了对称加密和非对称加密的基本原理以及一些例子，现将它上传到blog上，做个备份。
-PDF文件下载地址-> 对称加密与非对称加密 ">
+  <meta name="description" content="本文使用ubuntu 18作为系统，直接使用脚本启动Fabric网络，而非使用Docker容器来启动 1、安装环境 1.1、安装Ubuntu系统
+到官网下载最新版的ubuntu镜像，我本地是使用虚拟机来安装ubuntu的，打开虚拟机，选择镜像文件，根据提示一路安装， ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,49 @@ PDF文件下载地址-> 对称加密与非对称加密 ">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-08-26T11:09:59+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>11:09 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>本文使用ubuntu 18作为系统，直接使用脚本启动Fabric网络，而非使用Docker容器来启动</p>
+
+<h3>1、安装环境</h3>
+
+<p><strong>1.1、安装Ubuntu系统</strong><br/>
+到官网下载最新版的ubuntu镜像，我本地是使用虚拟机来安装ubuntu的，打开虚拟机，选择镜像文件，根据提示一路安装，</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -480,46 +523,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/07/17/cryptography-of-substitution-cipher/">密码学(二)之代换密码</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-07-17T17:28:46+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:28 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2018/07/17/cryptography-of-substitution-cipher/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>（一）代换密码（替换密码）</h3>
-
-<p>上一讲中，我们讲移位密码其实是将字母表中的字母一一对应到各数字，然后通过数字平移来进行加密，古典密码学中还有一种比较有名的加密方法，就是将明文中的字母表对应到一套密文的字母表，这种加密方法我们叫<strong>代换密码（substiution cipher）</strong>或叫<strong>替换密码</strong>，下图就是一个简单的代换密码对应表</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/07/17/cryptography-of-substitution-cipher/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -533,6 +536,10 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
@@ -550,10 +557,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
         <a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Fabric动态增加节点（Peer）</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -567,7 +570,7 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2019 - Peter Xu -
+  Copyright &copy; 2020 - Peter Xu -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

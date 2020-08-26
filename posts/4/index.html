@@ -9,8 +9,20 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="hello everybody, this is my first post, I'am very happy, bescuse it is successful. 如果想了解微信相关开发的东西请到我的新浪博客
-">
+  <meta name="description" content="首先看一下alias的用法，上一个实例是明了 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+class Dog def say puts &quot;say hello&quot; end alias :wang :say
+end dog = Dog.new
+dog.wang =&gt; say &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +85,77 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/05/28/ruby-alias-methods/">Rails 中alias Alias_method Alias_method_chain的使用</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-28T22:03:17+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:03 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2015/05/28/ruby-alias-methods/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h5>首先看一下alias的用法，上一个实例是明了</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
+</span><span class='line'>          <span class="nb">puts</span>  <span class="s2">&quot;say hello&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'> <span class="k">alias</span> <span class="ss">:wang</span> <span class="ss">:say</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">dog</span> <span class="o">=</span> <span class="no">Dog</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">dog</span><span class="o">.</span><span class="n">wang</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">=&gt;</span> <span class="n">say</span> <span class="n">hello</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>在类中可以将一个实例方法重新命名,注意的是新方法在前面，用空格格开</p>
+
+<h5>alias_method的用法，</h5>
+
+<p>和alias一样，只是他是module的一个私有方法，而且它的方法名可以是字符中，而alias不行，看代码</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/05/28/ruby-alias-methods/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/05/26/my-first-post/">Hello Everybody</a></h1>
     
     
@@ -118,6 +201,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
       </li>
     
@@ -133,10 +220,6 @@
         <a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Fabric动态增加节点（Peer）</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -150,7 +233,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2019 - Peter Xu -
+  Copyright &copy; 2020 - Peter Xu -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
