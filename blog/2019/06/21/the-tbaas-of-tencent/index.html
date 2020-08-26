@@ -1,0 +1,1004 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>腾讯云区块链服务平台介绍及接入 - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="1、TBaas简介 &emsp;1.1、TBaas简介 &emsp;1.2、Hyperledger Fabric的架构 &emsp;1.3、TBaaS的架构 2、如何使用TBaaS &emsp;2.1、创建联盟 &emsp;2.2、Channel管理 &emsp;2.3、ChainCode管理 3 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2019/06/21/the-tbaas-of-tencent/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">腾讯云区块链服务平台介绍及接入</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-06-21T16:17:20+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2019</span></span> <span class='time'>4:17 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p><strong>1、TBaas简介</strong></p>
+
+<p>&emsp;1.1、TBaas简介</p>
+
+<p>&emsp;1.2、Hyperledger Fabric的架构</p>
+
+<p>&emsp;1.3、TBaaS的架构</p>
+
+<p><strong>2、如何使用TBaaS</strong></p>
+
+<p>&emsp;2.1、创建联盟</p>
+
+<p>&emsp;2.2、Channel管理</p>
+
+<p>&emsp;2.3、ChainCode管理</p>
+
+<!-- more -->
+
+
+<p><strong>3、数据如何上链</strong></p>
+
+<p>&emsp;3.1、编写ChainCode</p>
+
+<p>&emsp;3.2、调用Fabric交易相关接口</p>
+
+<p>&emsp;3.3、调用Fabric区块链浏览器相关接口</p>
+
+<p><strong>4、需要注意的问题</strong></p>
+
+<p>&emsp;4.1、哪些数据适合存储在链上？</p>
+
+<p>&emsp;4.2、上链的性能问题</p>
+
+<p>&emsp;4.3、上链的数据隐私问题</p>
+
+<h3>1、TBaaS简介</h3>
+
+<h4>1.1、TBaas简介</h4>
+
+<p>腾讯云区块链服务平台（TBaaS）是一个企业级的区块链开放平台，可一键式快速部署接入、拥有去中心化信任机制、集合众多区块链底层技术的区块链服务平台，目前已支持 Hyperledger Fabric 与 FISCO-BCOS 区块链底层平台，后续将支持 Corda、EEA 等不同区块链底层技术。平台目前支持私有链与联盟链两种模式，</p>
+
+<p>TBaaS有一个重要特性是<strong>多链支持</strong>，这是其它普通联盟链没有的，不过从他的白皮书的了解到，TBaaS所说的多链并不是真正物理上的多链，而是TBaaS平台将自己的成员系统+通道组成的一个<strong>具有用户权限的多Channel(通道)管理平台</strong>，即逻辑上的多链，以下是官方白皮书对多链的说明。</p>
+
+<blockquote><p>一条逻辑上的区块链是集合了特定组织、特定节点的私有区块链系统，不同的组织间可以建立不同的逻辑区块链，链间实现数据隔离，智能合约可以部署在不同的逻辑区块链之上。</p>
+
+<p>在TBaaS系统中，支持用户在同一个区块链系统中建立多个不同的逻辑区块链，即多链。多链
+中每一条链都是包含记账节点、共识节点、智能合约和账簿的逻辑结构，它将参与者与数据(包含智
+能合约)进行隔离，实现了不同角色的用户访问权限不同，数据进行安全控制的基本要求。</p></blockquote>
+
+<p><a href="https://main.qcloudimg.com/raw/565be73decf6badd55779613908a3319/%E8%85%BE%E8%AE%AF%E4%BA%91%E5%8C%BA%E5%9D%97%E9%93%BETBaaS%E4%BA%A7%E5%93%81%E7%99%BD%E7%9A%AE%E4%B9%A6.pdf">点击查看白皮书全文</a></p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605172519389.png" alt="image-20190605172519389" /></p>
+
+<h4>1.2、Hyperledger Fabric的架构</h4>
+
+<p>在说TBaaS之前，简单介绍一下Fabric。</p>
+
+<p>Hyperledger Fabric 是一个企业级的区块链框架实现，是 Linux 基金会旗下托管的 Hyperledger 开源项目之一，具有高度的模块化、可配置设计，拥有完备的成员管理和治理措施，支持可插拔的共识协议。</p>
+
+<p>Hyperledger Fabric 不需要利用传统的发币、挖矿、PoW 工作量证明等手段来激励参与方。针对联盟链场景，差异化设计使得 Fabric 成为当前性能优秀、广受认可的区块链底层引擎。</p>
+
+<p>下面是Fabric整个架构图，</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606151636463.png" alt="image-20190606151636463" /></p>
+
+<p>整个Fabric网络由成员管理服务、区块链服务、链码服务三大块组成，其中区块链服务就是整个架构中最重要、也是最难的部分，因为在整个部署过程中，docker服务很多，docker之前互相通信，只要其中一个服务启动有问题，就会影响整个联盟网络，所以操作起来非常复杂。</p>
+
+<p>但在TBaaS中，Fabric作为TBaaS中底层引擎最重要的一种联盟链，区块链服务这块已由平台事先初始化好了，并且平台集成了腾讯云的用户系统，<strong>TBaaS平台将Fabric的成员管理和腾讯云的用户系统打通</strong>，这样在以后的成员管理，上链服务，多链上起到了很大的作用，同时作为企业，我们并不需要关心TBaaS底层的联盟链和用户管理的问题，我们只需要考虑ChainCode（智能合约）部分对接就可以。</p>
+
+<p>如果一个项目需要将数据上传到Fabric联盟链中，整个Fabric项目基本会分为三大块，如下图</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605181853438.png" alt="image-20190605181853438" /></p>
+
+<p>Fabric联盟链、Fabric区块链浏览器、API接口服务，Fabric联盟链是整个区块链的核心，联盟链中有什么，可以参考上面Fabric框架图，企业将数据上链，首先要编写Chaincode，将智能合约安装到通道中，再通过API接口服务调用ChainCode，将数据上链，企业还需搭建区块链浏览器，用于查询上链的数据，所以传统的Fabric联盟链中，企业需要做三块内容：</p>
+
+<ul>
+<li>编写ChainCode</li>
+<li>编写API接口服务</li>
+<li>部署(编写)区块链浏览器</li>
+</ul>
+
+
+<h4>1.3、TBaaS的架构</h4>
+
+<p>TBaaS依托腾讯金融云基础设施，集开发、管理、运维和数据存储等功能为一体的一站式区块链服务平台。基于 TBaaS 区块链服务平台，客户可以降低对区块链底层技术的获取成本，专注在区块链业务模式创新及业务应用的开发和运营之中。TBaaS 区块链服务平台集合众多区块链底层技术，目前已支持 Hyperledger Fabric 与 FISCO-BCOS 区块链底层平台，后续将支持 Corda、EEA 等不同区块链底层技术，下面是TBaaS的整体架构图</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605211810925.png" alt="image-20190605211810925" /></p>
+
+<p>可以看到TBaaS架构比Fabric架构丰富了很多，TBaaS从创建联盟、成员管理、证书管理、合约的管理及在线编辑等都做了可视化界面，这大大缩减了开发人员的时间和成本，TBaaS还集成了运维管理，从监控警告到策略配置都有一套可视化界面，所以TBaaS把整个区块链服务做成了一个标准服务，这样企业可以更专注在区块链业务模式创新及业务应用的开发和运营之中。</p>
+
+<h3>2、如何使用TBaaS</h3>
+
+<h4>2.1、创建联盟链</h4>
+
+<p>这里简要说明一下如何创建及管理整个TBaaS联盟链的过程，首先需要使用账号、密码登录腾讯云平台，进入管理后台通过 云产品->TBaas 进入 腾讯的TBaas管理后台。</p>
+
+<h5>2.1.1、创建联盟</h5>
+
+<p>联盟对应一个区块链业务团体，一个区块链业务团体可以由一个或者多个腾讯云用户组成。联盟可由腾讯云用户免费创建，在新建联盟过程中，只需要填写联盟名称、联盟的描述即可。</p>
+
+<p><img src="https://main.qcloudimg.com/raw/5934187a9764184a945eedc2ab2407b6.png" alt="img" /></p>
+
+<h5>2.1.2、邀请成员</h5>
+
+<p>联盟成员可以邀请其他成员加入联盟，在 “联盟列表” 或者 “联盟详情” 页面中，单击 “邀请成员” ，进行成员邀请。</p>
+
+<p><img src="https://main.qcloudimg.com/raw/2e5b9ac6aef2a4a5742bf2ff1611521c.png" alt="img" /></p>
+
+<h5>2.1.3、创建区块链网络</h5>
+
+<p>创建联盟后，可以在该联盟下创建区块链网络及配置组织和节点</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605214420286.png" alt="image-20190605214420286" /></p>
+
+<p>点击创建网络来创建一个联盟链网络</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605214757114.png" alt="image-20190605214757114" /></p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605215451472.png" alt="image-20190605215451472" /></p>
+
+<p>一个成员只能创建一个组织且每个组织最大只支持10个节点，</p>
+
+<h4>2.2、Channel管理</h4>
+
+<p>2.1的步骤走完后，整个联盟链的底层基础网络已经全部创建好，接下来需要创建通道，并将通道加入到组织中</p>
+
+<h5>2.2.1、创建Channel</h5>
+
+<p>在通道管理中点击新建智能合约。</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190605215907421.png" alt="image-20190605215907421" /></p>
+
+<h5>2.2.2、 将Channel加入节点</h5>
+
+<p>在 “通道管理” 页签中，选择待加入节点的通道名称，单击【加入节点】。如下图所示：</p>
+
+<p><img src="https://main.qcloudimg.com/raw/d4ce424bc8fffcad07b6b43673dcdfa5.png" alt="加入节点" /></p>
+
+<h5>2.2.3、邀请组织</h5>
+
+<p>一个联盟链中可以有多个通道，且每个通道可以邀请不同的组织加入该通道，</p>
+
+<p>在 “通道管理” 页签中，选择待邀请组织的通道名称，单击【邀请组织】。如下图所示：</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606151835949.png" alt="image-20190606151835949" /></p>
+
+<h4>2.3、ChainCode(智能合约)管理</h4>
+
+<p>智能合约开发是区块链应用的主要功能，所有区块链业务能力围绕智能合约为核心，来实
+现智能合同、自动触发、安全隔离、业务定义、数字协议等功能，因此智能合约是区块链应用开发
+过程中最主要的部分，下面整个智能合约的生命周期图：</p>
+
+<h5><img src="http://blog.1nongfu.com/image-20190606114621404.png" alt="image-20190606114621404" />2.3.1、查看/新增合约</h5>
+
+<p>进入合约管理的 “区块链网络”，进入 “区块链网络” 信息页面，选择"合约管理"，可以在线新建一个合约，要注意的是，合约是用Go语言写的，如下图</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606151900620.png" alt="image-20190606151900620" /></p>
+
+<p>单击【在线编辑】，可在区块链网络上编辑与使用智能合约。如下图所示：
+具体操作可以按照使用指引使用智能合约 IDE 编辑器。</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606151927206.png" alt="image-20190606151927206" /></p>
+
+<h5>2.3.1 安装合约</h5>
+
+<p>点击下图合约列表右边的安装，可以将编写好的合约安装到某个组织里</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606151950163.png" alt="image-20190606151950163" /></p>
+
+<h5>2.3.2、实例化合约</h5>
+
+<p>安装好合约后，需要再实例化合约，点击<strong>实例化合约，系统会启动一个Docker服务来运行这个智能合约</strong>，如果在所有的组织里都安装、实例化智能合约，那会就会起相应数量的Docker服务来运行每个组织里的智能合约，注意<strong>一定要先安装合约，再实例化合约</strong>。</p>
+
+<h5>2.3.3、升级合约</h5>
+
+<p>有时候业务变动，需要修改合约内容，这时候修改后的合约内容要重新生效，就需要升级合约，同样如果在多个组织里都有对应的合约，则需要一个一个地升级。</p>
+
+<h3>3、数据如何上链</h3>
+
+<p>上面的步骤走完，整个TBaaS平台的区块链网络已经全部安装好，接下来就是要做企业如何对接TBaaS的联盟链，先来看下下面这张图，可以看到，TBaaS已经帮我们把整个网络都封装好了，我们只要调相关接口及编写智能合约就可以，整个项目对接只需要做如下三点即可：</p>
+
+<ul>
+<li>编写ChainCode</li>
+<li>调用TBaaS平台提供的Fabric交易相关API</li>
+<li>调用TBaas平台提供的Fabric区块链浏览器相关API</li>
+</ul>
+
+
+<p><img src="http://blog.1nongfu.com/image-20190606091920521.png" alt="image-20190606091920521" /></p>
+
+<h4>3.1、编写ChainCode</h4>
+
+<p>TBaaS平台提供了一套很完善的在线编写智能合约的服务，使用在线IDE，可以直接编写和编译</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606151927206.png" alt="å¨çº¿ç¼è¾" /></p>
+
+<p>需要注意的是，ChainCode官方文档显示可以使用Go,NodeJs,Java来编写合约，但是<strong>官方推荐使用Go语言来编写智能合约</strong>，合约具体内容根据我们业务来定，合约编写好后，具体的安装和实例化可以查看2.3的内容，</p>
+
+<h4>3.2、调用Fabric交易相关接口</h4>
+
+<p>合约编写好后，通过安装和实例化后，就可以调用这个合约来将数据上链，TBaaS官方提供了三个Fabric交易相关的接口，分别是：</p>
+
+<ul>
+<li>Invoke异步调用结果查询</li>
+<li>新增交易</li>
+<li>交易查询</li>
+</ul>
+
+
+<p>下面简要说下这三个接口的作用，详细文档可以查看<a href="https://cloud.tencent.com/document/product/663/19465">官方文档</a></p>
+
+<h5>3.2.1、 Invoke异步调用结果查询</h5>
+
+<p>本接口是查询上链数据是否有效、成功，注意是异步的，TBaaS平台也提供了在线调试工具，如下图</p>
+
+<p><img src="http://blog.1nongfu.com/image-20190606104848714.png" alt="image-20190606104848714" /></p>
+
+<p>注意<strong>调用Fabric相关的接口，官方提供了， Python、Java、NodeJs、PHP、GO语言的SDK，所以调用这些接口时，看我们自己技术方便，随便选用哪种语言的SDK都可以</strong></p>
+
+<p>下面是是 Invoke异步调用结果查询的一个官方示例，可以看下</p>
+
+<p><strong>输入示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://tbaas.tencentcloudapi.com/?Action=GetInvokeTx
+</span><span class='line'>&Module=transaction
+</span><span class='line'>&Operation=query_txid
+</span><span class='line'>&ClusterId=251005746envnew
+</span><span class='line'>&ChannelName=ch042103
+</span><span class='line'>&PeerName=peer0.neworg02.envnew
+</span><span class='line'>&PeerGroup=NewOrg02
+</span><span class='line'>&TxId=280e9f1436c3ce045af4f3c7060ff217583585d41faf1f1daa99387419bac07c
+</span><span class='line'>&GroupName=NewOrg02
+</span><span class='line'>&&lt;公共请求参数&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>输出示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "Response": {
+</span><span class='line'>    "BlockId": 6,
+</span><span class='line'>    "RequestId": "551b801e-6dbe-46be-aa46-f8cc3ff1cd09",
+</span><span class='line'>    "TxValidationCode": 0,
+</span><span class='line'>    "TxValidationMsg": "VALID"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>3.2.2、新增交易</h5>
+
+<p>这个接口应该是最重要的一个接口，就是将我们自己的数据上链，具体把什么数据上链，可以根据我们自己的业务系统来，数据上链成功后会返回一个Txid，这个交易ID是数据在链上的唯一标识，应该需要存储到我们的业务系统，以后可能用到这个Txid来查询链上的数据。</p>
+
+<p>下面是一个示例：</p>
+
+<p><strong>输入示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://tbaas.tencentcloudapi.com/?Action=Invoke
+</span><span class='line'>&Module=transaction
+</span><span class='line'>&Operation=invoke
+</span><span class='line'>&ClusterId=251005746envnew
+</span><span class='line'>&Peers.0.PeerName=peer0.neworg02.envnew
+</span><span class='line'>&Peers.0.OrgName=NewOrg02
+</span><span class='line'>&ChannelName=ch042103
+</span><span class='line'>&ChaincodeName=cc050301
+</span><span class='line'>&FuncName=createCar
+</span><span class='line'>&Args.0=CAR92
+</span><span class='line'>&Args.1=Chevy
+</span><span class='line'>&Args.2=Volt
+</span><span class='line'>&Args.3=Black
+</span><span class='line'>&Args.4=Nick
+</span><span class='line'>&GroupName=NewOrg02
+</span><span class='line'>&&lt;公共请求参数&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>输出示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "Response": {
+</span><span class='line'>    "Events": "myOrgpeer0.myorg.envnew:VALID",
+</span><span class='line'>    "RequestId": "0b82b65e-7100-49f1-9f29-e934a8833711",
+</span><span class='line'>    "Txid": "0366ab8f31c9f8aa6b9fc9506fa841e55d1ecd492b3ecc373c0f66ca49f33ea1"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>3.2.3、交易查询</h5>
+
+<p>数据上链后，需要查看相关链上数据，注意这个查询接口是可以根据用户上链的数据查询，而不是根据上面的接口的Txid来查询，也就是说这个接口的查询交易的参数用户是可以自己自定义的，下面看下示例。</p>
+
+<p><strong>输入示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://tbaas.tencentcloudapi.com/?Action=Query
+</span><span class='line'>&Module=transaction
+</span><span class='line'>&Operation=query
+</span><span class='line'>&ClusterId=251005746envnew
+</span><span class='line'>&Peers.0.PeerName=peer0.neworg02.envnew
+</span><span class='line'>&Peers.0.OrgName=NewOrg02
+</span><span class='line'>&ChannelName=ch042103
+</span><span class='line'>&ChaincodeName=cc050301
+</span><span class='line'>&FuncName=queryCar
+</span><span class='line'>&Args.0=CAR92
+</span><span class='line'>&GroupName=NewOrg02
+</span><span class='line'>&&lt;公共请求参数&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>输出示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "Response": {
+</span><span class='line'>    "Data": [
+</span><span class='line'>      "{\"make\":\"Chevy\",\"model\":\"Volt\",\"colour\":\"Black\",\"owner\":\"Nick\"}"
+</span><span class='line'>    ],
+</span><span class='line'>    "RequestId": "3f6836c5-e889-431e-b932-47a1653c5f7b"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到Args.0=CAR92是自己定义的上链数据，并不是Txid。</p>
+
+<h4>3.3、调用Fabric区块链浏览器相关接口</h4>
+
+<p>TBaaS并没有直接提供给我们一个区块链浏览器相关的平台 ，只是提供了三个接口给我们，供我们自己查询，<strong>我们可以通过这些接口自己做一个简单的TBaaS版区块链浏览器出来，实现区块链数据的可视化管理</strong>，接口分别如下：</p>
+
+<ul>
+<li><p>查询区块列表</p></li>
+<li><p>获取区块链网络概要</p></li>
+<li><p>获取最新交易列表</p></li>
+</ul>
+
+
+<h5>3.3.1、查询区块列表</h5>
+
+<p>这个接口可以查看链上所有的区块数据，分页展示，可以在我们自己的系统里把链上所有的数据都分页展示出来，可以看下示例：</p>
+
+<p><strong>输入示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://tbaas.tencentcloudapi.com/?Action=GetBlockList
+</span><span class='line'>&Module=block
+</span><span class='line'>&Operation=block_list
+</span><span class='line'>&ChannelId=0
+</span><span class='line'>&GroupId=0
+</span><span class='line'>&ChannelName=kylotst
+</span><span class='line'>&GroupName=liulanOrg
+</span><span class='line'>&ClusterId=251005746bc0f03q8u93j
+</span><span class='line'>&Offset=0
+</span><span class='line'>&Limit=10
+</span><span class='line'>&&lt;公共请求参数&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>输出示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "Response": {
+</span><span class='line'>    "BlockList": [
+</span><span class='line'>      {
+</span><span class='line'>        "BlockId": 5,
+</span><span class='line'>        "BlockNum": 5,
+</span><span class='line'>        "DataHash": "92f1c3b1eb0eb1bc1825f1acd3474e7679b2a97cdf8d6155ed6a0e6c1458e479",
+</span><span class='line'>        "PreHash": "92f1c3b1eb0eb1bc1825f1acd3474e7679b2a97cdf8d6155ed6a0e6c1458e479",
+</span><span class='line'>        "TxCount": 1
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockId": 4,
+</span><span class='line'>        "BlockNum": 4,
+</span><span class='line'>        "DataHash": "17e381e65605963c9211abc5b72d80cf3a6a4955ff7b61c70b406b98c90ded6f",
+</span><span class='line'>        "PreHash": "17e381e65605963c9211abc5b72d80cf3a6a4955ff7b61c70b406b98c90ded6f",
+</span><span class='line'>        "TxCount": 1
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockId": 3,
+</span><span class='line'>        "BlockNum": 3,
+</span><span class='line'>        "DataHash": "32b80e93141467eda367f05a2428a6c03369405ae10349db7fad0762e9b56cc2",
+</span><span class='line'>        "PreHash": "32b80e93141467eda367f05a2428a6c03369405ae10349db7fad0762e9b56cc2",
+</span><span class='line'>        "TxCount": 1
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockId": 2,
+</span><span class='line'>        "BlockNum": 2,
+</span><span class='line'>        "DataHash": "8be5094bf40c5b7e410cc3e8aa33354da2aa78db862e17cfd5fa783dddc1ee3a",
+</span><span class='line'>        "PreHash": "8be5094bf40c5b7e410cc3e8aa33354da2aa78db862e17cfd5fa783dddc1ee3a",
+</span><span class='line'>        "TxCount": 1
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockId": 1,
+</span><span class='line'>        "BlockNum": 1,
+</span><span class='line'>        "DataHash": "af319fe2ff9e5830af0f07200adf965156446a205137e61d87f1db0b8f43cc7e",
+</span><span class='line'>        "PreHash": "af319fe2ff9e5830af0f07200adf965156446a205137e61d87f1db0b8f43cc7e",
+</span><span class='line'>        "TxCount": 1
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockId": 0,
+</span><span class='line'>        "BlockNum": 0,
+</span><span class='line'>        "DataHash": "96f22d00947478c1b16c2aec5e7079c761b168d304cadf19a14a032ee8f64a23",
+</span><span class='line'>        "PreHash": "96f22d00947478c1b16c2aec5e7079c761b168d304cadf19a14a032ee8f64a23",
+</span><span class='line'>        "TxCount": 1
+</span><span class='line'>      }
+</span><span class='line'>    ],
+</span><span class='line'>    "RequestId": "018328c8-9c24-4104-a0ad-a7a31c033278",
+</span><span class='line'>    "TotalCount": 6
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>3.3.2、获取区块链网络概要</h5>
+
+<p>这个接口可以查看区块网络的一个概要信息，包括当前通道数量、组织数量、节点数量、合约数量、Orderer数量等，下面是一个示例：</p>
+
+<p><strong>输入示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://tbaas.tencentcloudapi.com/?Action=GetClusterSummary
+</span><span class='line'>&Module=cluster_mng
+</span><span class='line'>&Operation=cluster_summary
+</span><span class='line'>&ClusterId=251005746bc0f03q8u93j
+</span><span class='line'>&GroupId=0
+</span><span class='line'>&GroupName=liulanOrg
+</span><span class='line'>&&lt;公共请求参数&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>输出示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "Response": {
+</span><span class='line'>    "ClientCertCount": 2,
+</span><span class='line'>    "JoinChannelCount": 1,
+</span><span class='line'>    "MyChaincodeCount": 1,
+</span><span class='line'>    "MyChannelCount": 1,
+</span><span class='line'>    "MyGroupCount": 1,
+</span><span class='line'>    "MyPeerCount": 2,
+</span><span class='line'>    "NoneChannelCount": 0,
+</span><span class='line'>    "OrderCertCount": 0,
+</span><span class='line'>    "OtherChaincodeCount": 0,
+</span><span class='line'>    "OtherChannelCount": 0,
+</span><span class='line'>    "OtherGroupCount": 0,
+</span><span class='line'>    "OtherPeerCount": 0,
+</span><span class='line'>    "PeerCertCount": 2,
+</span><span class='line'>    "RecentChaincodeCount": 1,
+</span><span class='line'>    "RequestId": "8646a1d8-bae3-4b41-8732-06b8c004eaa5",
+</span><span class='line'>    "TlsCertCount": 4,
+</span><span class='line'>    "TotalCertCount": 8,
+</span><span class='line'>    "TotalChaincodeCount": 1,
+</span><span class='line'>    "TotalChannelCount": 1,
+</span><span class='line'>    "TotalGroupCount": 1,
+</span><span class='line'>    "TotalPeerCount": 2
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>3.3.3、获取最新交易列表</h5>
+
+<p>这个接口也是获取交易数据，只是他获取的是最新上链的数据列表，总体跟3.3.1的接口很相似，下面是示例</p>
+
+<p><strong>输入示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://tbaas.tencentcloudapi.com/?Action=GetLatesdTransactionList
+</span><span class='line'>&Module=transaction
+</span><span class='line'>&Operation=latest_transaction_list
+</span><span class='line'>&GroupId=0&ChannelId=0
+</span><span class='line'>&LatestBlockNumber=5
+</span><span class='line'>&GroupName=liulanOrg
+</span><span class='line'>&ChannelName=kylotst
+</span><span class='line'>&ClusterId=251005746bc0f03q8u93j
+</span><span class='line'>&Offset=0
+</span><span class='line'>&Limit=10
+</span><span class='line'>&&lt;公共请求参数&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>输出示例</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "Response": {
+</span><span class='line'>    "RequestId": "68cd2009-6a2b-481e-850e-08522a546221",
+</span><span class='line'>    "TotalCount": 5,
+</span><span class='line'>    "TransactionList": [
+</span><span class='line'>      {
+</span><span class='line'>        "BlockHeight": 6,
+</span><span class='line'>        "BlockId": 5,
+</span><span class='line'>        "CreateOrgName": "liulanOrg",
+</span><span class='line'>        "CreateTime": "2019-04-24 11:39:52",
+</span><span class='line'>        "TransactionHash": "da6a44da08bda02fb94b2b3fb684350a7f636044f348dbed9804f1dc143d2a01",
+</span><span class='line'>        "TransactionId": "4ea1f77d1c2622f6672e37c611a0542dc9e21b15298b03de4127df454a17a457",
+</span><span class='line'>        "TransactionStatus": "VALID",
+</span><span class='line'>        "TransactionType": "ENDORSER_TRANSACTION"
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockHeight": 5,
+</span><span class='line'>        "BlockId": 4,
+</span><span class='line'>        "CreateOrgName": "liulanOrg",
+</span><span class='line'>        "CreateTime": "2019-04-24 11:39:25",
+</span><span class='line'>        "TransactionHash": "6e8a88088e1c0b111f7ff0f74e7891a15c5c32cd1fa68d8e5f8d11637fd4ca04",
+</span><span class='line'>        "TransactionId": "9f2e40a4443d9928ed9b8266e893ac90ed00381227994281833ecd4393d40b15",
+</span><span class='line'>        "TransactionStatus": "VALID",
+</span><span class='line'>        "TransactionType": "ENDORSER_TRANSACTION"
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockHeight": 4,
+</span><span class='line'>        "BlockId": 3,
+</span><span class='line'>        "CreateOrgName": "liulanOrg",
+</span><span class='line'>        "CreateTime": "2019-04-23 19:15:59",
+</span><span class='line'>        "TransactionHash": "421234c8ad48052f202a262f1fe739b963831c423b2d0028ba7496eca837cac9",
+</span><span class='line'>        "TransactionId": "bf2cdfd82a7b9a9a5ce135ef41687f3f04496c41575e2994fae99b58bec80754",
+</span><span class='line'>        "TransactionStatus": "VALID",
+</span><span class='line'>        "TransactionType": "ENDORSER_TRANSACTION"
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockHeight": 3,
+</span><span class='line'>        "BlockId": 2,
+</span><span class='line'>        "CreateOrgName": "liulanOrg",
+</span><span class='line'>        "CreateTime": "2019-04-23 19:14:23",
+</span><span class='line'>        "TransactionHash": "57407887234a4645c7b339aea5e94d3cf5f017f5eb05037a2c12fecf9d4fd6ae",
+</span><span class='line'>        "TransactionId": "71594843087d3435c2aa74f69d9d995ed97fff4951778b86956c2c069691fb54",
+</span><span class='line'>        "TransactionStatus": "VALID",
+</span><span class='line'>        "TransactionType": "ENDORSER_TRANSACTION"
+</span><span class='line'>      },
+</span><span class='line'>      {
+</span><span class='line'>        "BlockHeight": 2,
+</span><span class='line'>        "BlockId": 1,
+</span><span class='line'>        "CreateOrgName": "liulanOrg",
+</span><span class='line'>        "CreateTime": "2019-04-23 14:34:29",
+</span><span class='line'>        "TransactionHash": "9d798fe9f0eeaf5193ec1f9dc21e930bf3232820ddc1db18625b9f02bd35f54a",
+</span><span class='line'>        "TransactionId": "4ee11735f87b34673ea88c162e71b20fb71f798e89231e45bc0fbc6b9f09d02c",
+</span><span class='line'>        "TransactionStatus": "VALID",
+</span><span class='line'>        "TransactionType": "ENDORSER_TRANSACTION"
+</span><span class='line'>      }
+</span><span class='line'>    ]
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>4、需要注意的问题</h3>
+
+<p>上面是整个TBaaS的使用和对接过程，可以说基于TBaaS平台，联盟链的开发成本降了很多，但在整个开发过程中，有以下几个问题需要注意。</p>
+
+<h5>4.1、哪些数据适合存储在链上？</h5>
+
+<p>参与方最好不要将一些敏感信息上链，例如用户身份信息、用户联系方式、资金信息等。适合存储在链上的数据可划分为以下方面：</p>
+
+<ul>
+<li>项目由多方参与，且数据需要多方达成共识才能生成。</li>
+<li>项目由多方参与，且数据需要在多方之间内共享。</li>
+<li>需要特定参与方对真实性进行背书的数据。</li>
+<li>有直接或者间接价值的数据。</li>
+</ul>
+
+
+<h5>4.2、上链的性能问题</h5>
+
+<p>从TBaaS的官方文档上看，15节点的区块链网络中实现单通道超过7000TPS，官方并没有说明具体服务器的配置，之前我们做过测试，Farbic网络中，8G内存，4核心CPU，4个节点，单通道请求一般是200-300TPS左右，在实际应用中，一开始我们的节点数没有这么多，还有服务器的具体配置与应用环境，在对接的过程需要注意请求并发量，防止上链的性能问题。</p>
+
+<h5>4.3、上链的数据隐私问题</h5>
+
+<p>目前TBaaS针对Fabric的数据隐私问题，有如下不同程序保护</p>
+
+<ul>
+<li>使用多链支持，将区块链分为若干通道+腾讯云用户系统，通道与通道之间的数据隔离存储和传输，数据只能被此通道的参与方访问。</li>
+<li>参与方可以仅将数据的摘要值或者加密后的密文上链。该方式需要保证数据的访问方能够根据摘要值获取到原始数据，或者拥有对密文进行解密的密钥。</li>
+<li>通过在智能合约中定义规则，只允许特定的角色有权限访问数据。</li>
+</ul>
+
+
+<p><a href="http://blog.1nongfu.com/%E8%85%BE%E8%AE%AF%E4%BA%91%E5%8C%BA%E5%9D%97%E9%93%BE%E6%9C%8D%E5%8A%A1%E5%B9%B3%E5%8F%B0%E4%BB%8B%E7%BB%8D%E5%8F%8A%E6%8E%A5%E5%85%A5.pdf">点击下载PDF版</a></p>
+
+<div align="right">
+  徐耀&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+  最后更新时间：2019-06-06
+</div>
+
+
+<p></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-06-21T16:17:20+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>21</span><span class='date-suffix'>st</span>, <span class='date-year'>2019</span></span> <span class='time'>4:17 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/" title="Previous Post: ES6中如何删除数组中的重复项">&laquo; ES6中如何删除数组中的重复项</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/" title="Next Post: 密码学(三)之对称加密与非对称加密">密码学(三)之对称加密与非对称加密 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="腾讯云区块链服务平台介绍及接入"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/06/21/the-tbaas-of-tencent/">腾讯云区块链服务平台介绍及接入</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/">ES6中如何删除数组中的重复项</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Fabric动态增加节点（Peer）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

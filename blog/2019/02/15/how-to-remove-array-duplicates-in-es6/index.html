@@ -1,0 +1,439 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>ES6中如何删除数组中的重复项 - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="&emsp; ES6中，如何删除一个数组中的重复数据呢，以下是我总结的，从数组中过滤掉重复项并且返回唯一值的三种方法。我最喜欢的是使用Set因为它是最简单和最简单的😁 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+const array = ['🐷',1, 2,'🐷','🐷', 3 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">ES6中如何删除数组中的重复项</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-02-15T16:00:59+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>4:00 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>&emsp; ES6中，如何删除一个数组中的重复数据呢，以下是我总结的，从数组中过滤掉重复项并且返回唯一值的三种方法。我最喜欢的是使用Set因为它是最简单和最简单的😁</p>
+
+<!-- more -->
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>// 1: 'Set'
+</span><span class='line'>[... new Set(array)]
+</span><span class='line'>
+</span><span class='line'>// 2: 'Filter'
+</span><span class='line'>array.filter((item, index) =&gt; array.indexOf(item) === index)
+</span><span class='line'>
+</span><span class='line'>// 3: 'Reduce'
+</span><span class='line'>array.reduce((unique, item) =&gt; unique.includes(item) ? unique : [...unique, item], [])
+</span><span class='line'>
+</span><span class='line'>// 返回结果
+</span><span class='line'>[ '🐷', 1, 2, 3 ]</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>1. 使用Set</h4>
+
+<p>我先解释一下什么是Set:</p>
+
+<blockquote><p>Set是ES6中引入的新数据对象。Set只允许您存储唯一值。当传入数组时，它会删除任何重复的值。</p></blockquote>
+
+<p>ok，我们重新回到刚才的代码来分析一下发生了什么事情，（上面的代码）做了两件事情。
+1、首先，我们通过传递一个数组来创建了一个新的Set，因为Set只允许存储唯一的值，所以数组中那些重复的值会被删除。
+2、创建一个新的Set对象后，重复值已经被删除了，现在我们使用&hellip;运算符，将其转换回数组。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>// Step 1
+</span><span class='line'>const uniqueSet = new Set(array)
+</span><span class='line'># Set { '🐷', 1, 2, 3 }
+</span><span class='line'>
+</span><span class='line'>// Step 2
+</span><span class='line'>const backToArray = [...uniqueSet]
+</span><span class='line'># [ '🐷', 1, 2, 3 ]</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>使用Array.from 将Set转换为Array</h5>
+
+<p>或者你也可以使用Array.from将Set转化为数组</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>Array.from(new Set(array))
+</span><span class='line'># [ '🐷', 1, 2, 3 ]</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>2.使用Filter</h4>
+
+<p>为了便于理解，我们先来看下indexOf和filter会做什么事情</p>
+
+<h5>indexOf</h5>
+
+<p>indexOf方法会将我们提供的参数，在数组中找到该元素的第一个索引值并返回。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>array.indexOf('🐷') #=&gt; 0
+</span><span class='line'>array.indexOf(1) #=&gt; 1
+</span><span class='line'>array.indexOf(2) #=&gt; 2
+</span><span class='line'>array.indexOf(3) #=&gt; 5</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>filter</h4>
+
+<p>filter()方法会根据我们传递的条件，来创建一个新的元素数组。换句话说，如果元素通过并返回true，它将包含在已经过滤的数组中。任何失败元素或者返回为false的，都不会在过滤后的数组中。
+让我们一步步来分析数组循环时发生的事情</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>
+</span><span class='line'>array.filter((item, index) =&gt; {
+</span><span class='line'>  console.log(
+</span><span class='line'>      // a. Item
+</span><span class='line'>      item,
+</span><span class='line'>      // b. Index
+</span><span class='line'>      index,
+</span><span class='line'>      // c. IndexOf
+</span><span class='line'>      array.indexOf(item),
+</span><span class='line'>      // d. Condition
+</span><span class='line'>      array.indexOf(item) === index,
+</span><span class='line'>  );
+</span><span class='line'>  return array.indexOf(item) === index
+</span><span class='line'>})</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以下是上面显示的console.log的输出。重复项是索引与indexOf不匹配的位置。因此，在这些情况下，条件将为false，不会包含在我们的过滤数组中。
+<img src="https://upload-images.jianshu.io/upload_images/1796624-e1340356c5bd98fe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png" /></p>
+
+<h4>检索重复值</h4>
+
+<p>我们还可以使用filter方法从数组中检索重复值。我们可以通过简单地修改我们的条件就可以做到：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>const array = ['🐷',1, 2,'🐷','🐷', 3]
+</span><span class='line'>array.filter((item, index) =&gt; array.indexOf(item) !== index)
+</span><span class='line'># [ '🐷', '🐷' ]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再次，如果我们一步一来执行上面的代码，可以查看输出：
+<img src="https://upload-images.jianshu.io/upload_images/1796624-37f124574645e5c6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png" /></p>
+
+<h4>3.使用 reduce</h4>
+
+<p>reduce方法用于减少数组的元素，并根据您传递的某些reducer函数将它们组合成最终数组。</p>
+
+<p>在这个例子中，我们的reducer函数检查我们的最终数组是否包含该项。如果没有，请将该项目推送到我们的最终数组中。否则，跳过该元素并按原样返回我们的最终数组（基本上跳过该元素）。</p>
+
+<p>reduce总是有点难以理解，所以让我们进入每个案例并查看输出：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>array.reduce((unique, item) =&gt; {
+</span><span class='line'>  console.log(
+</span><span class='line'>      // a. Item
+</span><span class='line'>      item,
+</span><span class='line'>      // b. Final Array (Accumulator)
+</span><span class='line'>      unique,
+</span><span class='line'>      // c. Condition (Remember it only get pushed if this return 'false')
+</span><span class='line'>      unique.includes(item),
+</span><span class='line'>      // d. Reducer Function Result
+</span><span class='line'>      unique.includes(item) ? unique : [...unique, item],
+</span><span class='line'>  );
+</span><span class='line'>  unique.includes(item) ? unique : [...unique, item]
+</span><span class='line'>}, [])
+</span><span class='line'>
+</span><span class='line'># [ '🐷', '🐷' ]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这是console.log的输出：
+<img src="https://upload-images.jianshu.io/upload_images/1796624-8de3d95d35e6bf25.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png" /></p>
+
+<h4>参考资料</h4>
+
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set">MDN Web Docs — Set</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">MDN Web Docs — Filter</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce">MDN Web Docs — Reduce</a></li>
+<li><a href="https://gist.github.com/telekosmos/3b62a31a5c43f40849bb">GitHubGist: Remove duplicates from JS array</a></li>
+<li><a href="https://codehandbook.org/how-to-remove-duplicates-from-javascript-array/">CodeHandbook: How to Remove Duplicates from JavaScript Array</a></li>
+</ul>
+
+
+<h4>说明</h4>
+
+<p>本文翻译自<a href="https://medium.com/@samanthaming">Samantha Ming</a>的博客，原文地址<br/>
+<a href="https://medium.com/dailyjs/how-to-remove-array-duplicates-in-es6-5daa8789641c">https://medium.com/dailyjs/how-to-remove-array-duplicates-in-es6-5daa8789641c</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-02-15T16:00:59+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>15</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>4:00 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/01/10/fabric-adds-nodes-dynamically/" title="Previous Post: Fabric动态增加节点（Peer）">&laquo; Fabric动态增加节点（Peer）</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/06/21/the-tbaas-of-tencent/" title="Next Post: 腾讯云区块链服务平台介绍及接入">腾讯云区块链服务平台介绍及接入 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="ES6中如何删除数组中的重复项"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/06/21/the-tbaas-of-tencent/">腾讯云区块链服务平台介绍及接入</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/">ES6中如何删除数组中的重复项</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Fabric动态增加节点（Peer）</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiiii/">Fabric多台服务器的部署(五)</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
