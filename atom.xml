@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2019-09-09T15:23:28+08:00</updated>
+  <updated>2020-08-26T11:16:53+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,1114 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[非Docker环境部署Fabric]]></title>
+    <link href="http://xuyao.club/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/"/>
+    <updated>2020-08-26T11:09:59+08:00</updated>
+    <id>http://xuyao.club/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment</id>
+    <content type="html"><![CDATA[<p>本文使用ubuntu 18作为系统，直接使用脚本启动Fabric网络，而非使用Docker容器来启动</p>
+
+<h3>1、安装环境</h3>
+
+<p><strong>1.1、安装Ubuntu系统</strong><br/>
+到官网下载最新版的ubuntu镜像，我本地是使用虚拟机来安装ubuntu的，打开虚拟机，选择镜像文件，根据提示一路安装，</p>
+
+<!-- more -->
+
+
+<p><strong>1.2、安装Docker</strong><br/>
+因为chaincode最终还是要在docker里跑，所以还是要先装一下docker环境<br/>
+安装docker及docker-compose</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt install docker.io
+</span><span class='line'>apt install docker-compose</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由于国内直接镜像比较慢，所以建议使用Docker镜像代理，在阿里云里使用”容器镜像服务->镜像加速器“，找到自己的镜像加速地址，根据不同的系统配置镜像加速器，ubuntu系统配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo mkdir -p /etc/docker
+</span><span class='line'>sudo tee /etc/docker/daemon.json &lt;&lt;-'EOF'
+</span><span class='line'>{
+</span><span class='line'>  "registry-mirrors": ["https://youkey.mirror.aliyuncs.com"]
+</span><span class='line'>}
+</span><span class='line'>EOF
+</span><span class='line'>sudo systemctl daemon-reload
+</span><span class='line'>sudo systemctl restart docker</span></code></pre></td></tr></table></div></figure>
+
+
+<p>
+<strong>1.3、安装Golang</strong><br/>
+1、下载安装包到服务器上</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>wget https://dl.google.com/go/go1.14.1.linux-amd64.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2、解压安装包</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar -C /usr/local -xzf go1.14.1.linux-amd64.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、设置环境变量</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim ~/.bash_profile
+</span><span class='line'>
+</span><span class='line'>export PATH=$PATH:/usr/local/go/bin
+</span><span class='line'>export GOROOT=/usr/local/go
+</span><span class='line'>export GOPATH=/data/works/go
+</span><span class='line'>export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+</span><span class='line'>export GOBIN=$GOROOT/bin
+</span><span class='line'>export GOPROXY=https://goproxy.io</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>1.4、安装其它工具</strong><br/>
+安装一些系统操作的必要软件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt install curl #curl工具
+</span><span class='line'>apt-get install tree #树形结构查看文件
+</span><span class='line'>apt-get install jq</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2、Fabric安装和编译</h3>
+
+<p><strong>2.1、下载源码</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p $GOPATH/src/github.com/hyperledger
+</span><span class='line'>cd $GOPATH/src/github.com/hyperledger
+</span><span class='line'>git clone https://github.com/hyperledger/fabric</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>2.2、安装相关依赖软件</strong></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go get github.com/golang/protobuf/protoc-gen-go
+</span><span class='line'>mkdir -p $GOPATH/src/github.com/hyperledger/fabric/build/docker/gotools/bin
+</span><span class='line'>cp  $GOPATH/bin/protoc-gen-go $GOPATH/src/github.com/hyperledger/fabric/build/docker/gotools/bin</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>2.3、编译Fabric模块</strong><br/>
+进入到Fabirc源码所在的文件夹，执行以下命令可以一次完成Fabric 5个主要模块的编译过程，具体的命令如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd $GOPATH/src/github.com/hyperledger/fabric
+</span><span class='line'>make release  #编译fabric模块
+</span><span class='line'>make docker #做成镜像，如果需要</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对于Macos系统，在编译之前需要进行以下设置：</p>
+
+<ul>
+<li>打开文件$GOPATH/src/github.com/hyperledger/fabric/Makefile</li>
+<li>找到其中的第一个GO_LDFLAGS字符串的位置，在该字符串所在行的在行的末尾加上字符串-s</li>
+<li>保存文件Makefile
+上述命令执行完成之后，会自动将将编译好的二进制文件存放在以下路径中：</li>
+</ul>
+
+
+<p>Ubuntu和Centos系统的存放路径</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$GOPATH/src/github.com/hyperledger/fabric/release/linux-amd64/bin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Macos系统的存放路径</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$GOPATH/src/github.com/hyperledger/fabric/release/darwin-amd64/bin</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>2.4、Fabric模块安装</strong><br/>
+编译完成之后，这些模块已经已经可以被运行了，但是目前只能在编译文件所在的文件夹中运行这些模块，这样是非常不方便的。为了更加方便的使用这些模块，可以通过下面的命令将这些模块的可执行文件复制到系统目录中，这样在系统中的任何路径下面都运行这些可执行这些模块。</p>
+
+<p>Ubuntu和Centos将Fabric模块编译后的文件复制到系统文件夹中的方法如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp $GOPATH/src/github.com/hyperledger/fabric/release/linux-amd64/bin/* /usr/local/bin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Macos上面将Fabric模块编译后的文件复制到系统文件夹中的方法如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cp $GOPATH/src/github.com/hyperledger/fabric/release/darwin-amd64/bin/* /usr/local/bin</span></code></pre></td></tr></table></div></figure>
+
+
+<p>复制成功之后通过以下命令修改文件的执行权限，否则无法执行。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo chmod -R 775  /usr/local/bin/configtxgen
+</span><span class='line'>sudo chmod -R 775  /usr/local/bin/configtxlator
+</span><span class='line'>sudo chmod -R 775  /usr/local/bin/cryptogen
+</span><span class='line'>sudo chmod -R 775  /usr/local/bin/peer
+</span><span class='line'>sudo chmod -R 775  /usr/local/bin/orderer</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过上面这些命令之后，可以在系统的任何路径下面运行这些模块了。下面通过一组命令来进检查安装过程是否成功。
+<strong>2.5、检查各模块是否安装正确</strong><br/>
+采用 version 命令行选项</p>
+
+<table>
+<thead>
+<tr>
+<th> 模块名称 </th>
+<th> 功能 </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> peer </td>
+<td> 主节点模块，负责存储区块链数据，运行维护链码 </td>
+</tr>
+<tr>
+<td> Orderer </td>
+<td> 交易打包、排序模块 </td>
+</tr>
+<tr>
+<td> cryptogen </td>
+<td> 组织和证书生成模块 </td>
+</tr>
+<tr>
+<td> configtxgen </td>
+<td> 区块和交易生成模块 </td>
+</tr>
+<tr>
+<td> configtxlator </td>
+<td> 区块和交易解析模块 </td>
+</tr>
+</tbody>
+</table>
+
+
+<p><br/></p>
+
+<h3>3、启动Fabric网络</h3>
+
+<p><strong>3.1、生成Fabric需要的证书文件</strong><br/>
+本例中我们将配置文件和生成的证书文件放在文件夹/opt/hyperledger/fabricconfig中。</p>
+
+<p>创建存放证书的文件夹的命令如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /opt/hyperledger/fabricconfig</span></code></pre></td></tr></table></div></figure>
+
+
+<p>cryptogen提供了一个命令可以获取cryptogen模块所需要的配置文件的样式，该命令如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cryptogen showtemplate</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以把上述命令生成的内容复制到一个文件中稍加修改即可使用。本例中我们所使用的配置文件的内容如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>OrdererOrgs:
+</span><span class='line'>  - Name: Orderer
+</span><span class='line'>    Domain: xuyao.com
+</span><span class='line'>    Specs:
+</span><span class='line'>      - Hostname: orderer
+</span><span class='line'>PeerOrgs:
+</span><span class='line'>  - Name: Org1
+</span><span class='line'>    Domain: org1.xuyao.com
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 3
+</span><span class='line'>  - Name: Org2
+</span><span class='line'>    Domain: org2.xuyao.com
+</span><span class='line'>    Template:
+</span><span class='line'>      Count: 2
+</span><span class='line'>    Users:
+</span><span class='line'>      Count: 2</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将上述文件的内容保存到文件夹/opt/hyperledger/fabricconfig中，配置文件夹命名为：crypto-config.yaml。保存之后执行如下命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt/hyperledger/fabricconfig
+</span><span class='line'>cryptogen generate --config=crypto-config.yaml --output ./crypto-config</span></code></pre></td></tr></table></div></figure>
+
+
+<p>该命令执行完成之后我们会发现在文件夹/opt/hyperledger/fabricconfig中会新增加一个文件夹crypto-config，里面存放有本例的相关配置文件，可以通过tree命令查看生成证书文件的内容。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt/hyperledger/fabricconfig
+</span><span class='line'>tree -L 5</span></code></pre></td></tr></table></div></figure>
+
+
+<p>执行命令 tree -L 5 显示如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>├── crypto-config
+</span><span class='line'>│   ├── ordererOrganizations
+</span><span class='line'>│   │   └── xuyao.com
+</span><span class='line'>│   │       ├── ca
+</span><span class='line'>│   │       ├── msp
+</span><span class='line'>│   │       ├── orderers
+</span><span class='line'>│   │       ├── tlsca
+</span><span class='line'>│   │       └── users
+</span><span class='line'>│   └── peerOrganizations
+</span><span class='line'>│       ├── org1.xuyao.com
+</span><span class='line'>│       │   ├── ca
+</span><span class='line'>│       │   ├── msp
+</span><span class='line'>│       │   ├── peers
+</span><span class='line'>│       │   ├── tlsca
+</span><span class='line'>│       │   └── users
+</span><span class='line'>│       ├── org2.xuyao.com
+</span><span class='line'>│       │   ├── ca
+</span><span class='line'>│       │   ├── msp
+</span><span class='line'>│       │   ├── peers
+</span><span class='line'>│       │   ├── tlsca
+</span><span class='line'>│       │   └── users</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在上述命令显示的内容中提取出后缀为 qklszzn.com域名。本例中提取信息如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>orderer.xuyao.com
+</span><span class='line'>peer0.org1.xuyao.com
+</span><span class='line'>peer1.org1.xuyao.com
+</span><span class='line'>peer3.org1.xuyao.com
+</span><span class='line'>peer0.org2.xuyao.com
+</span><span class='line'>peer1.org2.xuyao.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通过上述步骤所有的证书文件都已经生成完毕，现在需要将测试域名映射到本机的IP地址上面，否则后面的操作可能会出现错误。
+打开端映射文件,在打开的文件中设置如下内容</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vi /etc/hosts</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>192.168.23.212 orderer.xuyao.com
+</span><span class='line'>192.168.23.212 peer0.org1.xuyao.com
+</span><span class='line'>192.168.23.212 peer1.org1.xuyao.com
+</span><span class='line'>192.168.23.212 peer3.org1.xuyao.com
+</span><span class='line'>192.168.23.212 peer0.org2.xuyao.com
+</span><span class='line'>192.168.23.212 peer1.org2.xuyao.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>3.2、生成创世块</strong><br/>
+<strong>3.2.1、系统创始块的生成</strong><br/>
+Fabric是基于区块链的分布式账本，每个账本都拥有自己的区块链，账本的区块链中会存储账本的交易，账本区块链中的第一个区块是个例外，该区块不存在交易数据而是存储配置信息，通常将账本的第一个区块成为创始块。综上所述，Fabric中账本的第一个区块是需要手动生成的。configtxgen模块是专门负责生成系统的创始块和Channel的创始块。configtxgen模块也需要一个配置文件来定义相关的属性。</p>
+
+<p>在Fabric源码中提供的configtxgen模块所需要的配置文件的例子。该文件的路径是$GOPATH/src/github.com/hyperledger/fabric/sampleconfig，在这个目录下面有一个名为configtx.yaml的文件，对这个文件进行修即可使用。由于创始块文件是提供给Orderer节点使用，因此我们创建文件一个文件夹来存在Orderer节点相关的文件。文件夹创建之后把样例配置文件复制到该文件夹中。</p>
+
+<p>创建存放configtxgen模块相关配置文件的文件夹的命令如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /opt/hyperledger/order/
+</span><span class='line'>cp -r $GOPATH/src/github.com/hyperledger/fabric/sampleconfig/configtx.yaml   /opt/hyperledger/order
+</span><span class='line'>cd /opt/hyperledger/order</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对configtx.yaml进行修改，修改后的内容如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>Profiles:
+</span><span class='line'>
+</span><span class='line'>    TestTwoOrgsOrdererGenesis:
+</span><span class='line'>        Orderer:
+</span><span class='line'>            &lt;&lt;: *OrdererDefaults
+</span><span class='line'>            Organizations:
+</span><span class='line'>                - *OrdererOrg
+</span><span class='line'>        Consortiums:
+</span><span class='line'>            SampleConsortium:
+</span><span class='line'>                Organizations:
+</span><span class='line'>                    - *Org1
+</span><span class='line'>                    - *Org2
+</span><span class='line'>
+</span><span class='line'>    TestTwoOrgsChannel:
+</span><span class='line'>        Consortium: SampleConsortium
+</span><span class='line'>        Application:
+</span><span class='line'>            &lt;&lt;: *ApplicationDefaults
+</span><span class='line'>            Organizations:
+</span><span class='line'>                - *Org1
+</span><span class='line'>                - *Org2
+</span><span class='line'>
+</span><span class='line'>Organizations:
+</span><span class='line'>    - &OrdererOrg
+</span><span class='line'>        Name: OrdererOrg
+</span><span class='line'>        ID: OrdererMSP
+</span><span class='line'>        MSPDir: /opt/hyperledger/fabricconfig/crypto-config/ordererOrganizations/xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>    - &Org1
+</span><span class='line'>
+</span><span class='line'>        Name: Org1MSP
+</span><span class='line'>        ID: Org1MSP
+</span><span class='line'>        MSPDir: /opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/msp
+</span><span class='line'>        AnchorPeers:
+</span><span class='line'>            - Host: peer0.org1.xuyao.com
+</span><span class='line'>              Port: 7051
+</span><span class='line'>
+</span><span class='line'>    - &Org2
+</span><span class='line'>        Name: Org2MSP
+</span><span class='line'>        ID: Org2MSP
+</span><span class='line'>        MSPDir: /opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org2.xuyao.com/msp
+</span><span class='line'>        AnchorPeers:
+</span><span class='line'>            - Host: peer0.org2.xuyao.com
+</span><span class='line'>              Port: 7051
+</span><span class='line'>
+</span><span class='line'>Orderer: &OrdererDefaults
+</span><span class='line'>
+</span><span class='line'>    OrdererType: solo
+</span><span class='line'>    Addresses:
+</span><span class='line'>        - orderer.xuyao.com:7050
+</span><span class='line'>    BatchTimeout: 2s
+</span><span class='line'>
+</span><span class='line'>    BatchSize:
+</span><span class='line'>        MaxMessageCount: 10
+</span><span class='line'>        AbsoluteMaxBytes: 98 MB
+</span><span class='line'>        PreferredMaxBytes: 512 KB
+</span><span class='line'>
+</span><span class='line'>    Kafka:
+</span><span class='line'>        Brokers:
+</span><span class='line'>            - 127.0.0.1:9092
+</span><span class='line'>    Organizations:
+</span><span class='line'>
+</span><span class='line'>Application: &ApplicationDefaults
+</span><span class='line'>
+</span><span class='line'>    Organizations:</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置文件修改完成之后执行如下面命令生成创始块文件。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt/hyperledger/order
+</span><span class='line'>configtxgen -profile  TestTwoOrgsOrdererGenesis  -outputBlock  ./genesis.block</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上述命令执行完成之后会在文件夹/opt/hyperledger/order中生成文件genesis.block。这是Fabric系统的创始块文件。<br/>
+<br/>
+<strong>3.2.2、账本创始块的生成</strong><br/>
+创建Channel也是通过configtxgen模块完成的，创建Channel初始块的配置文件和创建系统初始块的配置文件是一样的，具体在本例中，Channel的创始块的配置信息已经定义在本节第一部分系统创始块的生成中生成的配置文件configtx.yaml中。</p>
+
+<p>创建Channel的命令如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>configtxgen -profile  TestTwoOrgsChannel  -outputCreateChannelTx  ./roberttestchannel.tx -channelID  roberttestchannel</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上述命令执行完成之后会在目录生成文件roberttestchannel.tx，该文件用来生成Channel。除此之外还需要生成相关的锚点文件，生成锚点文件需要执行以下命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>configtxgen -profile  TestTwoOrgsChannel  -outputAnchorPeersUpdate ./Org1MSPanchors.tx -channelID  roberttestchannel -asOrg Org1MSP
+</span><span class='line'>
+</span><span class='line'>configtxgen -profile  TestTwoOrgsChannel  -outputAnchorPeersUpdate ./Org2MSPanchors.tx -channelID  roberttestchannel -asOrg Org2MSP</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面命令执行完成之后会在相应的文件夹下面生成文件Org1MSPanchors.tx和Org2MSPanchors.tx，这些文件在后面会被使用到。</p>
+
+<p><strong>3.3、Orderer节点的启动</strong><br/>
+Orderer节点负责交易的打包和区块的生成。Orderer节点的配置信息通常放在环境变量或者配置文件中，本例中的配置信息统一存放在配置文件中。在Fabric源码提供了Orderer启动所用到的配置文件的实例，将示例配置文件复制到Orderer的文件夹下面修改即可使用。</p>
+
+<p>复制配置文件到Orderer文件夹的命令如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd /opt/hyperledger/peer
+</span><span class='line'>cp $GOPATH/src/github.com/hyperledger/fabric/sampleconfig/orderer.yaml /opt/hyperledger/orderer</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在模板配置文件上稍加修改即可满足本例使用，由于篇幅本例中我们只列出需要修改的部分。修改后配置文件中发生变化的内容如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>General:
+</span><span class='line'>
+</span><span class='line'>    LedgerType: file
+</span><span class='line'>    ListenAddress: 0.0.0.0
+</span><span class='line'>    ListenPort: 7050
+</span><span class='line'>    TLS:
+</span><span class='line'>        Enabled: false
+</span><span class='line'>        PrivateKey: /opt/hyperledger/fabricconfig/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer.xuyao.com/tls/server.key
+</span><span class='line'>        Certificate: /opt/hyperledger/fabricconfig/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer.xuyao.com/tls/server.crt
+</span><span class='line'>        RootCAs:
+</span><span class='line'>          - /opt/hyperledger/fabricconfig/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer.xuyao.com/tls/ca.crt
+</span><span class='line'>        ClientAuthEnabled: false
+</span><span class='line'>        ClientRootCAs:
+</span><span class='line'>    LogLevel: debug
+</span><span class='line'>    LogFormat: '%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -&gt; %{level:.4s} %{id:03x}%{color:reset} %{message}'
+</span><span class='line'>    GenesisMethod: file
+</span><span class='line'>    GenesisProfile: TestOrgsOrdererGenesis
+</span><span class='line'>    GenesisFile: /opt/hyperledger/order/orderer.genesis.block
+</span><span class='line'>    LocalMSPDir: /opt/hyperledger/fabricconfig/crypto-config/ordererOrganizations/xuyao.com/orderers/orderer.xuyao.com/msp
+</span><span class='line'>    LocalMSPID: OrdererMSP
+</span><span class='line'>    Profile:
+</span><span class='line'>        Enabled: false
+</span><span class='line'>        Address: 0.0.0.0:6060
+</span><span class='line'>    BCCSP:
+</span><span class='line'>
+</span><span class='line'>        Default: SW
+</span><span class='line'>        SW:
+</span><span class='line'>            Hash: SHA2
+</span><span class='line'>            Security: 256
+</span><span class='line'>            FileKeyStore:
+</span><span class='line'>                KeyStore:
+</span><span class='line'>FileLedger:
+</span><span class='line'>    Location: /opt/hyperledger/order/production/orderer
+</span><span class='line'>    Prefix: hyperledger-fabric-ordererledger
+</span><span class='line'>RAMLedger:
+</span><span class='line'>    HistorySize: 1000
+</span><span class='line'>Debug:
+</span><span class='line'>    BroadcastTraceDir:
+</span><span class='line'>    DeliverTraceDir:</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在配置文件orderer.yaml所在的目录执行如下命令启动orderer</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>orderer start</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>3.4、Peer节点启动</strong><br/>
+Peer模块是Fabric的核心节点，所有的交易数据经过Orderer排序打包之后由Peer模块存储在区块链中。所有的Chaincode也是有Peer模块打包并且激活的。Peer模块的配置信息同样由环境变量和配置文件组成，本例中我们采用配置文的方式来配置peer节点的参数。在设定配置文件之前需要创建一个文件夹存放Peer模块的配置文件和区块数据。在Fabric源码中同样提供了Peer模块配置文件的示例，将示例配置文件复制到Peer模块的文件夹下面修改即可使用。</p>
+
+<p>创建存储Peer模块的配置文件和区块数据的文件夹，并复制示例配置文件的命令如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>mkdir -p /opt/hyperledger/peer
+</span><span class='line'>cd /opt/hyperledger/peer
+</span><span class='line'>cp  $GOPATH/src/github.com/hyperledger/fabric/sampleconfig/core.yaml /opt/hyperledger/peer</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在模板配置文件上稍加修改即可使用，由于篇幅本例中我们只列出需要修改的部分。修改后Peer模块配置文件中变化的内容如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>logging:
+</span><span class='line'>    peer:       debug
+</span><span class='line'>    cauthdsl:   warning
+</span><span class='line'>    gossip:     warning
+</span><span class='line'>    ledger:     info
+</span><span class='line'>    msp:        warning
+</span><span class='line'>    policies:   warning
+</span><span class='line'>    grpc:       error
+</span><span class='line'>    format: '%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -&gt; %{level:.4s} %{id:03x}%{color:reset} %{message}'
+</span><span class='line'>peer:
+</span><span class='line'>
+</span><span class='line'>    id: peer0.org1.qklszzn.com
+</span><span class='line'>    networkId: dev
+</span><span class='line'>    listenAddress: 0.0.0.0:7051
+</span><span class='line'>    chaincodeListenAddress: 0.0.0.0:7052
+</span><span class='line'>    address: peer0.org1.xuyao.com:7051
+</span><span class='line'>    addressAutoDetect: false
+</span><span class='line'>    gomaxprocs: -1
+</span><span class='line'>    gossip:
+</span><span class='line'>
+</span><span class='line'>        bootstrap: 127.0.0.1:7051
+</span><span class='line'>        useLeaderElection: true
+</span><span class='line'>        orgLeader: false
+</span><span class='line'>        endpoint:
+</span><span class='line'>        maxBlockCountToStore: 100
+</span><span class='line'>        maxPropagationBurstLatency: 10ms
+</span><span class='line'>        maxPropagationBurstSize: 10
+</span><span class='line'>        propagateIterations: 1
+</span><span class='line'>        propagatePeerNum: 3
+</span><span class='line'>        pullInterval: 4s
+</span><span class='line'>        pullPeerNum: 3
+</span><span class='line'>        requestStateInfoInterval: 4s
+</span><span class='line'>        publishStateInfoInterval: 4s
+</span><span class='line'>        stateInfoRetentionInterval:
+</span><span class='line'>        publishCertPeriod: 10s
+</span><span class='line'>        skipBlockVerification: false
+</span><span class='line'>        dialTimeout: 3s
+</span><span class='line'>        connTimeout: 2s
+</span><span class='line'>        recvBuffSize: 20
+</span><span class='line'>        sendBuffSize: 200
+</span><span class='line'>        digestWaitTime: 1s
+</span><span class='line'>        requestWaitTime: 1s
+</span><span class='line'>        responseWaitTime: 2s
+</span><span class='line'>        aliveTimeInterval: 5s
+</span><span class='line'>        aliveExpirationTimeout: 25s
+</span><span class='line'>        reconnectInterval: 2
+</span><span class='line'>        externalEndpoint: peer0.org1.qklszzn.com:7051
+</span><span class='line'>        election:
+</span><span class='line'>            startupGracePeriod: 15s
+</span><span class='line'>            membershipSampleInterval: 1s
+</span><span class='line'>            leaderAliveThreshold: 10s
+</span><span class='line'>            leaderElectionDuration: 5s
+</span><span class='line'>        pvtData:
+</span><span class='line'>            maxPeers: 3
+</span><span class='line'>            minAck:   3
+</span><span class='line'>    events:
+</span><span class='line'>        address: 0.0.0.0:7053
+</span><span class='line'>        buffersize: 100
+</span><span class='line'>        timeout: 10ms
+</span><span class='line'>    tls:
+</span><span class='line'>        enabled: false
+</span><span class='line'>        cert:
+</span><span class='line'>            file: /opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/tls/server.crt
+</span><span class='line'>        key:
+</span><span class='line'>            file: /opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/tls/server.key
+</span><span class='line'>        rootcert:
+</span><span class='line'>            file: /opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/tls/ca.crt
+</span><span class='line'>        serverhostoverride:
+</span><span class='line'>    fileSystemPath: /opt/hyperledger/peer/production
+</span><span class='line'>    BCCSP:
+</span><span class='line'>        Default: SW
+</span><span class='line'>        SW:
+</span><span class='line'>            Hash: SHA2
+</span><span class='line'>            Security: 256
+</span><span class='line'>            FileKeyStore:
+</span><span class='line'>                KeyStore:
+</span><span class='line'>
+</span><span class='line'>    mspConfigPath: /opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/peers/peer0.org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>    localMspId: Org1MSP
+</span><span class='line'>    profile:
+</span><span class='line'>        enabled:     false
+</span><span class='line'>        listenAddress: 0.0.0.0:6060
+</span><span class='line'>    handlers:
+</span><span class='line'>        authFilter: "DefaultAuth"
+</span><span class='line'>        decorator: "DefaultDecorator
+</span><span class='line'>vm:
+</span><span class='line'>    endpoint: unix:///var/run/docker.soc
+</span><span class='line'>    docker:
+</span><span class='line'>        tls:
+</span><span class='line'>            enabled: false
+</span><span class='line'>            ca:
+</span><span class='line'>                file: docker/ca.crt
+</span><span class='line'>            cert:
+</span><span class='line'>                file: docker/tls.crt
+</span><span class='line'>            key:
+</span><span class='line'>                file: docker/tls.key
+</span><span class='line'>
+</span><span class='line'>        attachStdout: false
+</span><span class='line'>        hostConfig:
+</span><span class='line'>            NetworkMode: host
+</span><span class='line'>            Dns:
+</span><span class='line'>            LogConfig:
+</span><span class='line'>                Type: json-file
+</span><span class='line'>                Config:
+</span><span class='line'>                    max-size: "50m"
+</span><span class='line'>                    max-file: "5"
+</span><span class='line'>            Memory: 2147483648
+</span><span class='line'>chaincode:
+</span><span class='line'>    peerAddress:
+</span><span class='line'>    id:
+</span><span class='line'>        path:
+</span><span class='line'>        name:
+</span><span class='line'>    builder: $(DOCKER_NS)/fabric-ccenv:$(ARCH)-$(PROJECT_VERSION)
+</span><span class='line'>    golang:
+</span><span class='line'>        runtime: $(BASE_DOCKER_NS)/fabric-baseos:$(ARCH)-$(BASE_VERSION)
+</span><span class='line'>    car:
+</span><span class='line'>        runtime: $(BASE_DOCKER_NS)/fabric-baseos:$(ARCH)-$(BASE_VERSION)
+</span><span class='line'>    java:
+</span><span class='line'>        Dockerfile:  |
+</span><span class='line'>            from $(DOCKER_NS)/fabric-javaenv:$(ARCH)-$(PROJECT_VERSION)
+</span><span class='line'>    node:
+</span><span class='line'>        runtime: $(BASE_DOCKER_NS)/fabric-baseimage:$(ARCH)-$(BASE_VERSION)
+</span><span class='line'>    startuptimeout: 300s
+</span><span class='line'>    executetimeout: 30s
+</span><span class='line'>    mode: dev
+</span><span class='line'>    keepalive: 0
+</span><span class='line'>    system:
+</span><span class='line'>        cscc: enable
+</span><span class='line'>        lscc: enable
+</span><span class='line'>        escc: enable
+</span><span class='line'>        vscc: enable
+</span><span class='line'>        qscc: enable
+</span><span class='line'>        rscc: disable
+</span><span class='line'>    logging:
+</span><span class='line'>      level:  info
+</span><span class='line'>      shim:   warning
+</span><span class='line'>      format: '%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -&gt; %{level:.4s} %{id:03x}%{color:reset} %{message}'
+</span><span class='line'>ledger:
+</span><span class='line'>
+</span><span class='line'>  blockchain:
+</span><span class='line'>  state:
+</span><span class='line'>    stateDatabase: goleveldb
+</span><span class='line'>    couchDBConfig:
+</span><span class='line'>       couchDBAddress: 127.0.0.1:5984
+</span><span class='line'>       username:
+</span><span class='line'>       password:
+</span><span class='line'>       maxRetries: 3
+</span><span class='line'>       maxRetriesOnStartup: 10
+</span><span class='line'>       requestTimeout: 35s
+</span><span class='line'>       queryLimit: 10000
+</span><span class='line'>  history:
+</span><span class='line'>    enableHistoryDatabase: true</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在配置文件core.yaml所在的文件夹中执行以下命令启动order节点</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set FABRIC_CFG_PATH=/opt/hyperledger/peer
+</span><span class='line'>peer node start 
+</span><span class='line'>#或者后台启动
+</span><span class='line'>peer node start &gt;&gt; log_peer.log 2&gt;&1 &</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>3.5、创建通道</strong><br/>
+现在我们可以创建通道，创建通道的过程一共需要三个步骤。</p>
+
+<p>第一步： 创建通道</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.qklszzn.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>cd /opt/hyperledger/order
+</span><span class='line'>
+</span><span class='line'>peer channel create -t 50s -o orderer.xuyao.com:7050 -c mychannel -f /opt/hyperledger/order/mychannel.tx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建通道完成之后，会在执行命令的当前目录生成名为mychannel.block的通道创始块文件</p>
+
+<p>第二步：让已经运行的Peer模块加入通道</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>peer channel join -b /opt/hyperledger/orderer/mychannel.block</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在上述创建通道的命令中-b后面的参数为第一步中生成的文件roberttestchannel.block，需要注意这个文件的路径。</p>
+
+<p>第三步：更新锚节点</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>peer channel update -o orderer.xuyao.com:7050 -c mychannel -f  /opt/hyperledger/order/Org1MSPanchors.tx</span></code></pre></td></tr></table></div></figure>
+
+
+<p><strong>3.6、Chaincode的部署和调用</strong><br/>
+现在可以部署一个Chaincode（关于Chaincode的详细内容在本书的第七章会有详细的介绍）来测试Peer节点和Orderer节点的部署是否正确。这里采用Fabric源码自带的例子来作为测试Chaincode。测试用Chaincode的源代码路径如下所示</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$GOPATH/src/github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Chaincode相关的测试一共有四个步骤。
+第一步： 部署chaincode代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>peer chaincode install -n xuyao_test_cc -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第二步： 实例化chaincode代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>peer chaincode instantiate -o  orderer.xuyao.com:7050 -C mychannel -n xuyao_test_cc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR  ('Org1MSP.member','Org2MSP.member')"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第三步：通过chaincode写入数据</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>peer chaincode invoke -o orderer.xuyao.com:7050 -C mychannel -n xuyao_test_cc -c '{"Args":["invoke","a","b","1"]}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第四步：通过chaincode查询数据</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>export set CORE_PEER_LOCALMSPID=Org1MSP
+</span><span class='line'>export set CORE_PEER_ADDRESS=peer0.org1.xuyao.com:7051
+</span><span class='line'>export set CORE_PEER_MSPCONFIGPATH=/opt/hyperledger/fabricconfig/crypto-config/peerOrganizations/org1.xuyao.com/users/Admin@org1.xuyao.com/msp
+</span><span class='line'>
+</span><span class='line'>peer chaincode query -C mychannel -n xuyao_test_cc -c '{"Args":["query","a"]}'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果上述命令都能正确执行，那么一个简单的Fabric系统就已经部署完成了。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[密码学(三)之对称加密与非对称加密]]></title>
@@ -6015,371 +7123,6 @@ slow Client可以通过使用反向代理缓存解决，反向代理缓存可以
 </span><span class='line'>
 </span><span class='line'><span class="o">-----</span><span class="k">BEGIN</span> <span class="no">PUBLIC</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw4a9XP0wqRORAm6hvKjr</span><span class="p">\</span><span class="n">nltdX0mfGIOWi4YqLyB4HYwFC0meRZbQ8ZtGxZ6wJAZ6uuJm7n4ZmMToPqiQywggC</span><span class="p">\</span><span class="n">nEfFjzjnX9HVPkLzuajXSTAqjihhbzs31VrPzwlCNiC</span><span class="o">+</span><span class="n">gJoN</span><span class="o">/</span><span class="no">UofwBQIVh19fAPPG</span><span class="p">\</span><span class="n">nTPL0Mf4n2zIylJudYQbiaL3Honx1L73hmzBeNMR1BbbE</span><span class="o">/</span><span class="n">u5ku3RhgYFetY</span><span class="o">+</span><span class="n">nxQRq</span><span class="p">\</span><span class="n">nxup8ekO3om6Q3Fd</span><span class="o">+</span><span class="mi">1</span><span class="n">gQw0EGdLvl5Jb7kCR5ZC6o9cB8vUl</span><span class="o">+</span><span class="n">f</span><span class="o">/</span><span class="n">c1jLm4Buz9AQXpq</span><span class="p">\</span><span class="n">nUAWIbJF2</span><span class="o">+</span><span class="n">g3nvGnPQBKHqyOqlzbDWgm4K</span><span class="o">+</span><span class="no">Bid8gGCUfL9oX4fzJ</span><span class="o">/</span><span class="no">DFzLZOpsCesQ</span><span class="p">\</span><span class="n">nKQIDAQAB</span><span class="p">\</span><span class="n">n</span><span class="o">-----</span><span class="k">END</span> <span class="no">PUBLIC</span> <span class="no">KEY</span><span class="o">-----</span><span class="p">\</span><span class="n">n</span>
 </span></code></pre></td></tr></table></div></figure>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[App自动化测试平台搭建记录之rspec与appium的完美组合]]></title>
-    <link href="http://xuyao.club/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium/"/>
-    <updated>2016-08-04T18:31:04+08:00</updated>
-    <id>http://xuyao.club/blog/2016/08/04/app-test-automation-platform-building-record-of-rspec-and-appium</id>
-    <content type="html"><![CDATA[<p>我们的预期目标是每天定时跑测试代码，并生成相应的测试报告，所以这里需要一个比较完善的测试框架来做这些事情，这里我选择的是rspec，</p>
-
-<h4>rspec与appium组合</h4>
-
-<ul>
-<li>将app(ios和android)端每个页面封装成自己的类，页面中的每个控件实例成方法，使用到哪个页面只需将对应的类初始化一下。</li>
-<li>写测试用例的人员只需写对应的测试用例，而不需要关注每个页面的控件封闭，而写控件封装的人，则只需写类的封装，也不必关注测试用例，这样极大的提高了开发效率</li>
-<li>考虑到ios与android中大部分页面的控件以及逻辑都是一样的，所以针对ios和android测试，spec代码只需写一份，这样做的好处是将测试用例与逻辑代码分离，便于以后维护，同时测试用例的扩展性和重用性也大大得到的提高</li>
-</ul>
-
-
-<!-- more -->
-
-
-<h4>（页面）类的封装</h4>
-
-<p>测试开发流程具体如下，以app上的添加亲友为例
-<img src="http://blog.1nongfu.com/Screenshot_2016-08-06-17-58-40_com.yydys.png" alt="img" />
-可以看到添加亲友页面上有4个控件，那么可以将这个页面封装成一个类，这些控件就是对应的实例方法</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android对应的类</span>
-</span><span class='line'><span class="k">module</span> <span class="nn">Simulator</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Android</span>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">Pages</span>
-</span><span class='line'>      <span class="k">module</span> <span class="nn">Patient</span>
-</span><span class='line'>        <span class="k">class</span> <span class="nc">AddRelative</span> <span class="o">&lt;</span> <span class="no">Simulator</span><span class="o">::</span><span class="no">Android</span><span class="o">::</span><span class="no">Pages</span><span class="o">::</span><span class="no">Patient</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">my_relatives_link</span>
-</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="s2">&quot;我的亲友&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">add_relative_button</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/add_folks&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">relative_select</span>
-</span><span class='line'>            <span class="c1">#text(&quot;是你的&quot;)</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/role_name&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">name_option_selected</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;爸爸&quot;</span>
-</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">mobile_num_text_field</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/mobile&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">glucose_sms_reminder</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/glucose_exception_togglebtn&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">medicine_sms_reminder</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/forget_medication_togglebtn&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">save_button</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="s2">&quot;com.yydys:id/right_btn&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#ios对应的类</span>
-</span><span class='line'><span class="k">module</span> <span class="nn">Simulator</span>
-</span><span class='line'>  <span class="k">module</span> <span class="nn">Ios</span>
-</span><span class='line'>    <span class="k">module</span> <span class="nn">Pages</span>
-</span><span class='line'>      <span class="k">module</span> <span class="nn">Patient</span>
-</span><span class='line'>        <span class="k">class</span> <span class="nc">AddRelative</span> <span class="o">&lt;</span> <span class="no">Simulator</span><span class="o">::</span><span class="no">Ios</span><span class="o">::</span><span class="no">Pages</span><span class="o">::</span><span class="no">Patient</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">my_relatives_link</span>
-</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="s2">&quot;我的亲友&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">add_relative_button</span>
-</span><span class='line'>            <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;添加亲友&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">relative_select</span>
-</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="s2">&quot;是您的&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">name_option_selected</span> <span class="nb">name</span><span class="o">=</span><span class="s2">&quot;爸爸&quot;</span>
-</span><span class='line'>            <span class="n">text</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">mobile_num_text_field</span>
-</span><span class='line'>            <span class="n">textfield_exact</span><span class="p">(</span><span class="s2">&quot;请输入手机号&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">glucose_sms_reminder</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="ss">xpath</span><span class="p">:</span> <span class="s2">&quot;//UIAApplication[1]/UIAWindow[1]/UIATableView[1]/UIATableCell[3]/UIASwitch[1]&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">medicine_sms_reminder</span>
-</span><span class='line'>            <span class="n">find</span><span class="p">(</span><span class="ss">xpath</span><span class="p">:</span> <span class="s2">&quot;//UIAApplication[1]/UIAWindow[1]/UIATableView[1]/UIATableCell[3]/UIASwitch[2]&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">save_button</span>
-</span><span class='line'>            <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;保存&quot;</span><span class="p">)</span>
-</span><span class='line'>            <span class="c1">#find(xpath: &quot;//UIAApplication[1]/UIAWindow[1]/UIATableView[1]/UIATableCell[4]/UIASwitch[1]&quot;)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="k">def</span> <span class="nf">return_button</span>
-</span><span class='line'>            <span class="n">button_exact</span><span class="p">(</span><span class="s2">&quot;返回&quot;</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>可以看到对应页面上的每个控件，ios和android都会有自己的封闭方法，这样做提高了代码的重用性，与测试代码分离，便于以后维护</p>
-
-<h4>测试用例</h4>
-
-<p>上面说道一般ios和android页面上的控件是一样的，所以正常情况下，我们只需写一份测试代码就可以，但是ios和android的测试代码还是要分开跑的，所以这里我引用了rpsec的<a href="http://rspec.info/documentation/3.5/rspec-core/#Shared_Examples_and_Contexts">share_example</a>来做</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#android的测试用例</span>
-</span><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;../../../shared/patient/v1/add_relative_spec&#39;</span>
-</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;AddRelative   &quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">include_examples</span> <span class="s2">&quot;share_add_relative&quot;</span>  <span class="p">,</span> <span class="s2">&quot;android&quot;</span>
-</span><span class='line'><span class="k">end</span>    
-</span><span class='line'>
-</span><span class='line'><span class="c1">#ios的测试用例</span>
-</span><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;../../../shared/patient/v1/add_relative_spec&#39;</span>
-</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;AddRelative&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">include_examples</span> <span class="s2">&quot;share_add_relative&quot;</span>  <span class="p">,</span> <span class="s2">&quot;ios&quot;</span>
-</span><span class='line'><span class="k">end</span>    
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#shared部分</span>
-</span><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;../../../spec_helper&#39;</span>
-</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">shared_examples</span> <span class="s2">&quot;share_add_relative&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">device</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">before</span><span class="p">(</span><span class="ss">:all</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">login</span> <span class="n">device</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">#Appium.promote_appium_methods Object</span>
-</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;add relative&quot;</span> <span class="k">do</span>
-</span><span class='line'>      <span class="k">begin</span>
-</span><span class='line'>              <span class="nb">sleep</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
-</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">user_center_bar</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">my_relatives_link</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">add_relative_button</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>          <span class="k">if</span> <span class="vi">@device</span><span class="o">.</span><span class="n">appium_device</span> <span class="o">==</span>  <span class="ss">:android</span>
-</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">relative_select</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">name_option_selected</span><span class="p">(</span><span class="s2">&quot;爸爸&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>          <span class="k">else</span>
-</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">relative_select</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">return_button</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">mobile_num_text_field</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="s2">&quot;13524836959&quot;</span><span class="p">)}</span>
-</span><span class='line'>          <span class="k">if</span> <span class="vi">@device</span><span class="o">.</span><span class="n">appium_device</span> <span class="o">==</span>  <span class="ss">:android</span>
-</span><span class='line'>              <span class="c1">#screen = wait {add_relative_page.boot_screen}</span>
-</span><span class='line'>              <span class="c1">#size = screen.window_size</span>
-</span><span class='line'>              <span class="c1">#start_x, end_x, start_y, end_y = size.width - 5, size.width/100, size.height/2, size.height/2</span>
-</span><span class='line'>              <span class="c1">#wait {exists{swipe(start_x:start_x,start_y:start_y, end_x:end_x,end_y:end_y, duration:1000)}}</span>
-</span><span class='line'>          <span class="k">else</span>
-</span><span class='line'>              <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">glucose_sms_reminder</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>              <span class="c1">#wait {add_relative_page.medicine_sms_reminder.click}</span>
-</span><span class='line'>          <span class="k">end</span>
-</span><span class='line'>          <span class="c1">#wait {add_relative_page.glucose_sms_reminder.}</span>
-</span><span class='line'>          <span class="c1">#wait {add_relative_page.mobile_num_text_field.type(&quot;11000009123&quot;)}</span>
-</span><span class='line'>          <span class="n">wait</span> <span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">save_button</span><span class="o">.</span><span class="n">click</span><span class="p">}</span>
-</span><span class='line'>          <span class="n">expect</span><span class="p">(</span><span class="n">exists</span><span class="p">{</span><span class="n">add_relative_page</span><span class="o">.</span><span class="n">add_relative_button</span><span class="p">})</span><span class="o">.</span><span class="n">to</span> <span class="n">be_truthy</span>
-</span><span class='line'>  <span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
-</span><span class='line'>          <span class="nb">puts</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span>
-</span><span class='line'>          <span class="vi">@driver</span><span class="o">.</span><span class="n">quit</span> <span class="k">if</span> <span class="vi">@driver</span>
-</span><span class='line'>          <span class="k">raise</span> <span class="n">e</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">after</span> <span class="k">do</span>
-</span><span class='line'>    <span class="vi">@driver</span><span class="o">.</span><span class="n">quit</span> <span class="k">if</span> <span class="vi">@driver</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>可以看到写测试用例的人员，不必关注底层控件的封装，只需按正常逻辑写测试用例就可</p>
-
-<h4>测试报告</h4>
-
-<p><img src="http://blog.1nongfu.com/C8EA5B20-316A-45CB-A950-5F393B4AEC85.png" alt="img" /></p>
-
-<h4>未完成的工作</h4>
-
-<ul>
-<li>配置jenkins，使其每天定时打包最新的代码</li>
-<li>动态数据的载入</li>
-<li>不同app版本的测试</li>
-<li>混合，h5页面的测试</li>
-</ul>
 
 ]]></content>
   </entry>

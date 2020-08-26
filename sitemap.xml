@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/</loc>
+<lastmod>2020-08-26T11:09:59+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/</loc>
 <lastmod>2019-09-09T14:26:46+08:00</lastmod>
 </url>
@@ -129,5 +133,14 @@
 </url>
 <url>
 <loc>http://xuyao.club/blog/archives/</loc>
+</url>
+<url>
+<loc>http://xuyao.club/posts/2/</loc>
+</url>
+<url>
+<loc>http://xuyao.club/posts/3/</loc>
+</url>
+<url>
+<loc>http://xuyao.club/posts/4/</loc>
 </url>
 </urlset>
