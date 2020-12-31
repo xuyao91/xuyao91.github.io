@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="（一）代换密码（替换密码） 上一讲中，我们讲移位密码其实是将字母表中的字母一一对应到各数字，然后通过数字平移来进行加密，古典密码学中还有一种比较有名的加密方法，就是将明文中的字母表对应到一套密文的字母表，这种加密方法我们叫代换密码（substiution cipher）或叫替换密码， &hellip;">
+  <meta name="description" content="1、前言 &emsp;Hyperledger Fabric是一个提供分布式账本解决方案的平台。Hyperledger Fabric由模块化架构支撑，并具备极佳的保密性、可伸缩性、灵活性和可扩展性。Hyperledger Fabric被设计成支持不同的模块组件直接拔插启用， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Fabric多台服务器的部署(一)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-14T11:55:10+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:55 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>1、前言</h3>
+
+<p>  &emsp;Hyperledger Fabric是一个提供分布式账本解决方案的平台。Hyperledger Fabric由模块化架构支撑，并具备极佳的保密性、可伸缩性、灵活性和可扩展性。Hyperledger Fabric被设计成支持不同的模块组件直接拔插启用，并能适应在经济生态系统中错综复杂的各种场景。
+ &emsp;目前Fabric在区块链溯源场景应用的挺多，农产品，奢侈品，艺术品，红酒等方面都看过到案例，区块链可以保存产品各个环节的数据，并上链，用户最后可能只需扫描一个二维码，就可以查出某个产品整个的生产过程，与中心化数据不同的是，区块链溯源项目数据一旦上链后不可更改，而且数据公开透明，任何一方都没有权利来更改它，同时每个环节需要为你上链的数据负责，如果哪天消费查出某个环节的数据是假的，由于账本数据是分布式的、不可更改的，大家只相信数据，商家也无法抵赖，最后商家只能认错，名誉扫地，所以区块链本质上是解决一个多方协作的一个信任问题，而对于一件事情需要多方协作，共同记账来一起完成的，Fabric作为联盟链，显然很符合这种需求。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-i/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -448,48 +489,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/10/20/about-rsa/">关于RSA加密的一些问题</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-10-20T18:35:23+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>6:35 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2016/10/20/about-rsa/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>做支付的时候经常有各种加密，最常见的算是RSA加密了，以前一直不太明白RSA加密是什么样的，如何工作的，今天看了一些文档，有了一些基本了解，记录下来，做个备份</p>
-
-<h4>什么是RSA</h4>
-
-<p>RSA是一种非对称加密算法，在公开密钥加密和电子商业被广泛使用，名字是由三个创始人的名字首字母组成，更多信息请查看<a href="https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95">https://zh.wikipedia.org/wiki/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95</a></p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2016/10/20/about-rsa/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -507,6 +506,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2020/12/31/one-last-little-surprise-for-2020/">2020年最后的一个小惊喜</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
       </li>
     
@@ -520,10 +523,6 @@
     
       <li class="post">
         <a href="/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/">ES6中如何删除数组中的重复项</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Fabric动态增加节点（Peer）</a>
       </li>
     
   </ul>
