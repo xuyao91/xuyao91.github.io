@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Golang项目中的版本管理 - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="go项目中经常会碰到线上编译好的二进制文件不清楚是哪次commit后编译的，每次编译出来的都是一个二进制文件，不利于管理，搞了个go项目的版本管理。
+利用go build的 -ldflags 参数，使用帮助命令查看详细信息 1
+go build --ldflags="--help" 参数很多， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2022/04/18/the-version-of-gloang-project/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Golang项目中的版本管理</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2022-04-18T16:59:05+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2022</span></span> <span class='time'>4:59 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>go项目中经常会碰到线上编译好的二进制文件不清楚是哪次commit后编译的，每次编译出来的都是一个二进制文件，不利于管理，搞了个go项目的版本管理。
+利用go build的 -ldflags 参数，使用帮助命令查看详细信息</p>
+
+<!-- more -->
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go build --ldflags="--help"</span></code></pre></td></tr></table></div></figure>
+
+
+<p>参数很多，但我们感兴趣的是 -X</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>usage: link [options] main.o
+</span><span class='line'>  -X definition
+</span><span class='line'>      add string value definition of the form importpath.name=value</span></code></pre></td></tr></table></div></figure>
+
+
+<p>-X 参数，指定 importpath.name=value，用于修改变量值。其中 importpath 表示包导入路径，name 是程序中的变量名，value 代表我们想要设定的变量值。
+看一下最简单的例子</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>package main
+</span><span class='line'>
+</span><span class='line'>import (
+</span><span class='line'> "fmt"
+</span><span class='line'>)
+</span><span class='line'>
+</span><span class='line'>var (
+</span><span class='line'> version = "0.0.0"
+</span><span class='line'>)
+</span><span class='line'>
+</span><span class='line'>func main() {
+</span><span class='line'> fmt.Println("version: ", version)
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果正常编译执行程序，将得到以下结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go build -o main && ./main
+</span><span class='line'>version:  0.0.0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此时，我们指定 &ndash;ldflags  的 -X 参数重新编译执行</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>go build -o main --ldflags="-X 'main.version=1.0.0'" && ./main
+</span><span class='line'>version:  1.0.0</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>项目中使用</h5>
+
+<p>但是在实际项目中使用，肯定不会这么简单，需要一些更详细的信息，比如版本号，最后一次commit id，当前的branch,编译时间，编译环境等，
+集成了一个包，以后可以在项目中直接用，github地址 <a href="https://github.com/xuyao91/version">version</a>
+原理跟上面写的一样，作用&ndash;ldflags=&ldquo;-X"写实现变量值设定，example下面有个shell脚本，执行./build.sh脚本，会直接build项目并设定版本信息，最后运行</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./example -version</span></code></pre></td></tr></table></div></figure>
+
+
+<p>输出结果</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Version: v1.0
+</span><span class='line'>Go Version: go version go1.15.6 darwin/amd64
+</span><span class='line'>Git Commit: 40a0e5935dcf1286c0c4e4b787167b04211e0324
+</span><span class='line'>Git Branch: master
+</span><span class='line'>Build Time: 2022-04-12 13:04:47</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就很方便管理编译后的二进制包了。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2022-04-18T16:59:05+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2022</span></span> <span class='time'>4:59 pm</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2020/12/31/one-last-little-surprise-for-2020/" title="Previous Post: 2020年最后的一个小惊喜">&laquo; 2020年最后的一个小惊喜</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="Golang项目中的版本管理"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2022/04/18/the-version-of-gloang-project/">Golang项目中的版本管理</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/12/31/one-last-little-surprise-for-2020/">2020年最后的一个小惊喜</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/06/21/the-tbaas-of-tencent/">腾讯云区块链服务平台介绍及接入</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2022 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

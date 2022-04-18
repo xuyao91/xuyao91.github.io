@@ -9,8 +9,8 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="想不到在2020年最后的几天，还有一个小惊喜。
-我竟然通过了Certified Hyperledger Fabric Administrator (CHFA)的考试，这次考试没怎么备考，全程就只用了2-3周的时间复习了一下，本以后会过不了，没想到最后竟然考过了，还是很高兴的。 ">
+  <meta name="description" content="go项目中经常会碰到线上编译好的二进制文件不清楚是哪次commit后编译的，每次编译出来的都是一个二进制文件，不利于管理，搞了个go项目的版本管理。
+利用go build的 -ldflags 参数，使用帮助命令查看详细信息 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,45 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2022/04/18/the-version-of-gloang-project/">Golang项目中的版本管理</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2022-04-18T16:59:05+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2022</span></span> <span class='time'>4:59 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2022/04/18/the-version-of-gloang-project/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>go项目中经常会碰到线上编译好的二进制文件不清楚是哪次commit后编译的，每次编译出来的都是一个二进制文件，不利于管理，搞了个go项目的版本管理。
+利用go build的 -ldflags 参数，使用帮助命令查看详细信息</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2022/04/18/the-version-of-gloang-project/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -461,66 +500,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Fabric多台服务器的部署(二)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-12-14T14:27:46+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>2:27 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>3、下载Fabric镜像</h3>
-
-<h5>3.1.1 下载Fabric 源码</h5>
-
-<p> 1、在后面的例子中，有些地方需要用到源码中提到的工具来编译和生成证书等，这里需要下载一下Fabric的源码，在本地下载Fabric官方提供的源码</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>git clone git@github.com:hyperledger/fabric.git</span></code></pre></td></tr></table></div></figure>
-
-
-<p>需要注意的时候，需要把下载好的源码放在$GOPATH里，这个环境变量是最初安装GO的设置的，如</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>echo $GOPATH
-</span><span class='line'>/Users/xuyao/go</span></code></pre></td></tr></table></div></figure>
-
-
-<p>那么fabric的源码地址路径应该是</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>/Users/xuyao/go/src/github.com/hyperledger/fabric/</span></code></pre></td></tr></table></div></figure>
-
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/12/14/deployment-of-fabric-multiple-servers-ii/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -534,6 +513,10 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2022/04/18/the-version-of-gloang-project/">Golang项目中的版本管理</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2020/12/31/one-last-little-surprise-for-2020/">2020年最后的一个小惊喜</a>
@@ -551,10 +534,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
         <a href="/blog/2019/06/21/the-tbaas-of-tencent/">腾讯云区块链服务平台介绍及接入</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2019/02/15/how-to-remove-array-duplicates-in-es6/">ES6中如何删除数组中的重复项</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -568,7 +547,7 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2020 - Peter Xu -
+  Copyright &copy; 2022 - Peter Xu -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
