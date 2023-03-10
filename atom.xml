@@ -4,7 +4,7 @@
   <title><![CDATA[老徐]]></title>
   <link href="http://xuyao.club/atom.xml" rel="self"/>
   <link href="http://xuyao.club/"/>
-  <updated>2022-04-18T17:03:15+08:00</updated>
+  <updated>2023-03-10T10:37:54+08:00</updated>
   <id>http://xuyao.club/</id>
   <author>
     <name><![CDATA[Peter Xu]]></name>
@@ -12,6 +12,261 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[H安装frp内网穿透工具]]></title>
+    <link href="http://xuyao.club/blog/2023/03/10/how-to-install-frp-vpn/"/>
+    <updated>2023-03-10T10:30:17+08:00</updated>
+    <id>http://xuyao.club/blog/2023/03/10/how-to-install-frp-vpn</id>
+    <content type="html"><![CDATA[<h4>1、需求背景</h4>
+
+<p>客户现场有几台服务器，是局域网的，因为要经常维护，显示每次去跑现场肯定是不合适的，为了便于维护和管理，可以装一个内网穿透工具&ndash;frp</p>
+
+<!--more-->
+
+
+<h4>2、安装</h4>
+
+<ol>
+<li>由于frp是golang语言写的，所以只要下载编译好的源码，直接跑就行，下载源码</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>下载最新版本的frp
+</span><span class='line'>wget https://github.com/fatedier/frp/releases/download/v0.45.0/frp_0.45.0_linux_amd64.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>解压gz包</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar -zxvf  frp_0.45.0_linux_amd64.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>配置frp，frp需要有一个公网ip，通过公网ip转发到要访问的局域网上，所以整个过程分为服务端和客户端，服务端是指有公网ip的那个服务器，客户端是需要访问的那台局域网<br/>
+服务端的配置文件</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>打开配置文件
+</span><span class='line'>vim frps.ini
+</span><span class='line'>
+</span><span class='line'>[common]
+</span><span class='line'>bind_port = 8700 #配置需要转发的端口</span></code></pre></td></tr></table></div></figure>
+
+
+<p>客户端配置文件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim frpc.ini
+</span><span class='line'>[common]
+</span><span class='line'>server_addr = 106.14.xxx.161 #公网服务器的IP
+</span><span class='line'>server_port = 8700 #公网服务端配置的端口
+</span><span class='line'>
+</span><span class='line'>[ssh]
+</span><span class='line'>type = tcp
+</span><span class='line'>local_ip = 127.0.0.1
+</span><span class='line'>local_port = 22
+</span><span class='line'>remote_port = 8600 #公网服务器的登录端口，</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>启动服务端和客户端
+服务端启动</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./frps -c frps.ini</span></code></pre></td></tr></table></div></figure>
+
+
+<p>客户端启动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./frpc -c frpc.ini</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样整个过种就可以了,可以试下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>通过端口登录公网的ip,实际是登录了局域网
+</span><span class='line'>ssh -oPort=8600 root@106.14.xxx.161</span></code></pre></td></tr></table></div></figure>
+
+
+<p>4.使用systemd启动frp,正常工作中，一般frp都要一直开着的，包括开机启动等，所以可以使用systemd来守护进程，
+安装systemd</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># yum
+</span><span class='line'>yum install systemd
+</span><span class='line'># apt
+</span><span class='line'>apt install systemd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建frps的配置文件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /etc/systemd/system/frps.service</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置文件内容</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[Unit]
+</span><span class='line'># 服务名称，可自定义
+</span><span class='line'>Description = frp server
+</span><span class='line'>After = network.target syslog.target
+</span><span class='line'>Wants = network.target
+</span><span class='line'>
+</span><span class='line'>[Service]
+</span><span class='line'>Type = simple
+</span><span class='line'># 启动frps的命令，需修改为您的frps的安装路径
+</span><span class='line'>ExecStart = /path/to/frps -c /path/to/frps.ini 
+</span><span class='line'># ExecStart = /path/to/frpc -c /path/to/frpc.ini
+</span><span class='line'>
+</span><span class='line'>[Install]
+</span><span class='line'>WantedBy = multi-user.target</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用systemd 命令，管理 frps。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># 启动frp
+</span><span class='line'>systemctl start frps
+</span><span class='line'># 停止frp
+</span><span class='line'>systemctl stop frps
+</span><span class='line'># 重启frp
+</span><span class='line'>systemctl restart frps
+</span><span class='line'># 查看frp状态
+</span><span class='line'>systemctl status frps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置开机自动启动frps</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>systemctl enable frps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看frps启动日志</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>journalctl -u frps.service</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>3、身份认证</h4>
+
+<p>frp还可以支持身份验证，有三种模式，token 和 oidc，默认为 token。<br/>
+简单给个token身份验证的方式，这个也是最常用的。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># frps.ini 服务端
+</span><span class='line'>[common]
+</span><span class='line'>bind_port = 8700
+</span><span class='line'>authentication_method = token
+</span><span class='line'>token = QqQ27WRVKGUNxxxx
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'># frpc.ini 客户端
+</span><span class='line'>[common]
+</span><span class='line'>server_addr = 106.xx.xx.xx
+</span><span class='line'>server_port = 8700
+</span><span class='line'>authentication_method = token
+</span><span class='line'>token = QqQ27WRVKGUNxxxx</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>4、配置自定义域名访问内网的Web服务</h4>
+
+<p>可以使用vhost_http_port用来监听8080端口</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#frps.ini 服务端
+</span><span class='line'>[common]
+</span><span class='line'>bind_port = 7000
+</span><span class='line'>vhost_http_port = 8800
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>#frpc.ini 客户端
+</span><span class='line'>[web]
+</span><span class='line'>type = http
+</span><span class='line'>local_port = 8800
+</span><span class='line'>custom_domains = xxx.1nongfu.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就可以通过浏览器访问<a href="http://xxx.1nongfu.com:8800">http://xxx.1nongfu.com:8800</a> 即可访问到处于内网机器上 8800 端口的服务，如果是静态资源可能还需要用nginx做个代理。</p>
+
+<p>frp还有很多功能，这个是最简单的例子</p>
+
+<h4>参考资料</h4>
+
+<ol>
+<li><a href="https://gofrp.org/docs/overview/">https://gofrp.org/docs/overview/</a></li>
+<li><a href="https://gofrp.org/docs/setup/systemd/">https://gofrp.org/docs/setup/systemd/</a></li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Golang项目中的版本管理]]></title>
@@ -6912,95 +7167,6 @@ POST和PUT在创建资源的区别：所创建的资源的名称(URI)是否由�
 
 <p>&emsp;目前功能做的比较简单，就是集成了一些基本的功能，后期会把spec测试补齐，及再做一些深度的集可成。
 具体如何使用，可以到github上看下<a href="https://github.com/xuyao91/rails-jwplayer/blob/master/README.md">rails-jwplayer</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[App自动化测试平台搭建记录之问题汇总]]></title>
-    <link href="http://xuyao.club/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues/"/>
-    <updated>2016-12-05T18:25:38+08:00</updated>
-    <id>http://xuyao.club/blog/2016/12/05/2app-text-automation-platform-building-record-of-some-issues</id>
-    <content type="html"><![CDATA[<p>搭建测试平台及写测试case时，遇到了一些问题，现在统一做个汇总，记录一下</p>
-
-<!-- more -->
-
-
-<h3>问题1： 测试数据的问题</h3>
-
-<p>a,测试每个case时，都会产生测试数据，怎么处理测试数据<br/>
-b,有些case有上下文逻辑关系，如果第一个case没跑，直接跑第二个case，肯定是跑不通的，也就是说数据之间也有逻辑关系<br/>
-c,正常情况下做自动化测试肯定是在生产环境或者类似生产环境上做测试，肯定不能在测试环境上做，因为要保证现在测试的东西跟生产环境是一模一样的，但是生产环境上测试肯定会产生很多的测试数据</p>
-
-<p>解决方法：<br/>
-以上问题解决方案是首先把现有的名个服务全部单独部署一套（这个代价有点大），这个环境是介于测试和生产之间，也就是说代码是生产稳定版本，数据库是备份生产的数据库下来（相当于是一个预发环境），这样就保证app的版本跟生产是一样的，只是数据不一样而已；因为数据库不是生产的，所以里面数据我们可以随意删减，每天跑测试case时，我会写一个脚本，把之前的测试数据全部删除，再自动增加一个逻辑上的测试数据上去，这样能保证在每天跑测试case时，数据库是干净的，而且各case都能保证之间的逻辑数据能衔接，现在的做法是每个跑case之前，定时跑一个脚本，删除一些测试数据，及增加一些逻辑数据，但是如果case多了，脚本复杂，其实很难确保删除处理完后，保证case能顺利通过，最好的办法应该是跑每个case之前把数据删除及增加逻辑数据，而不是一起跑，这样就能确保每个case的通过率。</p>
-
-<h3>问题2: 如何测试H5、hybrid app</h3>
-
-<p>app里面混入h5页面很正常，在一个即有原生页面又有H5页面，应该要怎么测试呢。appium其中的一个理念就是你不能为了测试应用而修改应用。为了符合这个方法学，我们可以使用 Selenium 测试传统 web 应用的方法来测试混合 web 应用 (比如，iOS 应用里的元素 &ldquo;UIWebView&rdquo; )，这是有可能的。这里会有一些技术性的复杂，Appium 需要知道你是想测试原生部分呢还是web部分。幸运的是，我们还能遵守 WebDriver 的协议。详细文档可以看<a href="https://github.com/appium/appium/blob/master/docs/en/advanced-concepts/hybrid.md">这里</a>
-appium会调用 GET session/:sessionId/contexts 接口来获得当前有context信息， 也可以使用POST session/:sessionId/context来访问当前的context可以具体看下代码</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">查看当前页面有多少个</span><span class="n">contexts</span>
-</span><span class='line'><span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">available_contexts</span>
-</span><span class='line'><span class="o">[</span>
-</span><span class='line'>    <span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="s2">&quot;NATIVE_APP&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="s2">&quot;WEBVIEW_49&quot;</span>
-</span><span class='line'><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">查看当前的</span><span class="n">context</span>
-</span><span class='line'><span class="o">[</span><span class="mi">2</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">current_context</span>
-</span><span class='line'><span class="s2">&quot;NATIVE_APP&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">转换</span><span class="n">context</span>
-</span><span class='line'><span class="o">[</span><span class="mi">3</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">webview</span> <span class="o">=</span> <span class="n">available_contexts</span><span class="o">.</span><span class="n">last</span>
-</span><span class='line'><span class="s2">&quot;WEBVIEW_49&quot;</span>
-</span><span class='line'><span class="o">[</span><span class="mi">4</span><span class="o">]</span> <span class="n">pry</span><span class="p">(</span><span class="n">main</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">set_context</span> <span class="n">webview</span>
-</span><span class='line'><span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这里需要特殊处理下是的ios环境，当在真机上运行用例时，appium 无法直接访问 web 视图，所以我们需要通过 USB 线缆来建立连接。我们使用 ios-webkit-debugger-proxy建立连接。使用 brew 安装最新的 ios-webkit-debug-proxy。在终端运行一下命令:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 如果你没有安装 brew 的话，先安装 brew。</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">ruby</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)&quot;</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">brew</span> <span class="n">update</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">brew</span> <span class="n">install</span> <span class="n">ios</span><span class="o">-</span><span class="n">webkit</span><span class="o">-</span><span class="n">debug</span><span class="o">-</span><span class="n">proxy</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>一旦安装好了， 你就可以启动代理：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 将udid替换成你的设备的udid。确保端口 27753 没有被占用</span>
-</span><span class='line'><span class="c1"># remote-debugger 将会使用这个端口。</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">ios_webkit_debug_proxy</span> <span class="o">-</span><span class="n">c</span> <span class="ss">c2848f21a19fa7dd3e83d4153225b77e9930039c</span><span class="p">:</span><span class="mi">27753</span> <span class="o">-</span><span class="n">d</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>还有一个问题就是appium 1.6以上版本需要xcode8打出来的ipa包，1.6以下请用xcode7打包</p>
-
-<h3>未完待续。。。</h3>
 ]]></content>
   </entry>
   

@@ -9,8 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="go项目中经常会碰到线上编译好的二进制文件不清楚是哪次commit后编译的，每次编译出来的都是一个二进制文件，不利于管理，搞了个go项目的版本管理。
-利用go build的 -ldflags 参数，使用帮助命令查看详细信息 ">
+  <meta name="description" content="1、需求背景 客户现场有几台服务器，是局域网的，因为要经常维护，显示每次去跑现场肯定是不合适的，为了便于维护和管理，可以装一个内网穿透工具&ndash;frp ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +66,46 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2023/03/10/how-to-install-frp-vpn/">H安装frp内网穿透工具</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2023-03-10T10:30:17+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>10:30 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2023/03/10/how-to-install-frp-vpn/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>1、需求背景</h4>
+
+<p>客户现场有几台服务器，是局域网的，因为要经常维护，显示每次去跑现场肯定是不合适的，为了便于维护和管理，可以装一个内网穿透工具&ndash;frp</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2023/03/10/how-to-install-frp-vpn/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -455,51 +494,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">Fabric多台服务器的部署(三)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-12-29T16:48:58+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:48 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>6、启动Fabric网络</h4>
-
-<p>&emsp;完成上面的工作后，我们已经生成了Fabric所需要的证书和创世纪块等一些必要文件后，现在我们就需要配置docker文件，来启动Fabric网络，之前我们讲过需要启动的一些服务，现在在列一下，服务器一共有4台， 跑4个peer，4个ca, 4个kafka，3个zookeeper, 2个orderer，具体信息如下：<br/>
-1、Server1：  peer1、Ca1、 Kafka1、Zookeeper1、Orderer1<br/>
-2、Server2：  peer2、Ca2、 Kafka2、Zookeeper2、Orderer2<br/>
-3、Server3：   peer3、Ca3、 Kafka3、Zookeeper31<br/>
-4、Server4：   peer4、Ca4、 Kafka4<br/>
-现在我们需要在各台服务器上启动这些服务，需要说明一下，我们需要先启动zookeeper，再启动kafka，然后启动orderer和peer，这些是有先后顺序的，因为各服务之间有依赖关系，不按顺序启动，最后可能各服务之间的通讯有问题，下面依次来启动这些服务。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iii/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -513,6 +507,10 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2023/03/10/how-to-install-frp-vpn/">H安装frp内网穿透工具</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2022/04/18/the-version-of-gloang-project/">Golang项目中的版本管理</a>
@@ -530,10 +528,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
         <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2019/06/21/the-tbaas-of-tencent/">腾讯云区块链服务平台介绍及接入</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -547,7 +541,7 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2022 - Peter Xu -
+  Copyright &copy; 2023 - Peter Xu -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
