@@ -1,0 +1,462 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>安装frp内网穿透工具 - 老徐</title>
+  <meta name="author" content="Peter Xu">
+
+  
+  <meta name="description" content="1、需求背景 客户现场有几台服务器，是局域网的，因为要经常维护，显示每次去跑现场肯定是不合适的，为了便于维护和管理，可以装一个内网穿透工具&ndash;frp 2、安装 由于frp是golang语言写的，所以只要下载编译好的源码，直接跑就行，下载源码 1
+2
+下载最新版本的frp
+wget &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://xuyao.club/blog/2023/03/10/how-to-install-frp-vpn/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">老徐</a></h1>
+  
+    <h2>Never underestimate your power to change yourself!</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://cn.bing.com" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="xuyao.club">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/2015/06/05/about-me-with-ruby-code/">About Me</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">安装frp内网穿透工具</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2023-03-10T10:30:17+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>10:30 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>1、需求背景</h4>
+
+<p>客户现场有几台服务器，是局域网的，因为要经常维护，显示每次去跑现场肯定是不合适的，为了便于维护和管理，可以装一个内网穿透工具&ndash;frp</p>
+
+<!--more-->
+
+
+<h4>2、安装</h4>
+
+<ol>
+<li>由于frp是golang语言写的，所以只要下载编译好的源码，直接跑就行，下载源码</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>下载最新版本的frp
+</span><span class='line'>wget https://github.com/fatedier/frp/releases/download/v0.45.0/frp_0.45.0_linux_amd64.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<p>解压gz包</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>tar -zxvf  frp_0.45.0_linux_amd64.tar.gz</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>配置frp，frp需要有一个公网ip，通过公网ip转发到要访问的局域网上，所以整个过程分为服务端和客户端，服务端是指有公网ip的那个服务器，客户端是需要访问的那台局域网<br/>
+服务端的配置文件</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>打开配置文件
+</span><span class='line'>vim frps.ini
+</span><span class='line'>
+</span><span class='line'>[common]
+</span><span class='line'>bind_port = 8700 #配置需要转发的端口</span></code></pre></td></tr></table></div></figure>
+
+
+<p>客户端配置文件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim frpc.ini
+</span><span class='line'>[common]
+</span><span class='line'>server_addr = 106.14.xxx.161 #公网服务器的IP
+</span><span class='line'>server_port = 8700 #公网服务端配置的端口
+</span><span class='line'>
+</span><span class='line'>[ssh]
+</span><span class='line'>type = tcp
+</span><span class='line'>local_ip = 127.0.0.1
+</span><span class='line'>local_port = 22
+</span><span class='line'>remote_port = 8600 #公网服务器的登录端口，</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>启动服务端和客户端
+服务端启动</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./frps -c frps.ini</span></code></pre></td></tr></table></div></figure>
+
+
+<p>客户端启动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./frpc -c frpc.ini</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样整个过种就可以了,可以试下</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>通过端口登录公网的ip,实际是登录了局域网
+</span><span class='line'>ssh -oPort=8600 root@106.14.xxx.161</span></code></pre></td></tr></table></div></figure>
+
+
+<p>4.使用systemd启动frp,正常工作中，一般frp都要一直开着的，包括开机启动等，所以可以使用systemd来守护进程，
+安装systemd</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># yum
+</span><span class='line'>yum install systemd
+</span><span class='line'># apt
+</span><span class='line'>apt install systemd</span></code></pre></td></tr></table></div></figure>
+
+
+<p>创建frps的配置文件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>vim /etc/systemd/system/frps.service</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置文件内容</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>[Unit]
+</span><span class='line'># 服务名称，可自定义
+</span><span class='line'>Description = frp server
+</span><span class='line'>After = network.target syslog.target
+</span><span class='line'>Wants = network.target
+</span><span class='line'>
+</span><span class='line'>[Service]
+</span><span class='line'>Type = simple
+</span><span class='line'># 启动frps的命令，需修改为您的frps的安装路径
+</span><span class='line'>ExecStart = /path/to/frps -c /path/to/frps.ini 
+</span><span class='line'># ExecStart = /path/to/frpc -c /path/to/frpc.ini
+</span><span class='line'>
+</span><span class='line'>[Install]
+</span><span class='line'>WantedBy = multi-user.target</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用systemd 命令，管理 frps。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># 启动frp
+</span><span class='line'>systemctl start frps
+</span><span class='line'># 停止frp
+</span><span class='line'>systemctl stop frps
+</span><span class='line'># 重启frp
+</span><span class='line'>systemctl restart frps
+</span><span class='line'># 查看frp状态
+</span><span class='line'>systemctl status frps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>配置开机自动启动frps</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>systemctl enable frps</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看frps启动日志</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>journalctl -u frps.service</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>3、身份认证</h4>
+
+<p>frp还可以支持身份验证，有三种模式，token 和 oidc，默认为 token。<br/>
+简单给个token身份验证的方式，这个也是最常用的。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># frps.ini 服务端
+</span><span class='line'>[common]
+</span><span class='line'>bind_port = 8700
+</span><span class='line'>authentication_method = token
+</span><span class='line'>token = QqQ27WRVKGUNxxxx
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'># frpc.ini 客户端
+</span><span class='line'>[common]
+</span><span class='line'>server_addr = 106.xx.xx.xx
+</span><span class='line'>server_port = 8700
+</span><span class='line'>authentication_method = token
+</span><span class='line'>token = QqQ27WRVKGUNxxxx</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>4、配置自定义域名访问内网的Web服务</h4>
+
+<p>可以使用vhost_http_port用来监听8080端口</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#frps.ini 服务端
+</span><span class='line'>[common]
+</span><span class='line'>bind_port = 7000
+</span><span class='line'>vhost_http_port = 8800
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>#frpc.ini 客户端
+</span><span class='line'>[web]
+</span><span class='line'>type = http
+</span><span class='line'>local_port = 8800
+</span><span class='line'>custom_domains = xxx.1nongfu.com</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样就可以通过浏览器访问<a href="http://xxx.1nongfu.com:8800">http://xxx.1nongfu.com:8800</a> 即可访问到处于内网机器上 8800 端口的服务，如果是静态资源可能还需要用nginx做个代理。</p>
+
+<p>frp还有很多功能，这个是最简单的例子</p>
+
+<h4>参考资料</h4>
+
+<ol>
+<li><a href="https://gofrp.org/docs/overview/">https://gofrp.org/docs/overview/</a></li>
+<li><a href="https://gofrp.org/docs/setup/systemd/">https://gofrp.org/docs/setup/systemd/</a></li>
+</ol>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Peter Xu</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2023-03-10T10:30:17+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>10:30 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2022/04/18/the-version-of-gloang-project/" title="Previous Post: Golang项目中的版本管理">&laquo; Golang项目中的版本管理</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+
+
+  <section>
+    <h1>Comments</h1>
+    <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
+	<div class="ds-thread" data-title="安装frp内网穿透工具"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"xuyao91"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end --></div>
+  </section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2023/03/10/how-to-install-frp-vpn/">安装frp内网穿透工具</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2022/04/18/the-version-of-gloang-project/">Golang项目中的版本管理</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/12/31/one-last-little-surprise-for-2020/">2020年最后的一个小惊喜</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2023 - Peter Xu -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
