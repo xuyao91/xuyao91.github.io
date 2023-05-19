@@ -9,7 +9,8 @@
 @import "plugins/**/*";
 @import "custom/styles";
 
-body>header {background-image: url(http://blog.1nongfu.com/16844637085541.png) !important;}
+body>header {background-image: url(http://blog.1nongfu.com/16844637085541.png) !important; height:245px;}
 body>header h2 {color: #fff;font-weight: bold;}
 
 html {background: #ffffff url(/images/line-tile.png?1461596052) top left;}
+body>header>hgroup {margin-top: 7rem}
