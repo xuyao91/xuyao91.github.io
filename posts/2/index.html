@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="6、启动Fabric网络 &emsp;完成上面的工作后，我们已经生成了Fabric所需要的证书和创世纪块等一些必要文件后，现在我们就需要配置docker文件，来启动Fabric网络，之前我们讲过需要启动的一些服务，现在在列一下，服务器一共有4台， 跑4个peer，4个ca, 4个kafka， &hellip;">
+  <meta name="description" content="7、创建channel和chaincode &emsp; 之前我们说过，本项目是一个nodejs的项目，是根据https://github.com/hyperledger/fabric-samples里的balance_transfer稍作修改来的， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,56 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Fabric多台服务器的部署(四)</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-12-29T16:51:08+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:51 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>7、创建channel和chaincode</h4>
+
+<p> &emsp; 之前我们说过，本项目是一个nodejs的项目，是根据<a href="https://github.com/hyperledger/fabric-samples">https://github.com/hyperledger/fabric-samples</a>里的balance_transfer稍作修改来的，所以这里我们创建channel和chaincode，包括数据上链都会用nodejs sdk来做。</p>
+
+<h6>7.1、启动nodejs服务</h6>
+
+<p> &emsp;进入我们的trace_wine项目，使用npm安装项目所需的package,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>npm install</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完后，我们现在要启动node服务，我们可以看下，当前目录下面的个runApp.sh的脚本文件，看下里面内容就知道，这是个启动node服务的脚本</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -480,42 +530,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/01/16/about-gem-rails-jwplayer/">关于rails-jwplayer Gem</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2017-01-16T19:54:57+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>7:54 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2017/01/16/about-gem-rails-jwplayer/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>&emsp;这几天公司有个业务，有一些课程（视频播放）需要统计用户的观看数据，包括用户看了多长时间，在哪些地方快进了，哪些地方暂停了，哪些地方重复看了等一些用户的行为操作，调查了一翻，H5自带的video是不支持这些功能，好在发现国外有个<a href="https://www.jwplayer.com/">jwplayer</a>的视频播放插件，功能不是一般的强大，支持各种自定义功能，于是看完文档后，自己就集成了一个基于jwplayer的rails gem（<a href="https://github.com/xuyao91/rails-jwplayer">rails-jwplayer</a>），便于以后自己用。</p>
-
-<p>&emsp;目前功能做的比较简单，就是集成了一些基本的功能，后期会把spec测试补齐，及再做一些深度的集可成。
-具体如何使用，可以到github上看下<a href="https://github.com/xuyao91/rails-jwplayer/blob/master/README.md">rails-jwplayer</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -533,6 +547,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/">使用PyTorch构建CNN网络训练MNIST数据集</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2023/03/10/how-to-install-frp-vpn/">安装frp内网穿透工具</a>
       </li>
     
@@ -546,10 +564,6 @@
     
       <li class="post">
         <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
       </li>
     
   </ul>

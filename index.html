@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="1、需求背景 客户现场有几台服务器，是局域网的，因为要经常维护，显示每次去跑现场肯定是不合适的，为了便于维护和管理，可以装一个内网穿透工具&ndash;frp ">
+  <meta name="description" content="前言 本文记录了使用PyTorch构建一个简单的CNN网络，并使用MNIST数据集进行训练和测试。记录整个推理过程 1、MNIST数据集 MNIST数据集是一个手写数字识别数据集，包含了60,000个28x28像素的手写数字图像（灰度图片），每个数字都有10个训练样本和10个测试样本。该数据集由C &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,56 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/">使用PyTorch构建CNN网络训练MNIST数据集</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2023-05-26T00:00:52+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>12:00 am</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h4>前言</h4>
+
+<p>本文记录了使用PyTorch构建一个简单的CNN网络，并使用MNIST数据集进行训练和测试。记录整个推理过程</p>
+
+<h4>1、MNIST数据集</h4>
+
+<p>MNIST数据集是一个手写数字识别数据集，包含了60,000个28x28像素的手写数字图像（灰度图片），每个数字都有10个训练样本和10个测试样本。该数据集由C. E. Mnih等人于1999年首次发布，并被广泛应用于机器学习领域的分类、识别和生成模型的研究中。<br/>
+MNIST数据集的特点：</p>
+
+<p>  1、 每个数字都是手写的，因此具有一定的噪声和不规则性；<br/>
+  2、 每个数字只有一种写法，因此可以视为二元分类问题；<br/>
+  3、 数据集中的数字图像比较简单，易于处理和识别；<br/>
+  4、 数据集中的数字图像没有标签，需要通过预处理和特征提取等方法来自动识别。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/">Read on&rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -444,56 +494,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Fabric多台服务器的部署(四)</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-12-29T16:51:08+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>4:51 pm</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h4>7、创建channel和chaincode</h4>
-
-<p> &emsp; 之前我们说过，本项目是一个nodejs的项目，是根据<a href="https://github.com/hyperledger/fabric-samples">https://github.com/hyperledger/fabric-samples</a>里的balance_transfer稍作修改来的，所以这里我们创建channel和chaincode，包括数据上链都会用nodejs sdk来做。</p>
-
-<h6>7.1、启动nodejs服务</h6>
-
-<p> &emsp;进入我们的trace_wine项目，使用npm安装项目所需的package,</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>npm install</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装完后，我们现在要启动node服务，我们可以看下，当前目录下面的个runApp.sh的脚本文件，看下里面内容就知道，这是个启动node服务的脚本</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2018/12/29/deployment-of-fabric-multiple-servers-iiii/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -509,6 +509,10 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/">使用PyTorch构建CNN网络训练MNIST数据集</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2023/03/10/how-to-install-frp-vpn/">安装frp内网穿透工具</a>
       </li>
     
@@ -522,10 +526,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     
       <li class="post">
         <a href="/blog/2020/08/26/deploy-fabric-to-a-non-docker-environment/">非Docker环境部署Fabric</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/09/09/symmetric-encryption-and-asymmetric-encryption/">密码学(三)之对称加密与非对称加密</a>
       </li>
     
   </ul>
