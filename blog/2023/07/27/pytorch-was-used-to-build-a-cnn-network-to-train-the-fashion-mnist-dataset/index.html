@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>使用PyTorch构建CNN网络训练MNIST数据集 - 老徐</title>
+  <title>使用PyTorch构建CNN网络训练FashionMNIST数据集 - 老徐</title>
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="前言 本文记录了使用PyTorch构建一个简单的CNN网络，并使用MNIST数据集进行训练和测试。记录整个推理过程 1、MNIST数据集 MNIST数据集是一个手写数字识别数据集，包含了60,000个28x28像素的手写数字图像（灰度图片），每个数字都有10个训练样本和10个测试样本。该数据集由C &hellip;">
+  <meta name="description" content="前言 本文记录了使用PyTorch构建一个简单的CNN网络，并使用Fahion-MNIST数据集进行训练和测试。记录整个推理过程 1、Fashion-MNIST数据集 Fashion-MNIST是一个流行的图像分类数据集，用于机器学习和计算机视觉任务。数据集包含了来自10个不同类别的70, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://xuyao.club/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/">
+  <link rel="canonical" href="http://xuyao.club/blog/2023/07/27/pytorch-was-used-to-build-a-cnn-network-to-train-the-fashion-mnist-dataset/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="老徐" type="application/atom+xml">
@@ -69,7 +69,7 @@
   
   <header>
     
-      <h1 class="entry-title">使用PyTorch构建CNN网络训练MNIST数据集</h1>
+      <h1 class="entry-title">使用PyTorch构建CNN网络训练FashionMNIST数据集</h1>
     
     
       <p class="meta">
@@ -78,7 +78,7 @@
 
 
 
-<time class='entry-date' datetime='2023-05-26T00:00:52+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>12:00 am</span></time>
+<time class='entry-date' datetime='2023-07-27T16:31:49+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>4:31 pm</span></time>
         
         <!-- doushuo commnet -->
         
@@ -91,34 +91,46 @@
 
 <div class="entry-content"><h4>前言</h4>
 
-<p>本文记录了使用PyTorch构建一个简单的CNN网络，并使用MNIST数据集进行训练和测试。记录整个推理过程</p>
-
-<h4>1、MNIST数据集</h4>
-
-<p>MNIST数据集是一个手写数字识别数据集，包含了60,000个28x28像素的手写数字图像（灰度图片），每个数字都有10个训练样本和10个测试样本。该数据集由C. E. Mnih等人于1999年首次发布，并被广泛应用于机器学习领域的分类、识别和生成模型的研究中。<br/>
-MNIST数据集的特点：</p>
-
-<p>  1、 每个数字都是手写的，因此具有一定的噪声和不规则性；<br/>
-  2、 每个数字只有一种写法，因此可以视为二元分类问题；<br/>
-  3、 数据集中的数字图像比较简单，易于处理和识别；<br/>
-  4、 数据集中的数字图像没有标签，需要通过预处理和特征提取等方法来自动识别。</p>
+<p>本文记录了使用PyTorch构建一个简单的CNN网络，并使用Fahion-MNIST数据集进行训练和测试。记录整个推理过程</p>
 
 <!--more-->
 
 
-<p></p>
+<h4>1、Fashion-MNIST数据集</h4>
+
+<p>Fashion-MNIST是一个流行的图像分类数据集，用于机器学习和计算机视觉任务。数据集包含了来自10个不同类别的70,000个灰度图像。每个图像的分辨率为28x28像素，并包含单件服装或配饰的图像。这些类别包括：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1、T恤
+</span><span class='line'>2、裤子
+</span><span class='line'>3、毛衣
+</span><span class='line'>4、裙子
+</span><span class='line'>5、外套
+</span><span class='line'>6、凉鞋
+</span><span class='line'>7、衬衫
+</span><span class='line'>8、运动鞋
+</span><span class='line'>9、包
+</span><span class='line'>10、短靴</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Fashion-MNIST数据集的目标是训练机器学习模型来准确地识别图像中的服装类别。由于这些图像是灰度图像，每个像素的值介于0到255之间。</p>
+
+<p>该数据集通常用于测试图像分类算法的性能，以及在实践中验证新的计算机视觉技术。它与MNIST数据集类似，但更具挑战性，因为服装图像的变化更加复杂。</p>
 
 <h4>2、构建卷积神经网络</h4>
 
-<p>整个神经网络一共5层，2个卷积层，2个线性层，1个全链接输出层,如下：<br/>
+<p>由于Fashion-MINST数据集跟MINST数据集一样，都是28*28的灰度图片，所以他们的输入是一样的，我们可以直接按照上次训练MINST的卷积神经网络来训练Fashion-MINST，上一讲中训练MINST的网络结构如下(具体可参考上一篇文章)：
 Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
-网络架构的说明：</p>
-
-<p>1、因为MNIST数据是一个灰度的28<em>28的图片，所以数据输入层只有1个输入通道。<br/>
-2、 卷积层的卷积核都使用3</em>3大小核。<br/>
-3、 权重参数使用Adam或者SGD来更新参数。<br/>
-4、 使用SGD方法，经过10epoch，准确率可以达到99.16%。<br/>
-代码如下</p>
+使用上一讲的卷积神经网络训练，训练10个epoch后的准确率在86%左右，可以看出，准确率不是很高，现在改一下神经网络，来提高其准确率，主要是增加卷积层，上一讲中只有两个卷积层，现在我们可以再增加一个卷积层，来看下训练效果，代码如下：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -285,6 +297,33 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 <span class='line-number'>163</span>
 <span class='line-number'>164</span>
 <span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+<span class='line-number'>178</span>
+<span class='line-number'>179</span>
+<span class='line-number'>180</span>
+<span class='line-number'>181</span>
+<span class='line-number'>182</span>
+<span class='line-number'>183</span>
+<span class='line-number'>184</span>
+<span class='line-number'>185</span>
+<span class='line-number'>186</span>
+<span class='line-number'>187</span>
+<span class='line-number'>188</span>
+<span class='line-number'>189</span>
+<span class='line-number'>190</span>
+<span class='line-number'>191</span>
+<span class='line-number'>192</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>import torch
 </span><span class='line'>import torch.nn as nn
 </span><span class='line'>import torch.nn.functional as F
@@ -296,11 +335,11 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>import sys
 </span><span class='line'>
 </span><span class='line'>BATCH_SIZE = 200 #每单次训练时加载的数据量，如果是用GPU跑的话，可以设置得高一点。
-</span><span class='line'>EPOCHS = 10  # 总共训练批次
+</span><span class='line'>EPOCHS = 5  # 总共训练批次
 </span><span class='line'>DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # 让torch判断是否使用GPU，建议使用GPU环境，因为会快很多
 </span><span class='line'>
 </span><span class='line'>train_loader = torch.utils.data.DataLoader(
-</span><span class='line'>    datasets.MNIST('../datasets/data', train=True, download=True,
+</span><span class='line'>    datasets.FashionMNIST('../datasets/data', train=True, download=True,
 </span><span class='line'>                   transform=transforms.Compose([
 </span><span class='line'>                       transforms.ToTensor(),
 </span><span class='line'>                       transforms.Normalize(mean=[0.5],std=[0.5])  # transforms.Normalize()将数据进行归一化处理，
@@ -308,32 +347,41 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>    batch_size=BATCH_SIZE, shuffle=True)
 </span><span class='line'>
 </span><span class='line'>test_loader = torch.utils.data.DataLoader(
-</span><span class='line'>    datasets.MNIST('../datasets/data', train=False, transform=transforms.Compose([
+</span><span class='line'>    datasets.FashionMNIST('../datasets/data', train=False, transform=transforms.Compose([
 </span><span class='line'>        transforms.ToTensor(),
 </span><span class='line'>        transforms.Normalize(mean=[0.5],std=[0.5])
 </span><span class='line'>    ])),
 </span><span class='line'>    batch_size=BATCH_SIZE, shuffle=True)
+</span><span class='line'>
+</span><span class='line'># Class labels
+</span><span class='line'>classes = ('T恤', '牛仔裤', '毛衣', '裙子', '外套',
+</span><span class='line'>        '凉鞋', '衬衫', '运动鞋', '包', '短靴')
 </span><span class='line'>
 </span><span class='line'># 网络结构 conv-&gt;Relu-&gt;pool-&gt;conv-&gt;Relu-&gt;pool-&gt;Linear-&gt;Relu-&gt;Linear-&gt;Sofrmax
 </span><span class='line'>class MNISTConvNet(nn.Module):
 </span><span class='line'>  def __init__(self):
 </span><span class='line'>    super().__init__()
 </span><span class='line'>    # 公式：OH=(H + 2P - FH)/S + 1; OW= (W + 2P - FW)/S + 1
-</span><span class='line'>    self.conv1 = nn.Conv2d(in_channels=1, out_channels=24, kernel_size=3, stride=1, padding=0) # 24, 26*26
-</span><span class='line'>    self.conv2 = nn.Conv2d(in_channels=24, out_channels=48, kernel_size=3, stride=1, padding=0) # 48, 11*11
-</span><span class='line'>    self.fc1 = nn.Linear(in_features=48*5*5, out_features=200)
-</span><span class='line'>    self.fc2 = nn.Linear(in_features=200, out_features=10)
+</span><span class='line'>    self.conv1 = nn.Conv2d(in_channels=1, out_channels=24, kernel_size=3, stride=1, padding=0) # 12, 26*26
+</span><span class='line'>    self.conv2 = nn.Conv2d(in_channels=24, out_channels=48, kernel_size=3, stride=1, padding=0) # 24, 24*24
+</span><span class='line'>    self.conv3 = nn.Conv2d(in_channels=48, out_channels=96, kernel_size=3, stride=1, padding=0) # 48, 10*10
+</span><span class='line'>    self.fc1 = nn.Linear(in_features=96*5*5, out_features=400)
+</span><span class='line'>    self.fc2 = nn.Linear(in_features=400, out_features=10)
 </span><span class='line'>    
 </span><span class='line'>  def forward(self, x):
 </span><span class='line'>    out = self.conv1(x)
 </span><span class='line'>    out = F.relu(out)
-</span><span class='line'>    out = F.max_pool2d(input=out, kernel_size=(2,2), stride=2) #24 13*13
+</span><span class='line'>    # out = F.max_pool2d(input=out, kernel_size=(2,2), stride=2) #12 13*13
 </span><span class='line'>    
 </span><span class='line'>    out = self.conv2(out)
 </span><span class='line'>    out = F.relu(out)
+</span><span class='line'>    out = F.max_pool2d(input=out, kernel_size=(2,2), stride=2) #24 12*12
+</span><span class='line'>    
+</span><span class='line'>    out = self.conv3(out)
+</span><span class='line'>    out = F.relu(out)
 </span><span class='line'>    out = F.max_pool2d(input=out, kernel_size=(2,2), stride=2) #48 5*5
 </span><span class='line'>    
-</span><span class='line'>    out = out.view(-1,48*5*5)
+</span><span class='line'>    out = out.view(-1,96*5*5)
 </span><span class='line'>    out = self.fc1(out)
 </span><span class='line'>    out = F.relu(out)
 </span><span class='line'>    
@@ -344,6 +392,8 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>
 </span><span class='line'>def train(model, optimizer, epoch):
 </span><span class='line'>  model.train() #设置模型为训练模式
+</span><span class='line'>  train_loss = 0
+</span><span class='line'>  correct = 0
 </span><span class='line'>  for batch_id, (images, labels) in enumerate(train_loader):
 </span><span class='line'>    images = images.to(DEVICE) # 将tensors移动到配置的device
 </span><span class='line'>    labels = labels.to(DEVICE)
@@ -353,10 +403,13 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>    loss.backward()
 </span><span class='line'>    optimizer.step()  # 调用step()方法更新梯度参数
 </span><span class='line'>    if (batch_id + 1) % 30 == 0:
-</span><span class='line'>        print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {}'.format(
-</span><span class='line'>            epoch, batch_id * len(images), len(train_loader.dataset),
-</span><span class='line'>                    100. * batch_id / len(train_loader), loss.item()))
-</span><span class='line'>
+</span><span class='line'>        print(f'Train Epoch: {epoch} [{batch_id * len(images)}/{len(train_loader.dataset)} ({ 100. * batch_id / len(train_loader):.0f}%)]\tLoss: {loss.item()}')
+</span><span class='line'>    train_loss += loss.item()
+</span><span class='line'>    # print(f'train loss: {loss.item()}, train_loss_sum: {train_loss}')
+</span><span class='line'>    
+</span><span class='line'>    pred = output.max(1, keepdim=True)[1]  # 找到概率最大的下标
+</span><span class='line'>    correct += pred.eq(labels.view_as(pred)).sum().item()
+</span><span class='line'>  return 100. * train_loss / len(train_loader.dataset), 100. * correct / len(train_loader.dataset)
 </span><span class='line'>  
 </span><span class='line'>def test(model):
 </span><span class='line'>  model.eval()
@@ -371,25 +424,23 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>          correct += pred.eq(labels.view_as(pred)).sum().item()
 </span><span class='line'>
 </span><span class='line'>  test_loss /= len(test_loader.dataset)
-</span><span class='line'>  print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({}%)\n'.format(
-</span><span class='line'>      test_loss, correct, len(test_loader.dataset),
-</span><span class='line'>      100. * correct / len(test_loader.dataset)))
-</span><span class='line'>
+</span><span class='line'>  print(f'\nTest set: Average loss: {test_loss:.4f}, Accuracy: {correct}/{len(test_loader.dataset)} ({100. * correct / len(test_loader.dataset)}%)\n')
+</span><span class='line'>  return test_loss, 100. * correct / len(test_loader.dataset)
 </span><span class='line'>
 </span><span class='line'>def predict(model):
 </span><span class='line'>  val_loader = torch.utils.data.DataLoader(
-</span><span class='line'>    datasets.MNIST('../datasets/data', train=False, transform=transforms.Compose([
+</span><span class='line'>    datasets.FashionMNIST('../datasets/data', train=False, transform=transforms.Compose([
 </span><span class='line'>                       transforms.ToTensor(),
 </span><span class='line'>                       transforms.Normalize(mean=[0.5],std=[0.5])
-</span><span class='line'>                   ])),batch_size=4, shuffle=True)
+</span><span class='line'>                   ])),batch_size=8, shuffle=True)
 </span><span class='line'>  iterator = iter(val_loader)#获得Iterator对象:
 </span><span class='line'>  X_val, Y_val = next(iterator) #循环Iterator对象迭代器，一般和上面的iter()一起使用
 </span><span class='line'>  inputs = Variable(X_val)
 </span><span class='line'>  #Variable()函数用于将一个张量转换为可训练的变量(也称为梯度变量)。使用Variable()函数可以方便地更新神经网络中的参数，从而实现反向传播算法。
 </span><span class='line'>  pred = model(inputs)
 </span><span class='line'>  _,pred = torch.max(pred, 1) #找到 tensor里最大的值，torch.max(input, dim)，input是softmax函数输出的一个tensor。 dim是max函数索引的维度0/1，0是每列的最大值，1是每行的最大值
-</span><span class='line'>  print("实际结果:",[i for i in Y_val])
-</span><span class='line'>  print("推理结果:", [ i for i in pred.data])
+</span><span class='line'>  print("实际结果:",[classes[i] for i in Y_val])
+</span><span class='line'>  print("推理结果:", [ classes[i] for i in pred.data])
 </span><span class='line'>
 </span><span class='line'>  img = torchvision.utils.make_grid(X_val)
 </span><span class='line'>  img = img.numpy().transpose(1,2,0)
@@ -405,21 +456,34 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>  model = MNISTConvNet().to(DEVICE)
 </span><span class='line'>  optimizer = optim.Adam(model.parameters()) #Adam方法更新权重参数
 </span><span class='line'>  # optimizer = optim.SGD(model.parameters(), lr=1e-1, momentum = 0.9) #SGD方法更新权重参数,学习率设置大一点，过小梯度下降过慢
-</span><span class='line'>
+</span><span class='line'>  train_loss_list, test_loss_list = [],[]
+</span><span class='line'>  train_acc_list, test_acc_list = [],[]
 </span><span class='line'>  for epoch in range(1, EPOCHS + 1):
-</span><span class='line'>    train(model, optimizer, epoch)
-</span><span class='line'>    torch.save(model.state_dict(), 'mnist_model.pkl') #保存模型
-</span><span class='line'>  test(model)
+</span><span class='line'>    train_loss, train_acc =  train(model, optimizer, epoch)
+</span><span class='line'>    #torch.save(model.state_dict(), 'fashion_mnist_model.pkl') #保存模型
+</span><span class='line'>    test_loss, test_acc = test(model)
+</span><span class='line'>    train_acc_list.append(train_acc)
+</span><span class='line'>    test_acc_list.append(test_acc)
+</span><span class='line'>    train_loss_list.append(train_loss)
+</span><span class='line'>    test_loss_list.append(test_loss)
+</span><span class='line'>    print(f'Epoch: {epoch} Train Loss: {train_loss:.4f}, Train Acc.: {train_acc:.2f}% | Validation Loss: {test_loss:.4f}, Validation Acc.: {test_acc:.2f}%')
+</span><span class='line'>  
+</span><span class='line'>  plt.plot(range(1, EPOCHS+1), train_loss_list, label='Training loss')
+</span><span class='line'>  plt.plot(range(1, EPOCHS+1), test_loss_list, label='Validation loss')
+</span><span class='line'>  plt.legend(loc='upper right')
+</span><span class='line'>  plt.ylabel('Cross entropy')
+</span><span class='line'>  plt.xlabel('Epoch')
+</span><span class='line'>  plt.show()
 </span><span class='line'>  
 </span><span class='line'>
 </span><span class='line'>def run_predict():
 </span><span class='line'>  model = MNISTConvNet().to(DEVICE)
-</span><span class='line'>  model.load_state_dict(torch.load('mnist_model.pkl')) #加载之前训练好的模型
+</span><span class='line'>  model.load_state_dict(torch.load('fashion_mnist_model.pkl')) #加载之前训练好的模型
 </span><span class='line'>  predict(model)
 </span><span class='line'>
 </span><span class='line'>def show_image():
 </span><span class='line'>  train_loader = torch.utils.data.DataLoader(
-</span><span class='line'>    datasets.MNIST('../datasets/data', train=True, download=True,
+</span><span class='line'>    datasets.FashionMNIST('../datasets/data', train=True, download=True,
 </span><span class='line'>                   transform=transforms.Compose([
 </span><span class='line'>                       transforms.ToTensor(),
 </span><span class='line'>                       transforms.Normalize((0.1307,), (0.3081,))  # transforms.Normalize()将数据进行归一化处理，
@@ -445,138 +509,21 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 </span><span class='line'>    if action == "train":
 </span><span class='line'>      run_train() # 用于训练数据
 </span><span class='line'>    elif action == "predict":
+</span><span class='line'>      print("-----")
 </span><span class='line'>      run_predict() # 用于预测图片
 </span><span class='line'>    elif action == "img":
 </span><span class='line'>      show_image() # 只是简单地显示图片
 </span><span class='line'>    else:
 </span><span class='line'>      print("请输入参数：train|predict|img")
+</span><span class='line'>  
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>3、训练</h3>
+<p>可以看到与上一讲的MINST网络的主要区别是增加一个卷积层。</p>
 
-<p>上面代码首先使用Adam方法理更新权重参数，经过5个epoch后，准确率可以达到99.02%，如下
-训练时使用如下代码训练：</p>
+<h5>3、训练</h5>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>python mnist_conv_net.py train</span></code></pre></td></tr></table></div></figure>
-
-
-<p>训练日志：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Train Epoch: 1 [5800/60000 (10%)] Loss: 0.489694
-</span><span class='line'>Train Epoch: 1 [11800/60000 (20%)]  Loss: 0.211527
-</span><span class='line'>Train Epoch: 1 [17800/60000 (30%)]  Loss: 0.184858
-</span><span class='line'>Train Epoch: 1 [23800/60000 (40%)]  Loss: 0.161435
-</span><span class='line'>Train Epoch: 1 [29800/60000 (50%)]  Loss: 0.173204
-</span><span class='line'>Train Epoch: 1 [35800/60000 (60%)]  Loss: 0.124986
-</span><span class='line'>Train Epoch: 1 [41800/60000 (70%)]  Loss: 0.076274
-</span><span class='line'>Train Epoch: 1 [47800/60000 (80%)]  Loss: 0.053319
-</span><span class='line'>Train Epoch: 1 [53800/60000 (90%)]  Loss: 0.044781
-</span><span class='line'>Train Epoch: 1 [59800/60000 (100%)] Loss: 0.063047
-</span><span class='line'>Train Epoch: 2 [5800/60000 (10%)] Loss: 0.077021
-</span><span class='line'>Train Epoch: 2 [11800/60000 (20%)]  Loss: 0.023402
-</span><span class='line'>Train Epoch: 2 [17800/60000 (30%)]  Loss: 0.050658
-</span><span class='line'>Train Epoch: 2 [23800/60000 (40%)]  Loss: 0.076794
-</span><span class='line'>Train Epoch: 2 [29800/60000 (50%)]  Loss: 0.058776
-</span><span class='line'>Train Epoch: 2 [35800/60000 (60%)]  Loss: 0.035746
-</span><span class='line'>Train Epoch: 2 [41800/60000 (70%)]  Loss: 0.093057
-</span><span class='line'>Train Epoch: 2 [47800/60000 (80%)]  Loss: 0.085911
-</span><span class='line'>Train Epoch: 2 [53800/60000 (90%)]  Loss: 0.066878
-</span><span class='line'>Train Epoch: 2 [59800/60000 (100%)] Loss: 0.120800
-</span><span class='line'>Train Epoch: 3 [5800/60000 (10%)] Loss: 0.053668
-</span><span class='line'>Train Epoch: 3 [11800/60000 (20%)]  Loss: 0.010750
-</span><span class='line'>Train Epoch: 3 [17800/60000 (30%)]  Loss: 0.029436
-</span><span class='line'>Train Epoch: 3 [23800/60000 (40%)]  Loss: 0.026253
-</span><span class='line'>Train Epoch: 3 [29800/60000 (50%)]  Loss: 0.026762
-</span><span class='line'>Train Epoch: 3 [35800/60000 (60%)]  Loss: 0.015479
-</span><span class='line'>Train Epoch: 3 [41800/60000 (70%)]  Loss: 0.109069
-</span><span class='line'>Train Epoch: 3 [47800/60000 (80%)]  Loss: 0.054719
-</span><span class='line'>Train Epoch: 3 [53800/60000 (90%)]  Loss: 0.034847
-</span><span class='line'>Train Epoch: 3 [59800/60000 (100%)] Loss: 0.019372
-</span><span class='line'>Train Epoch: 4 [5800/60000 (10%)] Loss: 0.025633
-</span><span class='line'>Train Epoch: 4 [11800/60000 (20%)]  Loss: 0.034000
-</span><span class='line'>Train Epoch: 4 [17800/60000 (30%)]  Loss: 0.016235
-</span><span class='line'>Train Epoch: 4 [23800/60000 (40%)]  Loss: 0.026829
-</span><span class='line'>Train Epoch: 4 [29800/60000 (50%)]  Loss: 0.070490
-</span><span class='line'>Train Epoch: 4 [35800/60000 (60%)]  Loss: 0.012940
-</span><span class='line'>Train Epoch: 4 [41800/60000 (70%)]  Loss: 0.017831
-</span><span class='line'>Train Epoch: 4 [47800/60000 (80%)]  Loss: 0.010007
-</span><span class='line'>Train Epoch: 4 [53800/60000 (90%)]  Loss: 0.014664
-</span><span class='line'>Train Epoch: 4 [59800/60000 (100%)] Loss: 0.039249
-</span><span class='line'>Train Epoch: 5 [5800/60000 (10%)] Loss: 0.052612
-</span><span class='line'>Train Epoch: 5 [11800/60000 (20%)]  Loss: 0.045722
-</span><span class='line'>Train Epoch: 5 [17800/60000 (30%)]  Loss: 0.012584
-</span><span class='line'>Train Epoch: 5 [23800/60000 (40%)]  Loss: 0.013080
-</span><span class='line'>Train Epoch: 5 [29800/60000 (50%)]  Loss: 0.033559
-</span><span class='line'>Train Epoch: 5 [35800/60000 (60%)]  Loss: 0.026182
-</span><span class='line'>Train Epoch: 5 [41800/60000 (70%)]  Loss: 0.001794
-</span><span class='line'>Train Epoch: 5 [47800/60000 (80%)]  Loss: 0.058093
-</span><span class='line'>Train Epoch: 5 [53800/60000 (90%)]  Loss: 0.038260
-</span><span class='line'>Train Epoch: 5 [59800/60000 (100%)] Loss: 0.012027
-</span><span class='line'>
-</span><span class='line'>Test set: Average loss: 0.0290, Accuracy: 9902/10000 (99.02%)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>可以再试下使用SGD来更新参数，将上面的Adam换成SGD</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>optimizer = optim.SGD(model.parameters(), lr=1e-1, momentum = 0.9) #SGD方法更新权重参数,学习率设置大一点，过小梯度下降过慢</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这里注意他的学习率，我一开始使用的是1e-3的学习率，结果发现梯度下降很慢，10epoch下来，loss值还有0.2多，精确度只有86%,把他改成1e-1，发现效果好很多，下面是他的训练日志：</p>
+<p>运行10epoch后的训练结果如下：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -680,132 +627,130 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 <span class='line-number'>100</span>
 <span class='line-number'>101</span>
 <span class='line-number'>102</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Train Epoch: 1 [5800/60000 (10%)] Loss: 0.6326162815093994
-</span><span class='line'>Train Epoch: 1 [11800/60000 (20%)]  Loss: 0.14702695608139038
-</span><span class='line'>Train Epoch: 1 [17800/60000 (30%)]  Loss: 0.11106981337070465
-</span><span class='line'>Train Epoch: 1 [23800/60000 (40%)]  Loss: 0.11699119210243225
-</span><span class='line'>Train Epoch: 1 [29800/60000 (50%)]  Loss: 0.08016740530729294
-</span><span class='line'>Train Epoch: 1 [35800/60000 (60%)]  Loss: 0.043048132210969925
-</span><span class='line'>Train Epoch: 1 [41800/60000 (70%)]  Loss: 0.07454550266265869
-</span><span class='line'>Train Epoch: 1 [47800/60000 (80%)]  Loss: 0.03606884181499481
-</span><span class='line'>Train Epoch: 1 [53800/60000 (90%)]  Loss: 0.018314605578780174
-</span><span class='line'>Train Epoch: 1 [59800/60000 (100%)] Loss: 0.032142993062734604
-</span><span class='line'>Train Epoch: 2 [5800/60000 (10%)] Loss: 0.017602885141968727
-</span><span class='line'>Train Epoch: 2 [11800/60000 (20%)]  Loss: 0.02773950807750225
-</span><span class='line'>Train Epoch: 2 [17800/60000 (30%)]  Loss: 0.09004029631614685
-</span><span class='line'>Train Epoch: 2 [23800/60000 (40%)]  Loss: 0.02125852182507515
-</span><span class='line'>Train Epoch: 2 [29800/60000 (50%)]  Loss: 0.0772605612874031
-</span><span class='line'>Train Epoch: 2 [35800/60000 (60%)]  Loss: 0.03700004518032074
-</span><span class='line'>Train Epoch: 2 [41800/60000 (70%)]  Loss: 0.05076766386628151
-</span><span class='line'>Train Epoch: 2 [47800/60000 (80%)]  Loss: 0.03611752390861511
-</span><span class='line'>Train Epoch: 2 [53800/60000 (90%)]  Loss: 0.04180872440338135
-</span><span class='line'>Train Epoch: 2 [59800/60000 (100%)] Loss: 0.024729833006858826
-</span><span class='line'>Train Epoch: 3 [5800/60000 (10%)] Loss: 0.08424612879753113
-</span><span class='line'>Train Epoch: 3 [11800/60000 (20%)]  Loss: 0.004190818872302771
-</span><span class='line'>Train Epoch: 3 [17800/60000 (30%)]  Loss: 0.035337768495082855
-</span><span class='line'>Train Epoch: 3 [23800/60000 (40%)]  Loss: 0.0022824255283921957
-</span><span class='line'>Train Epoch: 3 [29800/60000 (50%)]  Loss: 0.03864956274628639
-</span><span class='line'>Train Epoch: 3 [35800/60000 (60%)]  Loss: 0.022920949384570122
-</span><span class='line'>Train Epoch: 3 [41800/60000 (70%)]  Loss: 0.007762896828353405
-</span><span class='line'>Train Epoch: 3 [47800/60000 (80%)]  Loss: 0.02902868203818798
-</span><span class='line'>Train Epoch: 3 [53800/60000 (90%)]  Loss: 0.0689283162355423
-</span><span class='line'>Train Epoch: 3 [59800/60000 (100%)] Loss: 0.013603786006569862
-</span><span class='line'>Train Epoch: 4 [5800/60000 (10%)] Loss: 0.002816196996718645
-</span><span class='line'>Train Epoch: 4 [11800/60000 (20%)]  Loss: 0.015283504500985146
-</span><span class='line'>Train Epoch: 4 [17800/60000 (30%)]  Loss: 0.023883331567049026
-</span><span class='line'>Train Epoch: 4 [23800/60000 (40%)]  Loss: 0.012441331520676613
-</span><span class='line'>Train Epoch: 4 [29800/60000 (50%)]  Loss: 0.010721658356487751
-</span><span class='line'>Train Epoch: 4 [35800/60000 (60%)]  Loss: 0.008633618243038654
-</span><span class='line'>Train Epoch: 4 [41800/60000 (70%)]  Loss: 0.02001149021089077
-</span><span class='line'>Train Epoch: 4 [47800/60000 (80%)]  Loss: 0.008363565430045128
-</span><span class='line'>Train Epoch: 4 [53800/60000 (90%)]  Loss: 0.052691176533699036
-</span><span class='line'>Train Epoch: 4 [59800/60000 (100%)] Loss: 0.0459044873714447
-</span><span class='line'>Train Epoch: 5 [5800/60000 (10%)] Loss: 0.028606999665498734
-</span><span class='line'>Train Epoch: 5 [11800/60000 (20%)]  Loss: 0.009156718850135803
-</span><span class='line'>Train Epoch: 5 [17800/60000 (30%)]  Loss: 0.003058604197576642
-</span><span class='line'>Train Epoch: 5 [23800/60000 (40%)]  Loss: 0.0006700430531054735
-</span><span class='line'>Train Epoch: 5 [29800/60000 (50%)]  Loss: 0.010339883156120777
-</span><span class='line'>Train Epoch: 5 [35800/60000 (60%)]  Loss: 0.02346840687096119
-</span><span class='line'>Train Epoch: 5 [41800/60000 (70%)]  Loss: 0.01867305487394333
-</span><span class='line'>Train Epoch: 5 [47800/60000 (80%)]  Loss: 0.00615763058885932
-</span><span class='line'>Train Epoch: 5 [53800/60000 (90%)]  Loss: 0.026964306831359863
-</span><span class='line'>Train Epoch: 5 [59800/60000 (100%)] Loss: 0.03355356678366661
-</span><span class='line'>Train Epoch: 6 [5800/60000 (10%)] Loss: 0.0019284432055428624
-</span><span class='line'>Train Epoch: 6 [11800/60000 (20%)]  Loss: 0.006681244820356369
-</span><span class='line'>Train Epoch: 6 [17800/60000 (30%)]  Loss: 0.026242844760417938
-</span><span class='line'>Train Epoch: 6 [23800/60000 (40%)]  Loss: 0.029215598478913307
-</span><span class='line'>Train Epoch: 6 [29800/60000 (50%)]  Loss: 0.03575825318694115
-</span><span class='line'>Train Epoch: 6 [35800/60000 (60%)]  Loss: 0.007471080869436264
-</span><span class='line'>Train Epoch: 6 [41800/60000 (70%)]  Loss: 0.010791837237775326
-</span><span class='line'>Train Epoch: 6 [47800/60000 (80%)]  Loss: 0.0031418739818036556
-</span><span class='line'>Train Epoch: 6 [53800/60000 (90%)]  Loss: 0.005480702966451645
-</span><span class='line'>Train Epoch: 6 [59800/60000 (100%)] Loss: 0.0001745843474054709
-</span><span class='line'>Train Epoch: 7 [5800/60000 (10%)] Loss: 0.011564110405743122
-</span><span class='line'>Train Epoch: 7 [11800/60000 (20%)]  Loss: 0.029219292104244232
-</span><span class='line'>Train Epoch: 7 [17800/60000 (30%)]  Loss: 0.0013832019176334143
-</span><span class='line'>Train Epoch: 7 [23800/60000 (40%)]  Loss: 0.012693165801465511
-</span><span class='line'>Train Epoch: 7 [29800/60000 (50%)]  Loss: 0.0006698016077280045
-</span><span class='line'>Train Epoch: 7 [35800/60000 (60%)]  Loss: 0.0018981300527229905
-</span><span class='line'>Train Epoch: 7 [41800/60000 (70%)]  Loss: 0.010488353669643402
-</span><span class='line'>Train Epoch: 7 [47800/60000 (80%)]  Loss: 0.0014791633002460003
-</span><span class='line'>Train Epoch: 7 [53800/60000 (90%)]  Loss: 0.029287874698638916
-</span><span class='line'>Train Epoch: 7 [59800/60000 (100%)] Loss: 0.029237637296319008
-</span><span class='line'>Train Epoch: 8 [5800/60000 (10%)] Loss: 0.0069076246581971645
-</span><span class='line'>Train Epoch: 8 [11800/60000 (20%)]  Loss: 0.0002714076545089483
-</span><span class='line'>Train Epoch: 8 [17800/60000 (30%)]  Loss: 0.003580649383366108
-</span><span class='line'>Train Epoch: 8 [23800/60000 (40%)]  Loss: 0.0044055297039449215
-</span><span class='line'>Train Epoch: 8 [29800/60000 (50%)]  Loss: 0.005105248186737299
-</span><span class='line'>Train Epoch: 8 [35800/60000 (60%)]  Loss: 0.013003651052713394
-</span><span class='line'>Train Epoch: 8 [41800/60000 (70%)]  Loss: 0.002714156173169613
-</span><span class='line'>Train Epoch: 8 [47800/60000 (80%)]  Loss: 0.0037790806964039803
-</span><span class='line'>Train Epoch: 8 [53800/60000 (90%)]  Loss: 0.000915569078642875
-</span><span class='line'>Train Epoch: 8 [59800/60000 (100%)] Loss: 0.0026095432695001364
-</span><span class='line'>Train Epoch: 9 [5800/60000 (10%)] Loss: 0.002073458628728986
-</span><span class='line'>Train Epoch: 9 [11800/60000 (20%)]  Loss: 0.005496991332620382
-</span><span class='line'>Train Epoch: 9 [17800/60000 (30%)]  Loss: 0.009597436524927616
-</span><span class='line'>Train Epoch: 9 [23800/60000 (40%)]  Loss: 0.0016645310679450631
-</span><span class='line'>Train Epoch: 9 [29800/60000 (50%)]  Loss: 0.0006376765668392181
-</span><span class='line'>Train Epoch: 9 [35800/60000 (60%)]  Loss: 0.0005055389483459294
-</span><span class='line'>Train Epoch: 9 [41800/60000 (70%)]  Loss: 0.0015127335209399462
-</span><span class='line'>Train Epoch: 9 [47800/60000 (80%)]  Loss: 0.0017895273631438613
-</span><span class='line'>Train Epoch: 9 [53800/60000 (90%)]  Loss: 0.00020351675630081445
-</span><span class='line'>Train Epoch: 9 [59800/60000 (100%)] Loss: 0.003212581854313612
-</span><span class='line'>Train Epoch: 10 [5800/60000 (10%)]  Loss: 0.00015950168017297983
-</span><span class='line'>Train Epoch: 10 [11800/60000 (20%)] Loss: 0.0013000047765672207
-</span><span class='line'>Train Epoch: 10 [17800/60000 (30%)] Loss: 0.0015988206723704934
-</span><span class='line'>Train Epoch: 10 [23800/60000 (40%)] Loss: 0.0006124568171799183
-</span><span class='line'>Train Epoch: 10 [29800/60000 (50%)] Loss: 0.013285879977047443
-</span><span class='line'>Train Epoch: 10 [35800/60000 (60%)] Loss: 0.00040567651740275323
-</span><span class='line'>Train Epoch: 10 [41800/60000 (70%)] Loss: 0.00692130858078599
-</span><span class='line'>Train Epoch: 10 [47800/60000 (80%)] Loss: 0.0020271940156817436
-</span><span class='line'>Train Epoch: 10 [53800/60000 (90%)] Loss: 0.00022073769650887698
-</span><span class='line'>Train Epoch: 10 [59800/60000 (100%)]  Loss: 0.002098886761814356
+</pre></td><td class='code'><pre><code class=''><span class='line'>Train Epoch: 1 [5800/60000 (10%)] Loss: 0.6379690766334534
+</span><span class='line'>Train Epoch: 1 [11800/60000 (20%)]  Loss: 0.5845944881439209
+</span><span class='line'>Train Epoch: 1 [17800/60000 (30%)]  Loss: 0.4599098265171051
+</span><span class='line'>Train Epoch: 1 [23800/60000 (40%)]  Loss: 0.512351393699646
+</span><span class='line'>Train Epoch: 1 [29800/60000 (50%)]  Loss: 0.40181490778923035
+</span><span class='line'>Train Epoch: 1 [35800/60000 (60%)]  Loss: 0.3760054409503937
+</span><span class='line'>Train Epoch: 1 [41800/60000 (70%)]  Loss: 0.36197417974472046
+</span><span class='line'>Train Epoch: 1 [47800/60000 (80%)]  Loss: 0.3655475676059723
+</span><span class='line'>Train Epoch: 1 [53800/60000 (90%)]  Loss: 0.40860098600387573
+</span><span class='line'>Train Epoch: 1 [59800/60000 (100%)] Loss: 0.38368210196495056
+</span><span class='line'>Train Epoch: 2 [5800/60000 (10%)] Loss: 0.3502006232738495
+</span><span class='line'>Train Epoch: 2 [11800/60000 (20%)]  Loss: 0.2745484411716461
+</span><span class='line'>Train Epoch: 2 [17800/60000 (30%)]  Loss: 0.29497388005256653
+</span><span class='line'>Train Epoch: 2 [23800/60000 (40%)]  Loss: 0.30289018154144287
+</span><span class='line'>Train Epoch: 2 [29800/60000 (50%)]  Loss: 0.3070503771305084
+</span><span class='line'>Train Epoch: 2 [35800/60000 (60%)]  Loss: 0.34184956550598145
+</span><span class='line'>Train Epoch: 2 [41800/60000 (70%)]  Loss: 0.25298836827278137
+</span><span class='line'>Train Epoch: 2 [47800/60000 (80%)]  Loss: 0.2620333731174469
+</span><span class='line'>Train Epoch: 2 [53800/60000 (90%)]  Loss: 0.2306962013244629
+</span><span class='line'>Train Epoch: 2 [59800/60000 (100%)] Loss: 0.3607088327407837
+</span><span class='line'>Train Epoch: 3 [5800/60000 (10%)] Loss: 0.22903680801391602
+</span><span class='line'>Train Epoch: 3 [11800/60000 (20%)]  Loss: 0.20266905426979065
+</span><span class='line'>Train Epoch: 3 [17800/60000 (30%)]  Loss: 0.25112783908843994
+</span><span class='line'>Train Epoch: 3 [23800/60000 (40%)]  Loss: 0.22732162475585938
+</span><span class='line'>Train Epoch: 3 [29800/60000 (50%)]  Loss: 0.2040642946958542
+</span><span class='line'>Train Epoch: 3 [35800/60000 (60%)]  Loss: 0.20411935448646545
+</span><span class='line'>Train Epoch: 3 [41800/60000 (70%)]  Loss: 0.19729731976985931
+</span><span class='line'>Train Epoch: 3 [47800/60000 (80%)]  Loss: 0.24248278141021729
+</span><span class='line'>Train Epoch: 3 [53800/60000 (90%)]  Loss: 0.21713067591190338
+</span><span class='line'>Train Epoch: 3 [59800/60000 (100%)] Loss: 0.21899420022964478
+</span><span class='line'>Train Epoch: 4 [5800/60000 (10%)] Loss: 0.1833008974790573
+</span><span class='line'>Train Epoch: 4 [11800/60000 (20%)]  Loss: 0.1431916356086731
+</span><span class='line'>Train Epoch: 4 [17800/60000 (30%)]  Loss: 0.2693891227245331
+</span><span class='line'>Train Epoch: 4 [23800/60000 (40%)]  Loss: 0.21619722247123718
+</span><span class='line'>Train Epoch: 4 [29800/60000 (50%)]  Loss: 0.22982168197631836
+</span><span class='line'>Train Epoch: 4 [35800/60000 (60%)]  Loss: 0.26103365421295166
+</span><span class='line'>Train Epoch: 4 [41800/60000 (70%)]  Loss: 0.23812612891197205
+</span><span class='line'>Train Epoch: 4 [47800/60000 (80%)]  Loss: 0.25694453716278076
+</span><span class='line'>Train Epoch: 4 [53800/60000 (90%)]  Loss: 0.2516362965106964
+</span><span class='line'>Train Epoch: 4 [59800/60000 (100%)] Loss: 0.19944973289966583
+</span><span class='line'>Train Epoch: 5 [5800/60000 (10%)] Loss: 0.20240060985088348
+</span><span class='line'>Train Epoch: 5 [11800/60000 (20%)]  Loss: 0.17876243591308594
+</span><span class='line'>Train Epoch: 5 [17800/60000 (30%)]  Loss: 0.1623563915491104
+</span><span class='line'>Train Epoch: 5 [23800/60000 (40%)]  Loss: 0.14842358231544495
+</span><span class='line'>Train Epoch: 5 [29800/60000 (50%)]  Loss: 0.1817866861820221
+</span><span class='line'>Train Epoch: 5 [35800/60000 (60%)]  Loss: 0.1474132388830185
+</span><span class='line'>Train Epoch: 5 [41800/60000 (70%)]  Loss: 0.20310136675834656
+</span><span class='line'>Train Epoch: 5 [47800/60000 (80%)]  Loss: 0.2332427054643631
+</span><span class='line'>Train Epoch: 5 [53800/60000 (90%)]  Loss: 0.14285261929035187
+</span><span class='line'>Train Epoch: 5 [59800/60000 (100%)] Loss: 0.16876384615898132
+</span><span class='line'>Train Epoch: 6 [5800/60000 (10%)] Loss: 0.15261796116828918
+</span><span class='line'>Train Epoch: 6 [11800/60000 (20%)]  Loss: 0.12889760732650757
+</span><span class='line'>Train Epoch: 6 [17800/60000 (30%)]  Loss: 0.17289716005325317
+</span><span class='line'>Train Epoch: 6 [23800/60000 (40%)]  Loss: 0.12383649498224258
+</span><span class='line'>Train Epoch: 6 [29800/60000 (50%)]  Loss: 0.14670918881893158
+</span><span class='line'>Train Epoch: 6 [35800/60000 (60%)]  Loss: 0.20221909880638123
+</span><span class='line'>Train Epoch: 6 [41800/60000 (70%)]  Loss: 0.21042735874652863
+</span><span class='line'>Train Epoch: 6 [47800/60000 (80%)]  Loss: 0.16009800136089325
+</span><span class='line'>Train Epoch: 6 [53800/60000 (90%)]  Loss: 0.23655852675437927
+</span><span class='line'>Train Epoch: 6 [59800/60000 (100%)] Loss: 0.1507928967475891
+</span><span class='line'>Train Epoch: 7 [5800/60000 (10%)] Loss: 0.16259260475635529
+</span><span class='line'>Train Epoch: 7 [11800/60000 (20%)]  Loss: 0.14753393828868866
+</span><span class='line'>Train Epoch: 7 [17800/60000 (30%)]  Loss: 0.15315169095993042
+</span><span class='line'>Train Epoch: 7 [23800/60000 (40%)]  Loss: 0.1445481777191162
+</span><span class='line'>Train Epoch: 7 [29800/60000 (50%)]  Loss: 0.132000133395195
+</span><span class='line'>Train Epoch: 7 [35800/60000 (60%)]  Loss: 0.09024682641029358
+</span><span class='line'>Train Epoch: 7 [41800/60000 (70%)]  Loss: 0.15115217864513397
+</span><span class='line'>Train Epoch: 7 [47800/60000 (80%)]  Loss: 0.1311248242855072
+</span><span class='line'>Train Epoch: 7 [53800/60000 (90%)]  Loss: 0.10016605257987976
+</span><span class='line'>Train Epoch: 7 [59800/60000 (100%)] Loss: 0.12980304658412933
+</span><span class='line'>Train Epoch: 8 [5800/60000 (10%)] Loss: 0.12055137008428574
+</span><span class='line'>Train Epoch: 8 [11800/60000 (20%)]  Loss: 0.0916302502155304
+</span><span class='line'>Train Epoch: 8 [17800/60000 (30%)]  Loss: 0.14020071923732758
+</span><span class='line'>Train Epoch: 8 [23800/60000 (40%)]  Loss: 0.1205180287361145
+</span><span class='line'>Train Epoch: 8 [29800/60000 (50%)]  Loss: 0.1326950639486313
+</span><span class='line'>Train Epoch: 8 [35800/60000 (60%)]  Loss: 0.19008560478687286
+</span><span class='line'>Train Epoch: 8 [41800/60000 (70%)]  Loss: 0.1668577790260315
+</span><span class='line'>Train Epoch: 8 [47800/60000 (80%)]  Loss: 0.1530739814043045
+</span><span class='line'>Train Epoch: 8 [53800/60000 (90%)]  Loss: 0.13995856046676636
+</span><span class='line'>Train Epoch: 8 [59800/60000 (100%)] Loss: 0.05448155477643013
+</span><span class='line'>Train Epoch: 9 [5800/60000 (10%)] Loss: 0.09004207700490952
+</span><span class='line'>Train Epoch: 9 [11800/60000 (20%)]  Loss: 0.08474709838628769
+</span><span class='line'>Train Epoch: 9 [17800/60000 (30%)]  Loss: 0.12305212020874023
+</span><span class='line'>Train Epoch: 9 [23800/60000 (40%)]  Loss: 0.08823414891958237
+</span><span class='line'>Train Epoch: 9 [29800/60000 (50%)]  Loss: 0.07393839210271835
+</span><span class='line'>Train Epoch: 9 [35800/60000 (60%)]  Loss: 0.11944027245044708
+</span><span class='line'>Train Epoch: 9 [41800/60000 (70%)]  Loss: 0.086588054895401
+</span><span class='line'>Train Epoch: 9 [47800/60000 (80%)]  Loss: 0.08738173544406891
+</span><span class='line'>Train Epoch: 9 [53800/60000 (90%)]  Loss: 0.1982622593641281
+</span><span class='line'>Train Epoch: 9 [59800/60000 (100%)] Loss: 0.11448238044977188
+</span><span class='line'>Train Epoch: 10 [5800/60000 (10%)]  Loss: 0.0850382074713707
+</span><span class='line'>Train Epoch: 10 [11800/60000 (20%)] Loss: 0.06795746088027954
+</span><span class='line'>Train Epoch: 10 [17800/60000 (30%)] Loss: 0.1085655689239502
+</span><span class='line'>Train Epoch: 10 [23800/60000 (40%)] Loss: 0.05534665286540985
+</span><span class='line'>Train Epoch: 10 [29800/60000 (50%)] Loss: 0.09382271021604538
+</span><span class='line'>Train Epoch: 10 [35800/60000 (60%)] Loss: 0.026057429611682892
+</span><span class='line'>Train Epoch: 10 [41800/60000 (70%)] Loss: 0.07035879790782928
+</span><span class='line'>Train Epoch: 10 [47800/60000 (80%)] Loss: 0.1626715511083603
+</span><span class='line'>Train Epoch: 10 [53800/60000 (90%)] Loss: 0.08846493810415268
+</span><span class='line'>Train Epoch: 10 [59800/60000 (100%)]  Loss: 0.07113683223724365
 </span><span class='line'>
-</span><span class='line'>Test set: Average loss: 0.0360, Accuracy: 9916/10000 (99.16%)</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>Test set: Average loss: 0.2453, Accuracy: 9204/10000 (92.04%)</span></code></pre></td></tr></table></div></figure>
 
+
+<p>可以看到现在准确率达到了92.04%，可见适当增加卷积层可以提高识别精度</p>
 
 <h4>4、预测</h4>
 
-<p>使用如下代码进行预测</p>
+<p>使用命令预测一下</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>python mnist_conv_net.py predict</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'> python fashion_mnist_conv_net.py predict</span></code></pre></td></tr></table></div></figure>
 
 
-<p>可以看到输出结果：</p>
+<p><img src="http://blog.1nongfu.com/16871595198847.jpg" alt="" /></p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>实际结果: [tensor(8), tensor(7), tensor(4), tensor(7)]
-</span><span class='line'>推理结果: [tensor(8), tensor(7), tensor(4), tensor(7)]</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>实际结果: ['裙子', '外套', '凉鞋', '包', '包', '毛衣', '牛仔裤', '运动鞋']
+</span><span class='line'>推理结果: ['裙子', '外套', '凉鞋', '包', '包', '毛衣', '牛仔裤', '运动鞋']
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>对应的图片显示
-<img src="http://blog.1nongfu.com/16850290270582.jpg" alt="" /></p>
 
-<h4>5、总结</h4>
-
-<p>这是一个很简单的分类网络，数据集也很简单，网络的架构有点像LeNet-5网络，不过99.16%的结果只能算一般般，还有优化的空间，目前网上准确率最高的有99.79%,所以还有提供的空间。</p>
 </div>
 
 
@@ -821,7 +766,7 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
 
 
 
-<time class='entry-date' datetime='2023-05-26T00:00:52+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>12:00 am</span></time>
+<time class='entry-date' datetime='2023-07-27T16:31:49+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2023</span></span> <span class='time'>4:31 pm</span></time>
       
 
 
@@ -836,10 +781,8 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2023/03/10/how-to-install-frp-vpn/" title="Previous Post: 安装frp内网穿透工具">&laquo; 安装frp内网穿透工具</a>
+        <a class="basic-alignment left" href="/blog/2023/05/26/pytorch-was-used-to-build-a-cnn-network-to-train-the-mnist-dataset/" title="Previous Post: 使用PyTorch构建CNN网络训练MNIST数据集">&laquo; 使用PyTorch构建CNN网络训练MNIST数据集</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2023/07/27/pytorch-was-used-to-build-a-cnn-network-to-train-the-fashion-mnist-dataset/" title="Next Post: 使用PyTorch构建CNN网络训练FashionMNIST数据集">使用PyTorch构建CNN网络训练FashionMNIST数据集 &raquo;</a>
       
     </p>
   </footer>
@@ -850,7 +793,7 @@ Conv1->Relu->pool->Conv2->Relu->pool->Linear1->Relu->Linear2->Sofrmax
   <section>
     <h1>Comments</h1>
     <div id="comments" aria-live="polite"><!-- 多说评论框 start -->
-	<div class="ds-thread" data-title="使用PyTorch构建CNN网络训练MNIST数据集"></div>
+	<div class="ds-thread" data-title="使用PyTorch构建CNN网络训练FashionMNIST数据集"></div>
 <!-- 多说评论框 end -->
 <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 <script type="text/javascript">
