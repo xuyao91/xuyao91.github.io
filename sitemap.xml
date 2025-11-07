@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
+<loc>http://xuyao.club/blog/2025/11/07/the-architecture-of-the-transformer-model/</loc>
+<lastmod>2025-11-07T16:21:04+08:00</lastmod>
+</url>
+<url>
+<loc>http://xuyao.club/blog/2025/11/07/abount-old-images/</loc>
+<lastmod>2025-11-07T16:06:09+08:00</lastmod>
+</url>
+<url>
 <loc>http://xuyao.club/blog/2023/07/27/pytorch-was-used-to-build-a-cnn-network-to-train-the-fashion-mnist-dataset/</loc>
 <lastmod>2023-07-27T16:31:49+08:00</lastmod>
 </url>
