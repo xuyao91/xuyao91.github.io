@@ -9,7 +9,7 @@
   <meta name="author" content="Peter Xu">
 
   
-  <meta name="description" content="前言 本文记录了使用PyTorch构建一个简单的CNN网络，并使用Fahion-MNIST数据集进行训练和测试。记录整个推理过程 ">
+  <meta name="description" content="之前的图片一直存储在七牛云上，用了10来年了，去年突然收到七牛云发的邮件，提醒我已经欠费500多块钱，吓了一跳，因为我的图片数据量不多，流量也不多，再怎么用也不会出现这么多费用，何况之前充值过钱进去，排查才发现，之前blog上有一篇ppt文件被疯狂下载，花了几百G的流量，找七牛去客服， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -66,6 +66,41 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2025/11/07/abount-old-images/">关于旧图片</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2025-11-07T16:06:09+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2025</span></span> <span class='time'>4:06 pm</span></time>
+        
+        <!-- doushuo commnet -->
+        
+          | <a href="/blog/2025/11/07/abount-old-images/#comments">Comments</a>
+         
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>之前的图片一直存储在七牛云上，用了10来年了，去年突然收到七牛云发的邮件，提醒我已经欠费500多块钱，吓了一跳，因为我的图片数据量不多，流量也不多，再怎么用也不会出现这么多费用，何况之前充值过钱进去，排查才发现，之前blog上有一篇ppt文件被疯狂下载，花了几百G的流量，找七牛去客服，客服说没有出事情没有第一时间找他们，扣的费用只能我自己承担。。。。</p>
+
+<p>后来因为没有缴费，图片资源被释放，账号就被冻结了。。。所以很多年前写的blog图片显示不出来。</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -447,50 +482,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Fabric动态增加节点（Peer）</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-01-10T11:00:22+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>11:00 am</span></time>
-        
-        <!-- doushuo commnet -->
-        
-          | <a href="/blog/2019/01/10/fabric-adds-nodes-dynamically/#comments">Comments</a>
-         
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h5>前言</h5>
-
-<p> &emsp; 在实际项目中，因为项目的需求变动，一般都会对fabric网络做一个修改，最常见的变动就是在现有的Fabric网络中增加一个节点，现在以之前搭建的fabric网络（版本1.1），balance-transfer为例做个介绍，整个过程其实也很简单，生成节点证书，增加新节点的docker配置文件并启动相应的服务，然后将新节点加到现有的channel当中，并在节点上安装智能合约（Chaincode），下午详情讲一下具体的操作步骤。</p>
-
-<h4>1、修改crypto-config.yaml文件并生成对应的节点证书。</h4>
-
-<p>首先我们确认我们需要在Org2里增加节点，那么我们在crypto-config.yaml文件里找到对应Org2的配置，把Template字段里的count参数修改成2，意思就是在此组织下生成两个节点，配置文件如下</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2019/01/10/fabric-adds-nodes-dynamically/">Read on&rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -504,6 +495,10 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2025/11/07/abount-old-images/">关于旧图片</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2023/07/27/pytorch-was-used-to-build-a-cnn-network-to-train-the-fashion-mnist-dataset/">使用PyTorch构建CNN网络训练FashionMNIST数据集</a>
@@ -521,10 +516,6 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
         <a href="/blog/2022/04/18/the-version-of-gloang-project/">Golang项目中的版本管理</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2020/12/31/one-last-little-surprise-for-2020/">2020年最后的一个小惊喜</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -538,7 +529,7 @@ PDF文件下载地址-> <a href="http://img.1nongfu.com/%E5%AF%B9%E7%A7%B0%E5%8A
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2023 - Peter Xu -
+  Copyright &copy; 2025 - Peter Xu -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
